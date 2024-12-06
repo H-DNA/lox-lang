@@ -24,7 +24,7 @@ public class Jlox {
   }
 
   public static void runPrompt() throws IOException {
-    BufferedReader reader = new BUfferredReader(new InputStreamReader(System.in));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
     while (true) {
       System.out.print("> ");
