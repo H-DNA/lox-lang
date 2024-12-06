@@ -10,7 +10,7 @@ public class Jlox {
   public static void main(String[] args) throws IOException {
     if (args.length > 1) {
       System.out.println("Usage: jlox [script]");
-      System.exit(64); // EX_USAGE sysexits code
+      System.exit(2);
     } else if (args.length == 1) {
       runFile(args[0]);
     } else {
