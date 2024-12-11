@@ -178,4 +178,102 @@ public class ScannerTest {
     assertEquals(tokens.get(3).type, TokenType.EOF);
     assertEquals(tokens.get(3).literal, null);
   }
+
+  @Test
+  public void testPunctuators() {
+    String source = """
+          (){};,+-*! == <= = >= != < > /.
+        """;
+
+    Scanner scanner = new Scanner(source);
+    Pair<List<Token>, List<ScannerException>> res = scanner.tokenize();
+
+    List<Token> tokens = res.first;
+    List<ScannerException> errors = res.second;
+
+    // Test errors
+    assertEquals(errors.size(), 0);
+
+    // Test tokens
+    assertEquals(tokens.size(), 20); // 19 punctuators + 1 EOF
+
+    assertEquals(tokens.get(0).type, TokenType.LEFT_PAREN);
+    assertEquals(tokens.get(0).lexeme, "(");
+    assertEquals(tokens.get(0).literal, null);
+
+    assertEquals(tokens.get(1).type, TokenType.RIGHT_PAREN);
+    assertEquals(tokens.get(1).lexeme, ")");
+    assertEquals(tokens.get(1).literal, null);
+
+    assertEquals(tokens.get(2).type, TokenType.LEFT_BRACE);
+    assertEquals(tokens.get(2).lexeme, "{");
+    assertEquals(tokens.get(2).literal, null);
+
+    assertEquals(tokens.get(3).type, TokenType.RIGHT_BRACE);
+    assertEquals(tokens.get(3).lexeme, "}");
+    assertEquals(tokens.get(3).literal, null);
+
+    assertEquals(tokens.get(4).type, TokenType.SEMICOLON);
+    assertEquals(tokens.get(4).lexeme, ";");
+    assertEquals(tokens.get(4).literal, null);
+
+    assertEquals(tokens.get(5).type, TokenType.COMMA);
+    assertEquals(tokens.get(5).lexeme, ",");
+    assertEquals(tokens.get(5).literal, null);
+
+    assertEquals(tokens.get(6).type, TokenType.PLUS);
+    assertEquals(tokens.get(6).lexeme, "+");
+    assertEquals(tokens.get(6).literal, null);
+
+    assertEquals(tokens.get(7).type, TokenType.MINUS);
+    assertEquals(tokens.get(7).lexeme, "-");
+    assertEquals(tokens.get(7).literal, null);
+
+    assertEquals(tokens.get(8).type, TokenType.STAR);
+    assertEquals(tokens.get(8).lexeme, "*");
+    assertEquals(tokens.get(8).literal, null);
+
+    assertEquals(tokens.get(9).type, TokenType.BANG);
+    assertEquals(tokens.get(9).lexeme, "!");
+    assertEquals(tokens.get(9).literal, null);
+
+    assertEquals(tokens.get(10).type, TokenType.EQUAL_EQUAL);
+    assertEquals(tokens.get(10).lexeme, "==");
+    assertEquals(tokens.get(10).literal, null);
+
+    assertEquals(tokens.get(11).type, TokenType.LESS_EQUAL);
+    assertEquals(tokens.get(11).lexeme, "<=");
+    assertEquals(tokens.get(11).literal, null);
+
+    assertEquals(tokens.get(12).type, TokenType.EQUAL);
+    assertEquals(tokens.get(12).lexeme, "=");
+    assertEquals(tokens.get(12).literal, null);
+
+    assertEquals(tokens.get(13).type, TokenType.GREATER_EQUAL);
+    assertEquals(tokens.get(13).lexeme, ">=");
+    assertEquals(tokens.get(13).literal, null);
+
+    assertEquals(tokens.get(14).type, TokenType.BANG_EQUAL);
+    assertEquals(tokens.get(14).lexeme, "!=");
+    assertEquals(tokens.get(14).literal, null);
+
+    assertEquals(tokens.get(15).type, TokenType.LESS);
+    assertEquals(tokens.get(15).lexeme, "<");
+    assertEquals(tokens.get(15).literal, null);
+
+    assertEquals(tokens.get(16).type, TokenType.GREATER);
+    assertEquals(tokens.get(16).lexeme, ">");
+    assertEquals(tokens.get(16).literal, null);
+
+    assertEquals(tokens.get(17).type, TokenType.SLASH);
+    assertEquals(tokens.get(17).lexeme, "/");
+    assertEquals(tokens.get(17).literal, null);
+
+    assertEquals(tokens.get(18).type, TokenType.DOT);
+    assertEquals(tokens.get(18).lexeme, ".");
+    assertEquals(tokens.get(18).literal, null);
+
+    assertEquals(tokens.get(19).type, TokenType.EOF);
+    assertEquals(tokens.get(19).literal, null);
+  }
 }
