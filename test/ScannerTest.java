@@ -5,7 +5,6 @@ import com.lox.*;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class ScannerTest {
   @Test
   public void testIdentifiers() {
@@ -28,28 +27,37 @@ public class ScannerTest {
 
     assertEquals(tokens.get(0).type, TokenType.IDENTIFIER);
     assertEquals(tokens.get(0).lexeme, "andy");
+    assertEquals(tokens.get(0).literal, null);
 
     assertEquals(tokens.get(1).type, TokenType.IDENTIFIER);
     assertEquals(tokens.get(1).lexeme, "formless");
+    assertEquals(tokens.get(1).literal, null);
 
     assertEquals(tokens.get(2).type, TokenType.IDENTIFIER);
     assertEquals(tokens.get(2).lexeme, "fo");
+    assertEquals(tokens.get(2).literal, null);
 
     assertEquals(tokens.get(3).type, TokenType.IDENTIFIER);
     assertEquals(tokens.get(3).lexeme, "_");
+    assertEquals(tokens.get(3).literal, null);
 
     assertEquals(tokens.get(4).type, TokenType.IDENTIFIER);
     assertEquals(tokens.get(4).lexeme, "_123");
+    assertEquals(tokens.get(4).literal, null);
 
     assertEquals(tokens.get(5).type, TokenType.IDENTIFIER);
     assertEquals(tokens.get(5).lexeme, "_abc");
+    assertEquals(tokens.get(5).literal, null);
 
     assertEquals(tokens.get(6).type, TokenType.IDENTIFIER);
     assertEquals(tokens.get(6).lexeme, "ab123");
+    assertEquals(tokens.get(6).literal, null);
 
     assertEquals(tokens.get(7).type, TokenType.IDENTIFIER);
     assertEquals(tokens.get(7).lexeme, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_");
+    assertEquals(tokens.get(7).literal, null);
 
     assertEquals(tokens.get(8).type, TokenType.EOF);
+    assertEquals(tokens.get(8).literal, null);
   }
 }
