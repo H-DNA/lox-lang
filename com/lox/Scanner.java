@@ -168,7 +168,7 @@ public class Scanner {
       default:
         if (ScannerUtils.isSpace(c))
           break;
-        if (ScannerUtils.isAlpha(c)) {
+        if (ScannerUtils.isAlphaOrUnderscore(c)) {
           this.extractIdentifier();
           break;
         }
@@ -238,7 +238,7 @@ public class Scanner {
   }
 
   private void extractIdentifier() {
-    assert ScannerUtils.isAlpha(this.source.charAt(this.currentOffset - 1));
+    assert ScannerUtils.isAlphaNumericOrUnderscore(this.source.charAt(this.currentOffset - 1));
 
     int startOffset = this.currentOffset - 1;
 
