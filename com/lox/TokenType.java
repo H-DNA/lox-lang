@@ -1,6 +1,6 @@
 package com.lox;
 
-enum TokenType {
+public enum TokenType {
   // Symbols
   LEFT_PAREN, RIGHT_PAREN,
   LEFT_BRACE, RIGHT_BRACE,

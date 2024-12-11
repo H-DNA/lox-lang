@@ -5,18 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Scanner {
+public class Scanner {
   private final String source;
   private final List<Token> tokens = new ArrayList<>();
   private final List<ScannerException> errors = new ArrayList<>();
 
   private int currentOffset = 0;
 
-  Scanner(String source) {
+  public Scanner(String source) {
     this.source = source;
   }
 
-  Pair<List<Token>, List<ScannerException>> tokenize() {
+  public Pair<List<Token>, List<ScannerException>> tokenize() {
     if (this.isAtEnd())
       return new Pair<>(this.tokens, this.errors);
 
