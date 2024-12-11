@@ -142,4 +142,40 @@ public class ScannerTest {
     assertEquals(tokens.get(15).type, TokenType.EOF);
     assertEquals(tokens.get(15).literal, null);
   }
+
+  @Test
+  public void testNumbers() {
+    String source = """
+          123
+          123.456
+          123.
+        """;
+
+    Scanner scanner = new Scanner(source);
+    Pair<List<Token>, List<ScannerException>> res = scanner.tokenize();
+
+    List<Token> tokens = res.first;
+    List<ScannerException> errors = res.second;
+
+    // Test errors
+    assertEquals(errors.size(), 0);
+
+    // Test tokens
+    assertEquals(tokens.size(), 4); // 3 numbers + 1 EOF
+
+    assertEquals(tokens.get(0).type, TokenType.NUMBER);
+    assertEquals(tokens.get(0).lexeme, "123");
+    assertEquals(tokens.get(0).literal, 123.0);
+
+    assertEquals(tokens.get(1).type, TokenType.NUMBER);
+    assertEquals(tokens.get(1).lexeme, "123.456");
+    assertEquals(tokens.get(1).literal, 123.456);
+
+    assertEquals(tokens.get(2).type, TokenType.NUMBER);
+    assertEquals(tokens.get(2).lexeme, "123.");
+    assertEquals(tokens.get(2).literal, 123.);
+
+    assertEquals(tokens.get(3).type, TokenType.EOF);
+    assertEquals(tokens.get(3).literal, null);
+  }
 }
