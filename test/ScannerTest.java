@@ -149,6 +149,10 @@ public class ScannerTest {
           123
           123.456
           123.
+
+          123.abc
+          1a3.bc
+          13a.02
         """;
 
     Scanner scanner = new Scanner(source);
@@ -158,7 +162,11 @@ public class ScannerTest {
     List<ScannerException> errors = res.second;
 
     // Test errors
-    assertEquals(errors.size(), 0);
+    assertEquals(errors.size(), 3);
+
+    assertEquals(errors.get(0).message, "Invalid literal");
+    assertEquals(errors.get(1).message, "Invalid literal");
+    assertEquals(errors.get(2).message, "Invalid literal");
 
     // Test tokens
     assertEquals(tokens.size(), 4); // 3 numbers + 1 EOF
