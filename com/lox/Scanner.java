@@ -294,7 +294,7 @@ class ScannerUtils {
   }
 
   static boolean isSpace(char c) {
-    return Character.isSpaceChar(c);
+    return Character.isWhitespace(c);
   }
 
   static boolean isAlphaNumeric(char c) {
