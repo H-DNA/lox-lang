@@ -276,4 +276,38 @@ public class ScannerTest {
     assertEquals(tokens.get(19).type, TokenType.EOF);
     assertEquals(tokens.get(19).literal, null);
   }
+
+  @Test
+  public void testStrings() {
+    String source = """
+          ""
+          "string"
+          "
+        """;
+
+    Scanner scanner = new Scanner(source);
+    Pair<List<Token>, List<ScannerException>> res = scanner.tokenize();
+
+    List<Token> tokens = res.first;
+    List<ScannerException> errors = res.second;
+
+    // Test errors
+    assertEquals(errors.size(), 1);
+
+    assertEquals(errors.get(0).message, "Unterminated string literal");
+
+    // Test tokens
+    assertEquals(tokens.size(), 3); // 2 strings + 1 EOF
+
+    assertEquals(tokens.get(0).type, TokenType.STRING);
+    assertEquals(tokens.get(0).lexeme, "\"\"");
+    assertEquals(tokens.get(0).literal, "");
+
+    assertEquals(tokens.get(1).type, TokenType.STRING);
+    assertEquals(tokens.get(1).lexeme, "\"string\"");
+    assertEquals(tokens.get(1).literal, "string");
+
+    assertEquals(tokens.get(2).type, TokenType.EOF);
+    assertEquals(tokens.get(2).literal, null);
+  }
 }
