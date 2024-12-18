@@ -1,7 +1,7 @@
 package com.lox;
 
 public abstract class Expr {
-  static class Binary extends Expr {
+  public static class Binary extends Expr {
     public final Expr left;
     public final Token op;
     public final Expr right;
@@ -13,7 +13,7 @@ public abstract class Expr {
     }
   }
 
-  static class Unary extends Expr {
+  public static class Unary extends Expr {
     public final Token op;
     public final Expr inner;
 
@@ -23,7 +23,7 @@ public abstract class Expr {
     }
   }
 
-  static class Literal extends Expr {
+  public static class Literal extends Expr {
     public final Token value;
 
     public Literal(Token value) {
@@ -31,7 +31,7 @@ public abstract class Expr {
     }
   }
 
-  static class Grouping extends Expr {
+  public static class Grouping extends Expr {
     public final Expr inner;
 
     public Grouping(Expr inner) {
