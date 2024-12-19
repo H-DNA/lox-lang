@@ -1,4 +1,4 @@
-package com.lox;
+package com.lox.ast;
 
 public abstract class Expr {
   public static class Binary extends Expr {

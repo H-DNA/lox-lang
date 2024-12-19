@@ -1,4 +1,4 @@
-package com.lox;
+package com.lox.utils;
 
 public class Pair<T, S> {
   public final T first;

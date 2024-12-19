@@ -3,7 +3,7 @@ DIR := com/lox
 BUILD_DIR := build
 TEST_DIR := test
 
-SOURCES := $(wildcard $(DIR)/*.java)
+SOURCES := $(wildcard $(DIR)/**/*.java) $(wildcard $(DIR)/*.java)
 TESTS := $(wildcard $(TEST_DIR)/*.java)
 CLASSES := $(addprefix $(BUILD_DIR)/, $(SOURCES:.java=.class))
 

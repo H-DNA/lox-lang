@@ -1,4 +1,4 @@
-package com.lox;
+package com.lox.ast;
 
 public enum TokenType {
   // Symbols

@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.lox.ast.Token;
+import com.lox.ast.TokenType;
+import com.lox.utils.Pair;
+
 public class Scanner {
   private final String source;
   private final List<Token> tokens = new ArrayList<>();

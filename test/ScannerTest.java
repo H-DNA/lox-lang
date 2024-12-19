@@ -2,6 +2,10 @@ package com.lox;
 
 import java.util.List;
 import com.lox.*;
+import com.lox.ast.Token;
+import com.lox.ast.TokenType;
+import com.lox.utils.Pair;
+
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 

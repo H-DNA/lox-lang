@@ -1,5 +1,7 @@
 package com.lox;
 
+import com.lox.ast.Expr;
+
 public class PrettyPrinter {
   public String printExpr(Expr expr) {
     return switch (expr) {
