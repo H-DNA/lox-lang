@@ -10,6 +10,8 @@ import com.lox.object.LoxObject;
 import com.lox.object.LoxString;
 
 public class Interpreter {
+  public Interpreter() {}
+
   public Object evaluate(SyntaxNode node) {
     return new Object();
   }
