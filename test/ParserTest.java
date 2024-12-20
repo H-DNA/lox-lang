@@ -18,71 +18,71 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ParserTest {
   @Test
   public void testLiteral() throws Throwable {
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("\"true\"")), "\"true\"");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("true")), "true");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("\"false\"")), "\"false\"");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("false")), "false");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("0")), "0");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("\"true\"")), "\"true\"");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("true")), "true");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("\"false\"")), "\"false\"");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("false")), "false");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("0")), "0");
   }
 
   @Test
   public void testVariable() throws Throwable {
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("a")), "a");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("a1")), "a1");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("_a1")), "_a1");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("a")), "a");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("a1")), "a1");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("_a1")), "_a1");
   }
 
   @Test
   public void testUnary() throws Throwable {
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("-1")), "(- 1)");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("!1")), "(! 1)");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("-1")), "(- 1)");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("!1")), "(! 1)");
 
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("-   1")), "(- 1)");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("!   1")), "(! 1)");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("-   1")), "(- 1)");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("!   1")), "(! 1)");
 
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("!\"\"")), "(! \"\")");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("-\"\"")), "(- \"\")");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("!\"\"")), "(! \"\")");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("-\"\"")), "(- \"\")");
 
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("! -1")), "(! (- 1))");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("- !1")), "(- (! 1))");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("! -1")), "(! (- 1))");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("- !1")), "(- (! 1))");
 
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("!!1")), "(! (! 1))");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("--1")), "(- (- 1))");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("!!1")), "(! (! 1))");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("--1")), "(- (- 1))");
   }
 
   @Test
   public void testGrouping() throws Throwable {
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("(1)")), "(group 1)");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("(\"abc\")")), "(group \"abc\")");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("(true)")), "(group true)");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("(false)")), "(group false)");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("(1 + 2)")), "(group (+ 1 2))");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("(! 2)")), "(group (! 2))");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("(1)")), "(group 1)");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("(\"abc\")")), "(group \"abc\")");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("(true)")), "(group true)");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("(false)")), "(group false)");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("(1 + 2)")), "(group (+ 1 2))");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("(! 2)")), "(group (! 2))");
   }
 
   @Test
   public void testBinary() throws Throwable {
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("1 + 2")), "(+ 1 2)");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("1 + (2)")), "(+ 1 (group 2))");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("1 + (2 + 3)")), "(+ 1 (group (+ 2 3)))");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("1 + 2 * 3)")), "(+ 1 (* 2 3))");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("1 * 2 + 3)")), "(+ (* 1 2) 3)");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("(1 + 2) * 3)")), "(* (group (+ 1 2)) 3)");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("1 - 2 == 3)")), "(== (- 1 2) 3)");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("1 - 2 * 4 == 3 / 5")), "(== (- 1 (* 2 4)) (/ 3 5))");
-    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("1 - 2 * 4 == 3 / 5 != 6 >= 3")), "(!= (== (- 1 (* 2 4)) (/ 3 5)) (>= 6 3))");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("1 + 2")), "(+ 1 2)");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("1 + (2)")), "(+ 1 (group 2))");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("1 + (2 + 3)")), "(+ 1 (group (+ 2 3)))");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("1 + 2 * 3)")), "(+ 1 (* 2 3))");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("1 * 2 + 3)")), "(+ (* 1 2) 3)");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("(1 + 2) * 3)")), "(* (group (+ 1 2)) 3)");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("1 - 2 == 3)")), "(== (- 1 2) 3)");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("1 - 2 * 4 == 3 / 5")), "(== (- 1 (* 2 4)) (/ 3 5))");
+    assertEquals(ParserTestUtils.prettyPrintExpr(ParserTestUtils.parseExpr("1 - 2 * 4 == 3 / 5 != 6 >= 3")), "(!= (== (- 1 (* 2 4)) (/ 3 5)) (>= 6 3))");
   }
 
   @Test
   public void testInvalidGroup() throws Throwable {
     try {
-      TestUtils.parseExpr("(1 + 2");
+      ParserTestUtils.parseExpr("(1 + 2");
     } catch (ParserException e) {
       assertEquals(e.message, "Expect a closing parenthesis ')'");
     }
 
     try {
-      TestUtils.parseExpr("1 + (2");
+      ParserTestUtils.parseExpr("1 + (2");
     } catch (ParserException e) {
       assertEquals(e.message, "Expect a closing parenthesis ')'");
     }
@@ -91,20 +91,20 @@ public class ParserTest {
   @Test
   public void testInvalidPrimary() throws Throwable {
     try {
-      TestUtils.parseExpr("+1 + 2");
+      ParserTestUtils.parseExpr("+1 + 2");
     } catch (ParserException e) {
       assertEquals(e.message, "Expect a numeric literal, string literal, variable or grouping expression");
     }
 
     try {
-      TestUtils.parseExpr("+2");
+      ParserTestUtils.parseExpr("+2");
     } catch (ParserException e) {
       assertEquals(e.message, "Expect a numeric literal, string literal, variable or grouping expression");
     }
   }
 }
 
-class TestUtils {
+class ParserTestUtils {
   static Expr parseExpr(String source) throws Throwable {
     Method method = Parser.class.getDeclaredMethod("expression");
     method.setAccessible(true);
