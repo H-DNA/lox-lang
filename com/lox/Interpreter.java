@@ -28,8 +28,8 @@ public class Interpreter {
   }
 
   private LoxObject evaluateBinary(Expr.Binary bin) throws InterpreterException {
-    final LoxObject left = evaluateExpr(bin.left);
-    final LoxObject right = evaluateExpr(bin.right);
+    final LoxObject left = this.evaluateExpr(bin.left);
+    final LoxObject right = this.evaluateExpr(bin.right);
     return switch (bin.op.type) {
       case TokenType.PLUS -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
