@@ -97,7 +97,7 @@ public class ScannerTest {
 
     assertEquals(tokens.get(3).type, TokenType.FALSE);
     assertEquals(tokens.get(3).lexeme, "false");
-    assertEquals(tokens.get(3).literal, null);
+    assertEquals(tokens.get(3).literal, false);
 
     assertEquals(tokens.get(4).type, TokenType.FOR);
     assertEquals(tokens.get(4).lexeme, "for");
@@ -133,7 +133,7 @@ public class ScannerTest {
 
     assertEquals(tokens.get(12).type, TokenType.TRUE);
     assertEquals(tokens.get(12).lexeme, "true");
-    assertEquals(tokens.get(12).literal, null);
+    assertEquals(tokens.get(12).literal, true);
 
     assertEquals(tokens.get(13).type, TokenType.VAR);
     assertEquals(tokens.get(13).lexeme, "var");

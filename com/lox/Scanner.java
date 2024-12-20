@@ -257,7 +257,9 @@ public class Scanner {
     this.tokens.add(new Token(
         type,
         this.source.substring(startOffset, this.currentOffset),
-        null,
+        type == TokenType.TRUE ? Boolean.valueOf(true)
+          : type == TokenType.FALSE ? Boolean.valueOf(false)
+          : null,
         startOffset,
         this.currentOffset));
   }
