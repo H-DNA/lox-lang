@@ -1,6 +1,6 @@
 package com.lox.ast;
 
-public abstract class Expr {
+public abstract class Expr extends SyntaxNode {
   public static class Binary extends Expr {
     public final Expr left;
     public final Token op;

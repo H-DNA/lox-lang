@@ -1,6 +1,6 @@
 package com.lox.ast;
 
-public abstract class Stmt {
+public abstract class Stmt extends SyntaxNode {
   public static class ExprStmt extends Stmt {
     public final Expr expr;
 

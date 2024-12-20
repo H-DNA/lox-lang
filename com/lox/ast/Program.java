@@ -1,4 +1,4 @@
 package com.lox.ast;
 
-public class Program {
+public class Program extends SyntaxNode {
 }
