@@ -100,9 +100,9 @@ public class Interpreter {
     return switch(un.op.type) {
       case TokenType.BANG -> {
         if (TypecheckUtils.isBoolean(inner)) {
-          yield inner;
+          yield new LoxBoolean(!((LoxBoolean)inner).value);
         }
-        yield new LoxBoolean(true);
+        yield new LoxBoolean(false);
       }
       case TokenType.MINUS -> {
         if (!TypecheckUtils.isNumber(inner)) {
