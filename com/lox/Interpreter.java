@@ -56,14 +56,14 @@ public class Interpreter {
         yield new LoxNumber(((LoxNumber)left).value / ((LoxNumber)right).value);
       }
       case TokenType.EQUAL_EQUAL -> {
-        if (TypecheckUtils.isSameType(left, right)) {
-          throw new InterpreterException(String.format("Unsupported operator '==' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
+        if (!TypecheckUtils.isSameType(left, right)) {
+          yield new LoxBoolean(false);
         }
         yield new LoxBoolean(left.value().equals(right.value()));
       }
       case TokenType.BANG_EQUAL -> {
-        if (TypecheckUtils.isSameType(left, right)) {
-          throw new InterpreterException(String.format("Unsupported operator '!=' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
+        if (!TypecheckUtils.isSameType(left, right)) {
+          yield new LoxBoolean(true);
         }
         yield new LoxBoolean(!left.value().equals(right.value()));
       }
