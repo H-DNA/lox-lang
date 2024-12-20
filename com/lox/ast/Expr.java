@@ -31,11 +31,11 @@ public abstract class Expr {
     }
   }
 
-  public static class Primary extends Expr {
-    public final Token value;
+  public static class Variable extends Expr {
+    public final Token var;
 
-    public Primary(Token value) {
-      this.value = value;
+    public Variable(Token var) {
+      this.var = var;
     }
   }
 
