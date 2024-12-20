@@ -114,6 +114,9 @@ public class Parser {
       final Expr inner = this.expression();
       if (!this.match(TokenType.RIGHT_PAREN)) this.synchronizeGrouping();
       return new Expr.Grouping(inner);
+    } else if (this.match(TokenType.IDENTIFIER)) {
+      final Token identifier = this.previous();
+      return new Expr.Variable(identifier);
     }
 
     throw new ParserException("Expect a numeric literal, string literal, variable or grouping expression", this.current().startOffset, this.current().endOffset);

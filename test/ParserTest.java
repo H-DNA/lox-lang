@@ -25,6 +25,13 @@ public class ParserTest {
   }
 
   @Test
+  public void testVariable() throws Exception {
+    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("a")), "a");
+    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("a1")), "a1");
+    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("_a1")), "_a1");
+  }
+
+  @Test
   public void testUnary() throws Exception {
     assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("-1")), "(- 1)");
     assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("!1")), "(! 1)");
