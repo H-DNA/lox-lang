@@ -8,6 +8,6 @@ public class LoxString extends LoxObject {
   }
 
   public String value() {
-    return this.value();
+    return this.value;
   }
 }

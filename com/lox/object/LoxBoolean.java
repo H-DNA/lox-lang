@@ -8,6 +8,6 @@ public class LoxBoolean extends LoxObject {
   }
 
   public Boolean value() {
-    return this.value();
+    return this.value;
   }
 }
