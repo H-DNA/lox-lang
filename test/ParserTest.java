@@ -16,6 +16,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ParserTest {
   @Test
+  public void testLiteral() throws Exception {
+    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("\"true\"")), "\"true\"");
+    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("true")), "true");
+    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("\"false\"")), "\"false\"");
+    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("false")), "false");
+    assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("0")), "0");
+  }
+
+  @Test
   public void testUnary() throws Exception {
     assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("-1")), "(- 1)");
     assertEquals(TestUtils.prettyPrintExpr(TestUtils.parseExpr("!1")), "(! 1)");
