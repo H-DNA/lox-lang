@@ -16,6 +16,6 @@ default: $(SOURCES)
 test: $(SOURCES) $(JUNIT_JAR) $(TESTS)
 	@ mkdir -p $(BUILD_DIR)
 	@ javac -d $(BUILD_DIR) $(SOURCES) $(TESTS) -cp $(JUNIT_JAR)
-	@ java -jar $(JUNIT_JAR) -cp $(BUILD_DIR) --select-class com.lox.ScannerTest --select-class com.lox.ParserTest
+	@ java -jar $(JUNIT_JAR) -cp $(BUILD_DIR) --select-class com.lox.ScannerTest --select-class com.lox.ParserTest --select-class com.lox.InterpreterTest
 
 .PHONY: default test
