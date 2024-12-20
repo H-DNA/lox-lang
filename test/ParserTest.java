@@ -87,6 +87,21 @@ public class ParserTest {
       assertEquals(e.message, "Expect a closing parenthesis ')'");
     }
   }
+
+  @Test
+  public void testInvalidPrimary() throws Throwable {
+    try {
+      TestUtils.parseExpr("+1 + 2");
+    } catch (ParserException e) {
+      assertEquals(e.message, "Expect a numeric literal, string literal, variable or grouping expression");
+    }
+
+    try {
+      TestUtils.parseExpr("+2");
+    } catch (ParserException e) {
+      assertEquals(e.message, "Expect a numeric literal, string literal, variable or grouping expression");
+    }
+  }
 }
 
 class TestUtils {
