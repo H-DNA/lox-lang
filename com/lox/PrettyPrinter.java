@@ -9,6 +9,7 @@ public class PrettyPrinter {
       case Expr.Binary b -> String.format("(%s %s %s)", b.op, this.printExpr(b.left), this.printExpr(b.right));
       case Expr.Literal l -> l.value.lexeme;
       case Expr.Grouping g -> String.format("(group %s)", this.printExpr(g.inner));
+      case Expr.Variable v -> String.format("%s", v.var.lexeme);
       default -> throw new Error("Non-exhaustive check");
     };
   }
