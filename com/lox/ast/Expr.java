@@ -31,6 +31,14 @@ public abstract class Expr {
     }
   }
 
+  public static class Primary extends Expr {
+    public final Token value;
+
+    public Primary(Token value) {
+      this.value = value;
+    }
+  }
+
   public static class Grouping extends Expr {
     public final Expr inner;
 
