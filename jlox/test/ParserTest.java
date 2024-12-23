@@ -130,6 +130,22 @@ public class ParserTest {
     assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("print 1 - 2 * 4 == 3 / 5;")), "(print (== (- 1 (* 2 4)) (/ 3 5)))");
     assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("print 1 - 2 * 4 == 3 / 5 != 6 >= 3;")), "(print (!= (== (- 1 (* 2 4)) (/ 3 5)) (>= 6 3)))");
   }
+
+  @Test
+  public void testVarDecl() throws Throwable {
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("var x = 1 + 2;")), "(define x (+ 1 2))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("var yy = 1 + (2);")), "(define yy (+ 1 (group 2)))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("var _z1;")), "(define _z1)");
+  }
+
+  @Test
+  public void testInvalidVarDecl() throws Throwable {
+    try {
+      ParserTestUtils.parseStmt("var");
+    } catch (ParserException e) {
+      assertEquals(e.message, "Expect an identifier");
+    }
+  }
 }
 
 class ParserTestUtils {
