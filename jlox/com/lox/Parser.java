@@ -7,6 +7,7 @@ import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
 import com.lox.ast.Token;
 import com.lox.ast.TokenType;
+import com.lox.ast.Stmt.DeclStmt;
 import com.lox.ast.Stmt.ExprStmt;
 import com.lox.ast.Stmt.PrintStmt;
 import com.lox.utils.Pair;
@@ -25,7 +26,7 @@ public class Parser {
     if (this.isAtEnd()) return new Pair<>(this.stmts, this.errors);
     while (!this.isAtEnd()) {
       try {
-        this.stmts.add(this.statement());
+        this.stmts.add(this.declaration());
       } catch (SynchronizationException e) {
         this.synchronizeStatement();
       }
@@ -53,11 +54,52 @@ public class Parser {
     }
   }
 
+  private Stmt declaration() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    if (this.match(TokenType.VAR)) return this.varDeclaration();
+    return this.statement();
+  }
+
   private Stmt statement() throws SynchronizationException {
     assert !this.isAtEnd();
 
     if (this.match(TokenType.PRINT)) return this.printStatement();
     return this.expressionStatement();
+  }
+
+  private DeclStmt varDeclaration() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    assert this.previous().type == TokenType.VAR;
+
+    if (!this.match(TokenType.IDENTIFIER)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an identifier", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final Token id = this.previous();
+
+    if (this.match(TokenType.SEMICOLON)) {
+      return new DeclStmt(id, null);
+    }
+
+    if (!this.match(TokenType.EQUAL)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect '=' or an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+    
+    final Expr expr = this.expression();
+
+    if (!this.match(TokenType.SEMICOLON)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
+      this.synchronizeSimpleStatement();
+    }
+
+    return new DeclStmt(id, expr);
   }
 
   private PrintStmt printStatement() throws SynchronizationException {
