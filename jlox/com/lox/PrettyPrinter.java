@@ -1,8 +1,18 @@
 package com.lox;
 
 import com.lox.ast.Expr;
+import com.lox.ast.Stmt;
 
 public class PrettyPrinter {
+  public String printStmt(Stmt stmt) {
+    return switch (stmt) {
+      case Stmt.DeclStmt d -> String.format("(define %s %s)", d.id.lexeme, this.printExpr(d.expr));
+      case Stmt.ExprStmt e -> this.printExpr(e.expr);
+      case Stmt.PrintStmt p -> String.format("(print %s)", this.printExpr(p.expr));
+      default -> throw new Error("Non-exhaustive check");
+    };
+  }
+
   public String printExpr(Expr expr) {
     return switch (expr) {
       case Expr.Unary u -> String.format("(%s %s)", u.op.lexeme, this.printExpr(u.inner));
