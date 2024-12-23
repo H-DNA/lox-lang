@@ -39,10 +39,18 @@ public class Parser {
     while (!this.isAtEnd() && !this.match(TokenType.RIGHT_BRACE, TokenType.SEMICOLON)) {
       this.currentOffset += 1;
     }
-  }
+  } 
 
   private boolean isAtEnd() {
     return this.currentOffset == tokens.size();
+  }
+
+  private void synchronizeSimpleStatement() {
+    assert !this.isAtEnd();
+
+    while (!this.isAtEnd() && !this.match(TokenType.SEMICOLON)) {
+      this.currentOffset += 1;
+    }
   }
 
   private Stmt statement() throws SynchronizationException {
@@ -61,7 +69,7 @@ public class Parser {
     if (!this.match(TokenType.SEMICOLON)) {
       final Token invalidToken = this.current();
       this.errors.add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
-      this.synchronizeStatement();
+      this.synchronizeSimpleStatement();
     }
 
     return new PrintStmt(expr);
@@ -74,7 +82,7 @@ public class Parser {
     if (!this.match(TokenType.SEMICOLON)) {
       final Token invalidToken = this.current();
       this.errors.add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
-      this.synchronizeStatement();
+      this.synchronizeSimpleStatement();
     }
 
     return new ExprStmt(expr);
