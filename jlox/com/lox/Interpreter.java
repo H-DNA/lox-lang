@@ -1,15 +1,21 @@
 package com.lox;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
 import com.lox.ast.SyntaxNode;
 import com.lox.ast.TokenType;
 import com.lox.object.LoxBoolean;
+import com.lox.object.LoxNil;
 import com.lox.object.LoxNumber;
 import com.lox.object.LoxObject;
 import com.lox.object.LoxString;
 
 public class Interpreter {
+  private Environment env = new Environment();
+
   public Interpreter() {}
 
   public Object evaluate(SyntaxNode node) {
@@ -20,9 +26,13 @@ public class Interpreter {
     return switch(stmt) {
       case Stmt.PrintStmt p -> {
         System.out.println(StringifyUtils.stringify(this.evaluateExpr(p.expr)));
-        yield null;
+        yield new LoxNil();
       }
       case Stmt.ExprStmt e -> this.evaluateExpr(e.expr);
+      case Stmt.DeclStmt d -> {
+        this.env.define(d.id.lexeme, this.evaluateExpr(d.expr));
+        yield new LoxNil();
+      }
       default -> throw new Error("Non-exhaustive check");
     };
   }
@@ -138,8 +148,24 @@ public class Interpreter {
     };
   }
 
-  private LoxObject evaluateVariable(Expr.Variable var) {
-    throw new Error("Unimplemented");
+  private LoxObject evaluateVariable(Expr.Variable var) throws InterpreterException {
+    return this.env.get(var.var.lexeme);
+  }
+}
+
+class Environment {
+  private final Map<String, LoxObject> values = new HashMap<>();
+
+  public void define(String name, LoxObject value) {
+    this.values.put(name, value);
+  }
+
+  public LoxObject get(String name) throws InterpreterException {
+    if (values.containsKey(name)) {
+      return this.values.get(name);
+    }
+
+    throw new InterpreterException("Undefined variable '" + name + "'.");
   }
 }
 
