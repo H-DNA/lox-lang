@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
-import com.lox.ast.SyntaxNode;
 import com.lox.ast.TokenType;
 import com.lox.object.LoxBoolean;
 import com.lox.object.LoxNil;
@@ -17,10 +16,6 @@ public class Interpreter {
   private Environment env = new Environment();
 
   public Interpreter() {}
-
-  public Object evaluate(SyntaxNode node) {
-    return new Object();
-  }
 
   public Object evaluateStmt(Stmt stmt) throws InterpreterException {
     return switch(stmt) {
