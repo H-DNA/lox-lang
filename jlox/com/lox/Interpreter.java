@@ -1,7 +1,6 @@
 package com.lox;
 
 import com.lox.ast.Expr;
-import com.lox.ast.Program;
 import com.lox.ast.SyntaxNode;
 import com.lox.ast.TokenType;
 import com.lox.object.LoxBoolean;
