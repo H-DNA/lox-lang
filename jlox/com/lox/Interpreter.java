@@ -1,6 +1,7 @@
 package com.lox;
 
 import com.lox.ast.Expr;
+import com.lox.ast.Stmt;
 import com.lox.ast.SyntaxNode;
 import com.lox.ast.TokenType;
 import com.lox.object.LoxBoolean;
@@ -13,6 +14,17 @@ public class Interpreter {
 
   public Object evaluate(SyntaxNode node) {
     return new Object();
+  }
+
+  public Object evaluateStmt(Stmt stmt) throws InterpreterException {
+    return switch(stmt) {
+      case Stmt.PrintStmt p -> {
+        System.out.println(StringifyUtils.stringify(this.evaluateExpr(p.expr)));
+        yield null;
+      }
+      case Stmt.ExprStmt e -> this.evaluateExpr(e.expr);
+      default -> throw new Error("Non-exhaustive check");
+    };
   }
 
   public LoxObject evaluateExpr(Expr expr) throws InterpreterException {
@@ -154,6 +166,17 @@ class TypecheckUtils {
       case LoxString s -> "string";
       case LoxBoolean b -> "boolean";
       default -> "object";
+    };
+  }
+}
+
+class StringifyUtils {
+  public static String stringify(LoxObject obj) {
+    return switch(obj) {
+      case LoxNumber n -> String.valueOf(n.value);
+      case LoxString s -> s.value;
+      case LoxBoolean b -> String.valueOf(b.value);
+      default -> String.valueOf(obj);
     };
   }
 }
