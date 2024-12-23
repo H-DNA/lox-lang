@@ -156,6 +156,10 @@ class TypecheckUtils {
     return obj instanceof LoxBoolean;
   }
 
+  public static boolean isNil(LoxObject obj) {
+    return obj instanceof LoxNil;
+  }
+
   public static boolean isSameType(LoxObject obj1, LoxObject obj2) {
     return typenameOf(obj1) == typenameOf(obj2);
   }
@@ -165,6 +169,7 @@ class TypecheckUtils {
       case LoxNumber n -> "number";
       case LoxString s -> "string";
       case LoxBoolean b -> "boolean";
+      case LoxNil nil -> "nil";
       default -> "object";
     };
   }
@@ -176,6 +181,7 @@ class StringifyUtils {
       case LoxNumber n -> String.valueOf(n.value);
       case LoxString s -> s.value;
       case LoxBoolean b -> String.valueOf(b.value);
+      case LoxNil nil -> "nil";
       default -> String.valueOf(obj);
     };
   }
