@@ -130,7 +130,7 @@ public class Parser {
       this.currentOffset += 1;
     }
 
-    if (this.isAtEnd() || !this.dryMatch(TokenType.RIGHT_PAREN)) {
+    if (this.isAtEnd() || !this.match(TokenType.RIGHT_PAREN)) {
       throw new SynchronizationException();
     }
   }
