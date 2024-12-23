@@ -7,6 +7,8 @@ import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
 import com.lox.ast.Token;
 import com.lox.ast.TokenType;
+import com.lox.ast.Stmt.ExprStmt;
+import com.lox.ast.Stmt.PrintStmt;
 import com.lox.utils.Pair;
 
 public class Parser {
@@ -19,22 +21,17 @@ public class Parser {
     this.tokens = tokens;
   }
 
-  public Pair<List<Stmt>, List<ParserException>> parse() {
-    if (this.isAtEnd()) return new Pair<>(this.stmts, this.errors);
-    return new Pair<>(this.stmts, this.errors);
-  }
-
   private boolean isAtEnd() {
     return this.currentOffset == tokens.size();
   }
 
-  private Expr expression() throws ParserException {
+  private Expr expression() throws SynchronizationException {
     assert !this.isAtEnd();
 
     return this.equality();
   }
 
-  private Expr equality() throws ParserException {
+  private Expr equality() throws SynchronizationException {
     assert !this.isAtEnd();
 
     Expr left = this.comparison();
@@ -46,7 +43,7 @@ public class Parser {
     return left;
   }
 
-  private Expr comparison() throws ParserException {
+  private Expr comparison() throws SynchronizationException {
     assert !this.isAtEnd();
 
     Expr left = this.term();
@@ -58,7 +55,7 @@ public class Parser {
     return left;
   }
 
-  private Expr term() throws ParserException {
+  private Expr term() throws SynchronizationException {
     assert !this.isAtEnd();
 
     Expr left = this.factor();
@@ -70,7 +67,7 @@ public class Parser {
     return left;
   }
 
-  private Expr factor() throws ParserException {
+  private Expr factor() throws SynchronizationException {
     assert !this.isAtEnd();
 
     Expr left = this.unary();
@@ -82,7 +79,7 @@ public class Parser {
     return left;
   }
 
-  private Expr unary() throws ParserException {
+  private Expr unary() throws SynchronizationException {
     assert !this.isAtEnd();
 
     if (this.match(TokenType.BANG, TokenType.MINUS)) {
@@ -94,7 +91,7 @@ public class Parser {
     return this.primary();
   }
 
-  private Expr primary() throws ParserException {
+  private Expr primary() throws SynchronizationException {
     assert !this.isAtEnd();
 
     if (this.match(TokenType.NUMBER)) {
@@ -111,29 +108,31 @@ public class Parser {
       return new Expr.Literal(trueToken);
     } else if (this.match(TokenType.LEFT_PAREN)) {
       final Expr inner = this.expression();
-      if (!this.match(TokenType.RIGHT_PAREN)) this.synchronizeGrouping();
+      if (!this.match(TokenType.RIGHT_PAREN)) {
+        final Token invalidToken = this.current();
+        this.errors.add(new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
+        this.synchronizeGrouping();
+      }
       return new Expr.Grouping(inner);
     } else if (this.match(TokenType.IDENTIFIER)) {
       final Token identifier = this.previous();
       return new Expr.Variable(identifier);
     }
 
-    throw new ParserException("Expect a numeric literal, string literal, variable or grouping expression", this.current().startOffset, this.current().endOffset);
+    this.errors.add(new ParserException("Expect a numeric literal, string literal, variable or grouping expression", this.current().startOffset, this.current().endOffset));
+    throw new SynchronizationException();
   }
 
-  private void synchronizeGrouping() throws ParserException {
+  private void synchronizeGrouping() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    Token invalidToken = this.current();
     while (!this.isAtEnd() && !this.dryMatch(TokenType.RIGHT_PAREN, TokenType.RIGHT_BRACE, TokenType.SEMICOLON)) {
       this.currentOffset += 1;
     }
 
-    ParserException exception = new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset);
     if (this.isAtEnd() || !this.dryMatch(TokenType.RIGHT_PAREN)) {
-      throw exception;
+      throw new SynchronizationException();
     }
-    this.errors.add(exception);
   }
 
   private Token previous() {
@@ -174,3 +173,5 @@ public class Parser {
     return false;
   }
 }
+
+class SynchronizationException extends Exception {}
