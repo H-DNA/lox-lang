@@ -1,5 +1,6 @@
 package com.lox;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.List;
 
 import com.lox.*;
 import com.lox.ast.Expr;
+import com.lox.ast.Stmt;
 import com.lox.ast.SyntaxNode;
 import com.lox.ast.Token;
 import com.lox.ast.TokenType;
@@ -102,6 +104,32 @@ public class ParserTest {
       assertEquals(e.message, "Expect a numeric literal, string literal, variable or grouping expression");
     }
   }
+
+  @Test
+  public void testExprStmt() throws Throwable {
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("1 + 2;")), "(+ 1 2)");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("1 + (2);")), "(+ 1 (group 2))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("1 + (2 + 3);")), "(+ 1 (group (+ 2 3)))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("1 + 2 * 3;")), "(+ 1 (* 2 3))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("1 * 2 + 3;")), "(+ (* 1 2) 3)");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("(1 + 2) * 3;)")), "(* (group (+ 1 2)) 3)");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("1 - 2 == 3;")), "(== (- 1 2) 3)");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("1 - 2 * 4 == 3 / 5;")), "(== (- 1 (* 2 4)) (/ 3 5))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("1 - 2 * 4 == 3 / 5 != 6 >= 3;")), "(!= (== (- 1 (* 2 4)) (/ 3 5)) (>= 6 3))");
+  }
+
+  @Test
+  public void testPrintStmt() throws Throwable {
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("print 1 + 2;")), "(print (+ 1 2))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("print 1 + (2);")), "(print (+ 1 (group 2)))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("print 1 + (2 + 3);")), "(print (+ 1 (group (+ 2 3))))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("print 1 + 2 * 3;")), "(print (+ 1 (* 2 3)))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("print 1 * 2 + 3;")), "(print (+ (* 1 2) 3))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("print (1 + 2) * 3;)")), "(print (* (group (+ 1 2)) 3))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("print 1 - 2 == 3;")), "(print (== (- 1 2) 3))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("print 1 - 2 * 4 == 3 / 5;")), "(print (== (- 1 (* 2 4)) (/ 3 5)))");
+    assertEquals(ParserTestUtils.prettyPrintStmt(ParserTestUtils.parseStmt("print 1 - 2 * 4 == 3 / 5 != 6 >= 3;")), "(print (!= (== (- 1 (* 2 4)) (/ 3 5)) (>= 6 3)))");
+  }
 }
 
 class ParserTestUtils {
@@ -116,12 +144,36 @@ class ParserTestUtils {
     try {
       return (Expr)method.invoke(parser);
     } catch (InvocationTargetException e) {
-      throw e.getCause();
+      Field field = Parser.class.getDeclaredField("errors");
+      field.setAccessible(true);
+      throw ((List<ParserException>)field.get(parser)).get(0);
     }
   }
 
   static String prettyPrintExpr(Expr expr) {
     PrettyPrinter printer = new PrettyPrinter();
     return printer.printExpr(expr);
+  }
+
+  static Stmt parseStmt(String source) throws Throwable {
+    Method method = Parser.class.getDeclaredMethod("declaration");
+    method.setAccessible(true);
+
+    Scanner scanner = new Scanner(source);
+    List<Token> tokens = scanner.tokenize().first;
+    Parser parser = new Parser(tokens);
+
+    try {
+      return (Stmt)method.invoke(parser);
+    } catch (InvocationTargetException e) {
+      Field field = Parser.class.getDeclaredField("errors");
+      field.setAccessible(true);
+      throw ((List<ParserException>)field.get(parser)).get(0);
+    }
+  }
+
+  static String prettyPrintStmt(Stmt stmt) {
+    PrettyPrinter printer = new PrettyPrinter();
+    return printer.printStmt(stmt);
   }
 }
