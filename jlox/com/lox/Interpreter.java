@@ -1,6 +1,7 @@
 package com.lox;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.lox.ast.Expr;
@@ -16,6 +17,12 @@ public class Interpreter {
   private Environment env = new Environment();
 
   public Interpreter() {}
+
+  public <T extends List<Stmt>> void evaluate(T stmts) throws InterpreterException {
+    for (Stmt stmt: stmts) {
+      this.evaluateStmt(stmt);
+    }
+  }
 
   public Object evaluateStmt(Stmt stmt) throws InterpreterException {
     return switch(stmt) {
