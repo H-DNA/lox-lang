@@ -24,7 +24,7 @@ public class Parser {
 
   public Pair<List<Stmt>, List<ParserException>> parse() {
     if (this.isAtEnd()) return new Pair<>(this.stmts, this.errors);
-    while (!this.isAtEnd()) {
+    while (!this.isAtEnd() && !this.match(TokenType.EOF)) {
       try {
         this.stmts.add(this.declaration());
       } catch (SynchronizationException e) {
