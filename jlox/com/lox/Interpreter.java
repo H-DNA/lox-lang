@@ -18,7 +18,7 @@ public class Interpreter {
 
   public Interpreter() {}
 
-  public <T extends List<Stmt>> void evaluate(T stmts) throws InterpreterException {
+  public void evaluate(List<Stmt> stmts) throws InterpreterException {
     for (Stmt stmt: stmts) {
       this.evaluateStmt(stmt);
     }

@@ -1,9 +1,19 @@
 package com.lox;
 
+import java.util.List;
+
 import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
 
 public class PrettyPrinter {
+  public String print(List<Stmt> stmts) {
+    String res = "";
+    for (Stmt stmt: stmts) {
+      res += this.printStmt(stmt) + "\n";
+    }
+    return res.strip();
+  }
+
   public String printStmt(Stmt stmt) {
     return switch (stmt) {
       case Stmt.DeclStmt d -> d.expr == null ? String.format("(define %s)", d.id.lexeme) : String.format("(define %s %s)", d.id.lexeme, this.printExpr(d.expr));
