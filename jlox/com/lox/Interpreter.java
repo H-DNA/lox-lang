@@ -1,7 +1,7 @@
 package com.lox;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.lox.ast.Expr;
@@ -18,7 +18,7 @@ public class Interpreter {
 
   public Interpreter() {}
 
-  public void evaluate(ArrayList<Stmt> stmts) throws InterpreterException {
+  public void evaluate(List<Stmt> stmts) throws InterpreterException {
     for (Stmt stmt: stmts) {
       this.evaluateStmt(stmt);
     }

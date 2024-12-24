@@ -1,12 +1,12 @@
 package com.lox;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
 
 public class PrettyPrinter {
-  public String print(ArrayList<Stmt> stmts) {
+  public String print(List<Stmt> stmts) {
     String res = "";
     for (Stmt stmt: stmts) {
       res += this.printStmt(stmt) + "\n";
