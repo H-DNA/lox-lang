@@ -65,16 +65,14 @@ public class ParserTest {
   @Test
   public void testBinary() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 + 2;"), "(+ 1 2)");
-    // ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 + (2);"), "(+ 1 (group 2))");
-    // ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 + (2 + 3);"), "(+ 1 (group (+ 2 3)))");
-    // ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 + 2 * 3;"), "(+ 1 (* 2 3))");
-    // ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 * 2 + 3;"), "(+ (* 1 2) 3)");
-    // ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("(1 + 2) * 3;"), "(* (group (+ 1 2)) 3)");
-    // ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 - 2 == 3;"), "(== (- 1 2) 3)");
-    // ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 - 2 * 4 == 3 / 5;"),
-    //    "(== (- 1 (* 2 4)) (/ 3 5))");
-    // ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 - 2 * 4 == 3 / 5 != 6 >= 3;"),
-    //    "(!= (== (- 1 (* 2 4)) (/ 3 5)) (>= 6 3))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 + (2);"), "(+ 1 (group 2))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 + (2 + 3);"), "(+ 1 (group (+ 2 3)))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 + 2 * 3;"), "(+ 1 (* 2 3))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 * 2 + 3;"), "(+ (* 1 2) 3)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("(1 + 2) * 3;"), "(* (group (+ 1 2)) 3)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 - 2 == 3;"), "(== (- 1 2) 3)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 - 2 * 4 == 3 / 5;"), "(== (- 1 (* 2 4)) (/ 3 5))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 - 2 * 4 == 3 / 5 != 6 >= 3;"), "(!= (== (- 1 (* 2 4)) (/ 3 5)) (>= 6 3))");
   }
 
   @Test
@@ -95,10 +93,10 @@ public class ParserTest {
 
   @Test
   public void testPrintStmt() throws Throwable {
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("print 1 + 2;"), "(print (+ 1 2))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("print 1 + (2);"), "(print (+ 1 (group 2)))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("print 1 + (2 + 3);"),
-        "(print (+ 1 (group (+ 2 3))))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("print a + 2;"), "(print (+ a 2))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("print 1 + (a);"), "(print (+ 1 (group a)))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("print 1 + (b + 3);"),
+        "(print (+ 1 (group (+ b 3))))");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("print 1 + 2 * 3;"), "(print (+ 1 (* 2 3)))");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("print 1 * 2 + 3;"), "(print (+ (* 1 2) 3))");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("print (1 + 2) * 3;"),
