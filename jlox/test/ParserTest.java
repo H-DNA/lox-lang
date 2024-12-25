@@ -119,6 +119,7 @@ public class ParserTest {
   @Test
   public void testInvalidVarDecl() throws Throwable {
     ParserTestUtils.assertOneError(ParserTestUtils.parse("var"), "Expect an identifier");
+    ParserTestUtils.assertOneError(ParserTestUtils.parse("var x ="), "Expect a numeric literal, string literal, variable or grouping expression");
   }
 }
 
