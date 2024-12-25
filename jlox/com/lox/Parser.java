@@ -266,7 +266,7 @@ public class Parser {
   }
 
   private boolean match(TokenType... types) {
-    assert !this.isAtEnd();
+    if (this.isAtEnd()) return false;
 
     final TokenType currentType = this.tokens.get(this.currentOffset).type;
     for (TokenType type: types) {

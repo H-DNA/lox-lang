@@ -272,7 +272,7 @@ public class Scanner {
   }
 
   private boolean match(char expected) {
-    assert !this.isAtEnd();
+    if (this.isAtEnd()) return false;
     if (expected != this.source.charAt(this.currentOffset))
       return false;
     this.currentOffset += 1;
