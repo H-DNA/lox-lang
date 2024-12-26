@@ -24,7 +24,7 @@ public class Interpreter {
     }
   }
 
-  public Object evaluateStmt(Stmt stmt) throws InterpreterException {
+  public LoxObject evaluateStmt(Stmt stmt) throws InterpreterException {
     return switch(stmt) {
       case Stmt.PrintStmt p -> {
         System.out.println(StringifyUtils.stringify(this.evaluateExpr(p.expr)));
