@@ -167,7 +167,7 @@ class Environment {
       return this.values.get(name);
     }
 
-    throw new InterpreterException("Undefined variable '" + name + "'.");
+    throw new InterpreterException("Undefined variable '" + name + "'");
   }
 }
 
