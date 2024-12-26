@@ -21,59 +21,70 @@ import static org.junit.jupiter.api.Assertions.*;
 public class InterpreterTest {
   @Test
   public void testLiteral() throws Throwable {
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("\"true\";"), "true");
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("false;"), false);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("true;"), true);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("0;"), 0.0);
+    InterpreterTestUtils.assertLastStmtEquals("\"true\";", "true");
+    InterpreterTestUtils.assertLastStmtEquals("false;", false);
+    InterpreterTestUtils.assertLastStmtEquals("true;", true);
+    InterpreterTestUtils.assertLastStmtEquals("0;", 0.0);
   }
 
   @Test
   public void testUnary() throws Throwable {
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("-1;"), -1.0);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("!1;"), false);
+    InterpreterTestUtils.assertLastStmtEquals("-1;", -1.0);
+    InterpreterTestUtils.assertLastStmtEquals("!1;", false);
 
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("-   1;"), -1.0);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("!   1;"), false);
+    InterpreterTestUtils.assertLastStmtEquals("-   1;", -1.0);
+    InterpreterTestUtils.assertLastStmtEquals("!   1;", false);
 
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("!\"\";"), false);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("! -1;"), false);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("!0;"), false);
+    InterpreterTestUtils.assertLastStmtEquals("!\"\";", false);
+    InterpreterTestUtils.assertLastStmtEquals("! -1;", false);
+    InterpreterTestUtils.assertLastStmtEquals("!0;", false);
 
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("!!1;"), true);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("--1;"), 1.0);
+    InterpreterTestUtils.assertLastStmtEquals("!!1;", true);
+    InterpreterTestUtils.assertLastStmtEquals("--1;", 1.0);
   }
 
   @Test
   public void testGrouping() throws Throwable {
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("(1);"), 1.0);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("(\"abc\");"), "abc");
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("(true);"), true);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("(false);"), false);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("(1 + 2);"), 3.0);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("(! 2);"), false);
+    InterpreterTestUtils.assertLastStmtEquals("(1);", 1.0);
+    InterpreterTestUtils.assertLastStmtEquals("(\"abc\");", "abc");
+    InterpreterTestUtils.assertLastStmtEquals("(true);", true);
+    InterpreterTestUtils.assertLastStmtEquals("(false);", false);
+    InterpreterTestUtils.assertLastStmtEquals("(1 + 2);", 3.0);
+    InterpreterTestUtils.assertLastStmtEquals("(! 2);", false);
   }
 
   @Test
   public void testBinary() throws Throwable {
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("1 + 2;"), 3.0);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("1 + (2);"), 3.0);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("1 + (2 + 3);"), 6.0);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("1 + 2 * 3;"), 7.0);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("1 * 2 + 3;"), 5.0);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("(1 + 2) * 3;"), 9.0);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("1 - 2 == 3;"), false);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("1 - 2 * 4 == -7;"), true);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("2 / 1 == 2;"), true);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("2 / 1 >= 1;"), true);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("2 / 1 > 1;"), true);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("2 / 1 <= 1;"), false);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("2 / 1 < 1;"), false);
-    assertEquals(InterpreterTestUtils.assertLastStmtEquals("2 / 1 != 1;"), true);
+    InterpreterTestUtils.assertLastStmtEquals("1 + 2;", 3.0);
+    InterpreterTestUtils.assertLastStmtEquals("1 + (2);", 3.0);
+    InterpreterTestUtils.assertLastStmtEquals("1 + (2 + 3);", 6.0);
+    InterpreterTestUtils.assertLastStmtEquals("1 + 2 * 3;", 7.0);
+    InterpreterTestUtils.assertLastStmtEquals("1 * 2 + 3;", 5.0);
+    InterpreterTestUtils.assertLastStmtEquals("(1 + 2) * 3;", 9.0);
+    InterpreterTestUtils.assertLastStmtEquals("1 - 2 == 3;", false);
+    InterpreterTestUtils.assertLastStmtEquals("1 - 2 * 4 == -7;", true);
+    InterpreterTestUtils.assertLastStmtEquals("2 / 1 == 2;", true);
+    InterpreterTestUtils.assertLastStmtEquals("2 / 1 >= 1;", true);
+    InterpreterTestUtils.assertLastStmtEquals("2 / 1 > 1;", true);
+    InterpreterTestUtils.assertLastStmtEquals("2 / 1 <= 1;", false);
+    InterpreterTestUtils.assertLastStmtEquals("2 / 1 < 1;", false);
+    InterpreterTestUtils.assertLastStmtEquals("2 / 1 != 1;", true);
+  }
+
+  @Test
+  public void testVarDecl() throws Throwable {
+    InterpreterTestUtils.assertLastStmtEquals("var x = 3; x;", 3.0);
+    InterpreterTestUtils.assertLastStmtEquals("var x = 3; var x = 4; x;", 4.0);
+    InterpreterTestUtils.assertLastStmtEquals("var x = 1 + 2; x;", 3.0);
+    InterpreterTestUtils.assertErrorMessageIs("var x = y; x;", "Undefined variable 'y'");
+    InterpreterTestUtils.assertErrorMessageIs("var x = y + 1; x;", "Undefined variable 'y'");
+    InterpreterTestUtils.assertErrorMessageIs("var x = x; x;", "Undefined variable 'x'");
+    InterpreterTestUtils.assertLastStmtEquals("var y = 1 + 2; var x = y * 2; x;", 6.0);
   }
 }
 
 class InterpreterTestUtils {
-  static Object assertLastStmtEquals(String source) throws Throwable {
+  static void assertLastStmtEquals(String source, Object target) throws Throwable {
     Scanner scanner = new Scanner(source);
     List<Token> tokens = scanner.tokenize().first;
     Parser parser = new Parser(tokens);
@@ -84,6 +95,26 @@ class InterpreterTestUtils {
     for (Stmt stmt: stmts) {
       res = interpreter.evaluateStmt(stmt);
     }
-    return res.value();
+    assertEquals(res.value(), target);
+  }
+
+  static void assertErrorMessageIs(String source, String target) throws Throwable {
+    Scanner scanner = new Scanner(source);
+    List<Token> tokens = scanner.tokenize().first;
+    Parser parser = new Parser(tokens);
+    List<Stmt> stmts = parser.parse().first; 
+
+    Interpreter interpreter = new Interpreter();
+    LoxObject res = new LoxNil();
+    
+    try {
+      for (Stmt stmt: stmts) {
+        res = interpreter.evaluateStmt(stmt);
+      }
+    } catch (InterpreterException e) {
+      assertEquals(e.message, target);
+      return;
+    }
+    assertEquals("An exception was caught", "No exception was caught");
   }
 }
