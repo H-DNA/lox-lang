@@ -1,5 +1,7 @@
 package com.lox;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -81,6 +83,14 @@ public class InterpreterTest {
     InterpreterTestUtils.assertErrorMessageIs("var x = x; x;", "Undefined variable 'x'");
     InterpreterTestUtils.assertLastStmtEquals("var y = 1 + 2; var x = y * 2; x;", 6.0);
   }
+
+  @Test
+  public void testPrintStmt() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("var x = 3; print x;", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("var x = \"3.02\"; print x;", "3.02\n");
+    InterpreterTestUtils.assertStdoutIs("print 1 + 2 + 3;", "6.0\n");
+    InterpreterTestUtils.assertStdoutIs("var x = 10; var y = x * 2; print y + 1 + 2 + 3;", "26.0\n");
+  }
 }
 
 class InterpreterTestUtils {
@@ -116,5 +126,21 @@ class InterpreterTestUtils {
       return;
     }
     assertEquals("An exception was caught", "No exception was caught");
+  }
+
+  static void assertStdoutIs(String source, String target) throws Throwable {
+    Scanner scanner = new Scanner(source);
+    List<Token> tokens = scanner.tokenize().first;
+    Parser parser = new Parser(tokens);
+    List<Stmt> stmts = parser.parse().first; 
+    
+    PrintStream originalStream = System.out;
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(out));
+    Interpreter interpreter = new Interpreter();
+    interpreter.evaluate(stmts);
+    System.setOut(originalStream);
+
+    assertEquals(out.toString(), target);
   }
 }
