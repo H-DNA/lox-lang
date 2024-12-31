@@ -74,7 +74,7 @@ public class Interpreter {
       }
       case TokenType.SLASH -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
-          throw new InterpreterException(String.format("Unsupported operator '+' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
+          throw new InterpreterException(String.format("Unsupported operator '/' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
         yield new LoxNumber(((LoxNumber)left).value / ((LoxNumber)right).value);
       }
