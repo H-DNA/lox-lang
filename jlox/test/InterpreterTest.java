@@ -91,6 +91,20 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("print 1 + 2 + 3;", "6.0\n");
     InterpreterTestUtils.assertStdoutIs("var x = 10; var y = x * 2; print y + 1 + 2 + 3;", "26.0\n");
   }
+
+  @Test
+  public void testTypeMismatch() throws Throwable {
+    InterpreterTestUtils.assertErrorMessageIs("1 + \"3\"", "Unsupported operator '+' on number and string");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" + 3", "Unsupported operator '+' on string and number");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" + \"3\"", "Unsupported operator '+' on string and string");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" * \"3\"", "Unsupported operator '*' on string and string");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" - \"3\"", "Unsupported operator '-' on string and string");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" / \"3\"", "Unsupported operator '/' on string and string");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" > \"3\"", "Unsupported operator '>' on string and string");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" >= \"3\"", "Unsupported operator '>=' on string and string");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" <= \"3\"", "Unsupported operator '<=' on string and string");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" < \"3\"", "Unsupported operator '<' on string and string");
+  }
 }
 
 class InterpreterTestUtils {
