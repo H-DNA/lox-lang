@@ -243,6 +243,9 @@ public class Parser {
     } else if (this.match(TokenType.FALSE)) {
       final Token trueToken = this.previous();
       return new Expr.Literal(trueToken);
+    } else if (this.match(TokenType.NIL)) {
+      final Token nilToken = this.previous();
+      return new Expr.Literal(nilToken);
     } else if (this.match(TokenType.LEFT_PAREN)) {
       final Expr inner = this.expression();
       if (!this.match(TokenType.RIGHT_PAREN)) {

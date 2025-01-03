@@ -142,6 +142,9 @@ public class Interpreter {
   }
 
   private LoxObject evaluateLiteral(Expr.Literal lit) {
+    if (lit.value.literal == null) {
+      return new LoxNil();
+    }
     return switch (lit.value.literal) {
       case Double d -> new LoxNumber(d);
       case String s -> new LoxString(s);
