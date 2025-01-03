@@ -114,11 +114,11 @@ public class InterpreterTest {
   public void testVarDecl() throws Throwable {
     InterpreterTestUtils.assertLastStmtEquals("var x; x;", null);
     InterpreterTestUtils.assertLastStmtEquals("var x = 3; x;", 3.0);
-    InterpreterTestUtils.assertLastStmtEquals("var x = 3; var x = 4; x;", 4.0);
     InterpreterTestUtils.assertLastStmtEquals("var x = 1 + 2; x;", 3.0);
     InterpreterTestUtils.assertErrorMessageIs("var x = y; x;", "Undefined variable 'y'");
     InterpreterTestUtils.assertErrorMessageIs("var x = y + 1; x;", "Undefined variable 'y'");
     InterpreterTestUtils.assertErrorMessageIs("var x = x; x;", "Undefined variable 'x'");
+    InterpreterTestUtils.assertErrorMessageIs("var x = 1; var x = 3; x;", "Redeclared variable 'x'");
     InterpreterTestUtils.assertLastStmtEquals("var y = 1 + 2; var x = y * 2; x;", 6.0);
   }
 
@@ -150,6 +150,7 @@ public class InterpreterTest {
     InterpreterTestUtils.assertLastStmtEquals("var x = nil; var y = 1; if (!x) if (x) y + 1; else y + 2; else y - 1;", 3.0);
     InterpreterTestUtils.assertLastStmtEquals("var x = nil; var y = 1; if (!x) if (x) y + 1; else y + 2; else y - 1;", 3.0);
   }
+
   @Test
   public void testBlockStmt() throws Throwable {
     InterpreterTestUtils.assertLastStmtEquals("{ var c = 3; }", null);
@@ -159,6 +160,27 @@ public class InterpreterTest {
     InterpreterTestUtils.assertLastStmtEquals("{ var c = 4.0; if (!c) c + 1; else c * 0 }", 0.0);
     InterpreterTestUtils.assertLastStmtEquals("var c = nil; if (c) { 4.0; } else { 5.0 }", 5.0);
     InterpreterTestUtils.assertLastStmtEquals("var c = true; if (c) { 4.0; } else { 5.0 }", 4.0);
+  }
+  
+  @Test
+  public void testLexicalScoping() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("var a = 3; { print a; }", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = 4; print a; }", "4.0\n");
+    InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = 4; } print a;", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = 4; { var a = 5; print a; } }", "5.0\n");
+    InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = 4; { var a = 5; } print a; }", "4.0\n");
+    InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = 4; { var a = 5; } } print a;", "3.0\n");
+
+    InterpreterTestUtils.assertErrorMessageIs("var a = 3; { var b = 4; { var c = 5; } } print c;", "Undefined variable 'c'");
+    InterpreterTestUtils.assertErrorMessageIs("var a = 3; { var b = 4; { var c = 5; } print c; }", "Undefined variable 'c'");
+    InterpreterTestUtils.assertErrorMessageIs("var a = 3; { var b = 4; { var c = 5; } } print b;", "Undefined variable 'b'");
+
+    InterpreterTestUtils.assertStdoutIs("var a = 3; { a = 4; print a; }", "4.0\n");
+    InterpreterTestUtils.assertStdoutIs("var a = 3; { a = a + 1; } print a;", "4.0\n");
+    InterpreterTestUtils.assertStdoutIs("var a = 3; { var b = 3; { a = a + b; } } print a;", "6.0\n");
+
+    InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = a + 1; } print a;", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = a + 1; print a; }", "4.0\n");
   }
 
   @Test

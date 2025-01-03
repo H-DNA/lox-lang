@@ -45,10 +45,12 @@ public class Interpreter {
         }
       }
       case Stmt.BlockStmt b -> {
+        this.env = new Environment(this.env);
         LoxObject lastValue = new LoxNil();
         for (Stmt s: b.stmts) {
           lastValue = this.evaluateStmt(s);
         }
+        this.env = this.env.parent;
         yield lastValue;
       }
       default -> throw new Error("Non-exhaustive check");
@@ -193,26 +195,40 @@ public class Interpreter {
 }
 
 class Environment {
+  public final Environment parent;
   private final Map<String, LoxObject> values = new HashMap<>();
 
-  public void define(String name, LoxObject value) {
+  Environment() {
+    this.parent = null;
+  }
+
+  Environment(Environment parent) {
+    this.parent = parent;
+  }
+
+  public void define(String name, LoxObject value) throws InterpreterException {
+    if (values.containsKey(name)) {
+      throw new InterpreterException("Redeclared variable '" + name + "'");
+    }
     this.values.put(name, value);
   }
 
   public void assign(String name, LoxObject value) throws InterpreterException {
-    if (values.containsKey(name)) {
-      this.values.put(name, value);
-      return;
+    for (Environment env = this; env != null; env = env.parent) {
+      if (env.values.containsKey(name)) {
+        env.values.put(name, value);
+        return;
+      }
     }
-
     throw new InterpreterException("Undefined variable '" + name + "'");
   }
 
   public LoxObject get(String name) throws InterpreterException {
-    if (values.containsKey(name)) {
-      return this.values.get(name);
+    for (Environment env = this; env != null; env = env.parent) {
+      if (env.values.containsKey(name)) {
+        return env.values.get(name);
+      }
     }
-
     throw new InterpreterException("Undefined variable '" + name + "'");
   }
 }
