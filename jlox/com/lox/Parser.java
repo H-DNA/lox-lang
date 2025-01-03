@@ -182,7 +182,7 @@ public class Parser {
   private Expr assignment() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    Expr left = this.equality();
+    Expr left = this.logicalOr();
     if (this.match(TokenType.EQUAL)) {
       Token op = this.previous();
       Expr right = this.assignment();
@@ -191,6 +191,30 @@ public class Parser {
       } else {
         this.errors.add(new ParserException("Invalid assignment target", op.startOffset, op.endOffset));
       }
+    }
+    return left;
+  }
+
+  private Expr logicalOr() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    Expr left = this.logicalAnd();
+    while (this.match(TokenType.OR)) {
+      Token op = this.previous();
+      Expr right = this.logicalAnd();
+      left = new Expr.Binary(left, op, right);
+    }
+    return left;
+  }
+
+  private Expr logicalAnd() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    Expr left = this.equality();
+    while (this.match(TokenType.AND)) {
+      Token op = this.previous();
+      Expr right = this.equality();
+      left = new Expr.Binary(left, op, right);
     }
     return left;
   }

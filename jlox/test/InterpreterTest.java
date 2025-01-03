@@ -88,6 +88,29 @@ public class InterpreterTest {
   }
 
   @Test
+  public void testLogical() throws Throwable {
+    InterpreterTestUtils.assertLastStmtEquals("true and 3;", 3.0);
+    InterpreterTestUtils.assertLastStmtEquals("true and nil;", null);
+    InterpreterTestUtils.assertLastStmtEquals("true and \"abc\";", "abc");
+    InterpreterTestUtils.assertLastStmtEquals("true and false;", false);
+
+    InterpreterTestUtils.assertLastStmtEquals("nil and 3;", null);
+    InterpreterTestUtils.assertLastStmtEquals("false and \"abc\";", false);
+    InterpreterTestUtils.assertLastStmtEquals("false and 3;", false);
+
+    InterpreterTestUtils.assertLastStmtEquals("nil or 3;", 3.0);
+    InterpreterTestUtils.assertLastStmtEquals("false or \"abc\";", "abc");
+    InterpreterTestUtils.assertLastStmtEquals("false or 3;", 3.0);
+    InterpreterTestUtils.assertLastStmtEquals("false or false;", false);
+    InterpreterTestUtils.assertLastStmtEquals("false or nil;", null);
+
+    InterpreterTestUtils.assertLastStmtEquals("3.0 or nil;", 3.0);
+    InterpreterTestUtils.assertLastStmtEquals("\"abc\" or nil;", "abc");
+    InterpreterTestUtils.assertLastStmtEquals("true or nil;", true);
+    InterpreterTestUtils.assertLastStmtEquals("true or false;", true);
+  }
+
+  @Test
   public void testVarDecl() throws Throwable {
     InterpreterTestUtils.assertLastStmtEquals("var x = 3; x;", 3.0);
     InterpreterTestUtils.assertLastStmtEquals("var x = 3; var x = 4; x;", 4.0);
@@ -112,6 +135,8 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("var x = \"3.02\"; print x;", "3.02\n");
     InterpreterTestUtils.assertStdoutIs("print 1 + 2 + 3;", "6.0\n");
     InterpreterTestUtils.assertStdoutIs("var x = 10; var y = x * 2; print y + 1 + 2 + 3;", "26.0\n");
+    InterpreterTestUtils.assertStdoutIs("var x = 3; print x or false;", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("var x = 3; print x and false;", "false\n");
   }
 
   @Test

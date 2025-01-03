@@ -72,6 +72,22 @@ public class Interpreter {
       this.env.assign(((Variable)bin.left).var.lexeme, right);
       return right;
     }
+    if (bin.op.type == TokenType.OR) {
+      final LoxObject left = this.evaluateExpr(bin.left);
+      if (ValuecheckUtils.isTruthy(left)) {
+        return left;
+      }
+      final LoxObject right = this.evaluateExpr(bin.right);
+      return right;
+    }
+    if (bin.op.type == TokenType.AND) {
+      final LoxObject left = this.evaluateExpr(bin.left);
+      if (ValuecheckUtils.isFalsy(left)) {
+        return left;
+      }
+      final LoxObject right = this.evaluateExpr(bin.right);
+      return right;
+    }
     final LoxObject left = this.evaluateExpr(bin.left);
     final LoxObject right = this.evaluateExpr(bin.right);
     return switch (bin.op.type) { 
@@ -134,7 +150,7 @@ public class Interpreter {
           throw new InterpreterException(String.format("Unsupported operator '>=' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
         yield new LoxBoolean(((LoxNumber)left).value >= ((LoxNumber)right).value);
-      }
+      } 
       default -> throw new Error(String.format("Unreachable: Unexpected binary operator '%s'", bin.op.lexeme));
     };
   }
