@@ -52,12 +52,13 @@ public abstract class Stmt extends SyntaxNode {
   }
 
   public static class ForStmt extends Stmt {
-    public final DeclStmt init;
+    public final Stmt init;
     public final ExprStmt cond;
     public final Expr post;
     public final Stmt body;
 
-    public ForStmt(DeclStmt init, ExprStmt cond, Expr post, Stmt body) {
+    public ForStmt(Stmt init, ExprStmt cond, Expr post, Stmt body) {
+      assert init instanceof DeclStmt || init instanceof ExprStmt;
       this.init = init;
       this.cond = cond;
       this.post = post;

@@ -26,6 +26,12 @@ public class PrettyPrinter {
           yield String.format("(if %s then %s else %s)", this.printExpr(i.cond), this.printStmt(i.thenBranch), this.printStmt(i.elseBranch));
         }
       }
+      case Stmt.WhileStmt w -> {
+        yield String.format("(while %s do %s)", this.printExpr(w.cond), this.printStmt(w.body));
+      }
+      case Stmt.ForStmt f -> {
+        yield String.format("(for %s %s %s do %s)", this.printStmt(f.init), this.printStmt(f.cond), this.printExpr(f.post), this.printStmt(f.body));
+      }
       case Stmt.BlockStmt b -> {
         String res = "(block";
         for (Stmt s: b.stmts) {

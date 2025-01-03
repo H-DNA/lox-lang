@@ -154,7 +154,7 @@ public class Parser {
       throw new SynchronizationException();
     }
 
-    final DeclStmt init = this.varDeclaration();
+    final Stmt init = this.match(TokenType.VAR) ? this.varDeclaration() : this.expressionStatement();
     final ExprStmt cond = this.expressionStatement();
     final Expr post = this.expression();
 

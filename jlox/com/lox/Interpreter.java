@@ -44,6 +44,22 @@ public class Interpreter {
           yield i.elseBranch != null ? this.evaluateStmt(i.elseBranch) : new LoxNil();
         }
       }
+      case Stmt.WhileStmt w -> {
+        while (ValuecheckUtils.isTruthy(this.evaluateExpr(w.cond))) {
+          this.evaluateStmt(w.body);
+        }
+        yield new LoxNil();
+      }
+      case Stmt.ForStmt f -> {
+        this.env = new Environment(this.env);
+        this.evaluateStmt(f.init);
+        while (ValuecheckUtils.isTruthy(this.evaluateStmt(f.cond))) {
+          this.evaluateStmt(f.body);
+          this.evaluateExpr(f.post);
+        }
+        this.env = this.env.parent;
+        yield new LoxNil();
+      }
       case Stmt.BlockStmt b -> {
         this.env = new Environment(this.env);
         LoxObject lastValue = new LoxNil();

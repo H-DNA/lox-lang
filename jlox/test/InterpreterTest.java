@@ -161,6 +161,19 @@ public class InterpreterTest {
     InterpreterTestUtils.assertLastStmtEquals("var c = nil; if (c) { 4.0; } else { 5.0 }", 5.0);
     InterpreterTestUtils.assertLastStmtEquals("var c = true; if (c) { 4.0; } else { 5.0 }", 4.0);
   }
+
+  @Test
+  public void testWhileStmt() throws Throwable {
+    InterpreterTestUtils.assertLastStmtEquals("var a = 0; var sum = 0; while (a < 10) { sum = sum + a; a = a + 1; } sum;", 45.0);
+    InterpreterTestUtils.assertLastStmtEquals("var a = 1; while (a < 10) a = a * 2; a;", 16.0);
+  }
+  
+  @Test
+  public void testForStmt() throws Throwable {
+    InterpreterTestUtils.assertLastStmtEquals("var sum = 0; for (var a = 0; a < 10; a = a + 1) { sum = sum + a; } sum;", 45.0);
+    InterpreterTestUtils.assertLastStmtEquals("var sum = 0; var a; for (a = 0; a < 10; a = a + 1) { sum = sum + a; } sum;", 45.0);
+    InterpreterTestUtils.assertLastStmtEquals("var a; for (a = 1; a < 10; a = a * 2) {} a;", 16.0);
+  }
   
   @Test
   public void testLexicalScoping() throws Throwable {
