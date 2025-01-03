@@ -11,8 +11,10 @@ import com.lox.ast.Expr.Variable;
 import com.lox.ast.Stmt.BlockStmt;
 import com.lox.ast.Stmt.DeclStmt;
 import com.lox.ast.Stmt.ExprStmt;
+import com.lox.ast.Stmt.ForStmt;
 import com.lox.ast.Stmt.IfStmt;
 import com.lox.ast.Stmt.PrintStmt;
+import com.lox.ast.Stmt.WhileStmt;
 import com.lox.utils.Pair;
 
 public class Parser {
@@ -61,6 +63,8 @@ public class Parser {
 
     if (this.match(TokenType.LEFT_BRACE)) return this.blockStatement();
     if (this.match(TokenType.IF)) return this.ifStatement();
+    if (this.match(TokenType.WHILE)) return this.whileStatement();
+    if (this.match(TokenType.FOR)) return this.forStatement();
     if (this.match(TokenType.PRINT)) return this.printStatement();
     return this.expressionStatement();
   }
@@ -113,6 +117,56 @@ public class Parser {
       }
     }
     return new BlockStmt(stmts);
+  }
+
+  private WhileStmt whileStatement() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    assert this.previous().type == TokenType.WHILE;
+
+    if (!this.match(TokenType.LEFT_PAREN)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final Expr cond = this.expression();
+
+    if (!this.match(TokenType.RIGHT_PAREN)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final Stmt body = this.statement();
+
+    return new WhileStmt(cond, body);
+  }
+
+  private ForStmt forStatement() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    assert this.previous().type == TokenType.FOR;
+
+    if (!this.match(TokenType.LEFT_PAREN)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final DeclStmt init = this.varDeclaration();
+    final ExprStmt cond = this.expressionStatement();
+    final Expr post = this.expression();
+
+    if (!this.match(TokenType.RIGHT_PAREN)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final Stmt body = this.statement();
+
+    return new ForStmt(init, cond, post, body);
   }
 
   private IfStmt ifStatement() throws SynchronizationException {

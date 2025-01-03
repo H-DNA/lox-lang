@@ -41,6 +41,30 @@ public abstract class Stmt extends SyntaxNode {
     }
   }
 
+  public static class WhileStmt extends Stmt {
+    public final Expr cond;
+    public final Stmt body;
+
+    public WhileStmt(Expr cond, Stmt body) {
+      this.cond = cond;
+      this.body = body;
+    }
+  }
+
+  public static class ForStmt extends Stmt {
+    public final DeclStmt init;
+    public final ExprStmt cond;
+    public final Expr post;
+    public final Stmt body;
+
+    public ForStmt(DeclStmt init, ExprStmt cond, Expr post, Stmt body) {
+      this.init = init;
+      this.cond = cond;
+      this.post = post;
+      this.body = body;
+    }
+  }
+
   public static class BlockStmt extends Stmt {
     public final List<Stmt> stmts;
 

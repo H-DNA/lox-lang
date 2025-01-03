@@ -33,7 +33,7 @@ public class Interpreter {
       }
       case Stmt.ExprStmt e -> this.evaluateExpr(e.expr);
       case Stmt.DeclStmt d -> {
-        this.env.define(d.id.lexeme, this.evaluateExpr(d.expr));
+        this.env.define(d.id.lexeme, d.expr == null ? new LoxNil() : this.evaluateExpr(d.expr));
         yield new LoxNil();
       }
       case Stmt.IfStmt i -> {
