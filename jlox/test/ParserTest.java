@@ -121,6 +121,15 @@ public class ParserTest {
     ParserTestUtils.assertOneError(ParserTestUtils.parse("var"), "Expect an identifier");
     ParserTestUtils.assertOneError(ParserTestUtils.parse("var x ="), "Expect a numeric literal, string literal, variable or grouping expression");
   }
+
+  @Test
+  public void testIfStmt() throws Throwable {
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x) x;"), "(if x then x)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x) x; else x;"), "(if x then x else x)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x == 1) x + 1; else x - 1;"), "(if (== x 1) then (+ x 1) else (- x 1))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x == 1) if (x != 2) 3; else 2;"), "(if (== x 1) then (if (!= x 2) then 3 else 2))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x == 1) if (x != 2) 3; else 2; else x - 1;"), "(if (== x 1) then (if (!= x 2) then 3 else 2) else (- x 1))");
+  }
 }
 
 class ParserTestUtils {

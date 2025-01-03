@@ -19,6 +19,13 @@ public class PrettyPrinter {
       case Stmt.DeclStmt d -> d.expr == null ? String.format("(define %s)", d.id.lexeme) : String.format("(define %s %s)", d.id.lexeme, this.printExpr(d.expr));
       case Stmt.ExprStmt e -> this.printExpr(e.expr);
       case Stmt.PrintStmt p -> String.format("(print %s)", this.printExpr(p.expr));
+      case Stmt.IfStmt i -> {
+        if (i.elseBranch == null) {
+          yield String.format("(if %s then %s)", this.printExpr(i.cond), this.printStmt(i.thenBranch));
+        } else {
+          yield String.format("(if %s then %s else %s)", this.printExpr(i.cond), this.printStmt(i.thenBranch), this.printStmt(i.elseBranch));
+        }
+      }
       default -> throw new Error("Non-exhaustive check");
     };
   }

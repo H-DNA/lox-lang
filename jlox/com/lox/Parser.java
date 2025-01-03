@@ -9,6 +9,7 @@ import com.lox.ast.Token;
 import com.lox.ast.TokenType;
 import com.lox.ast.Stmt.DeclStmt;
 import com.lox.ast.Stmt.ExprStmt;
+import com.lox.ast.Stmt.IfStmt;
 import com.lox.ast.Stmt.PrintStmt;
 import com.lox.utils.Pair;
 
@@ -64,6 +65,7 @@ public class Parser {
   private Stmt statement() throws SynchronizationException {
     assert !this.isAtEnd();
 
+    if (this.match(TokenType.IF)) return this.ifStatement();
     if (this.match(TokenType.PRINT)) return this.printStatement();
     return this.expressionStatement();
   }
@@ -100,6 +102,36 @@ public class Parser {
     }
 
     return new DeclStmt(id, expr);
+  }
+
+  private IfStmt ifStatement() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    assert this.previous().type == TokenType.IF;
+
+    if (!this.match(TokenType.LEFT_PAREN)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final Expr cond = this.expression();
+
+    if (!this.match(TokenType.RIGHT_PAREN)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final Stmt thenBranch = this.statement();
+
+    if (!this.match(TokenType.ELSE)) {
+      return new IfStmt(cond, thenBranch, null);
+    }
+
+    final Stmt elseBranch = this.statement();
+
+    return new IfStmt(cond, thenBranch, elseBranch);
   }
 
   private PrintStmt printStatement() throws SynchronizationException {

@@ -26,4 +26,16 @@ public abstract class Stmt extends SyntaxNode {
       this.expr = expr;
     }
   }
+
+  public static class IfStmt extends Stmt {
+    public final Expr cond;
+    public final Stmt thenBranch;
+    public final Stmt elseBranch;
+
+    public IfStmt(Expr cond, Stmt thenBranch, Stmt elseBranch) {
+      this.cond = cond;
+      this.thenBranch = thenBranch;
+      this.elseBranch = elseBranch;
+    }
+  }
 }
