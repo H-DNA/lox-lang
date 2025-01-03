@@ -7,6 +7,7 @@ import java.util.Map;
 import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
 import com.lox.ast.TokenType;
+import com.lox.ast.Expr.Variable;
 import com.lox.object.LoxBoolean;
 import com.lox.object.LoxNil;
 import com.lox.object.LoxNumber;
@@ -59,9 +60,14 @@ public class Interpreter {
   }
 
   private LoxObject evaluateBinary(Expr.Binary bin) throws InterpreterException {
+    if (bin.op.type == TokenType.EQUAL) {
+      final LoxObject right = this.evaluateExpr(bin.right);
+      this.env.assign(((Variable)bin.left).var.lexeme, right);
+      return right;
+    }
     final LoxObject left = this.evaluateExpr(bin.left);
     final LoxObject right = this.evaluateExpr(bin.right);
-    return switch (bin.op.type) {
+    return switch (bin.op.type) { 
       case TokenType.PLUS -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
           throw new InterpreterException(String.format("Unsupported operator '+' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
@@ -168,6 +174,15 @@ class Environment {
 
   public void define(String name, LoxObject value) {
     this.values.put(name, value);
+  }
+
+  public void assign(String name, LoxObject value) throws InterpreterException {
+    if (values.containsKey(name)) {
+      this.values.put(name, value);
+      return;
+    }
+
+    throw new InterpreterException("Undefined variable '" + name + "'");
   }
 
   public LoxObject get(String name) throws InterpreterException {

@@ -99,6 +99,14 @@ public class InterpreterTest {
   }
 
   @Test
+  public void testAssignment() throws Throwable {
+    InterpreterTestUtils.assertLastStmtEquals("var x = 3; x = 4;", 4.0);
+    InterpreterTestUtils.assertLastStmtEquals("var x = 3; var y = 5; x = y = 10;", 10.0);
+    InterpreterTestUtils.assertLastStmtEquals("var x = 3; var y = 5; x = y = 10; x;", 10.0);
+    InterpreterTestUtils.assertLastStmtEquals("var x = 3; var y = 5; x = y = 10; y;", 10.0);
+  }
+
+  @Test
   public void testPrintStmt() throws Throwable {
     InterpreterTestUtils.assertStdoutIs("var x = 3; print x;", "3.0\n");
     InterpreterTestUtils.assertStdoutIs("var x = \"3.02\"; print x;", "3.02\n");

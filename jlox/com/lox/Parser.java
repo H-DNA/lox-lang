@@ -7,6 +7,7 @@ import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
 import com.lox.ast.Token;
 import com.lox.ast.TokenType;
+import com.lox.ast.Expr.Variable;
 import com.lox.ast.Stmt.DeclStmt;
 import com.lox.ast.Stmt.ExprStmt;
 import com.lox.ast.Stmt.IfStmt;
@@ -165,7 +166,23 @@ public class Parser {
   private Expr expression() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    return this.equality();
+    return this.assignment();
+  }
+
+  private Expr assignment() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    Expr left = this.equality();
+    if (this.match(TokenType.EQUAL)) {
+      Token op = this.previous();
+      Expr right = this.assignment();
+      if (left instanceof Variable) {
+        return new Expr.Binary(left, op, right);
+      } else {
+        this.errors.add(new ParserException("Invalid assignment target", op.startOffset, op.endOffset));
+      }
+    }
+    return left;
   }
 
   private Expr equality() throws SynchronizationException {
