@@ -35,6 +35,14 @@ public class Interpreter {
         this.env.define(d.id.lexeme, this.evaluateExpr(d.expr));
         yield new LoxNil();
       }
+      case Stmt.IfStmt i -> {
+        final Object condValue = this.evaluateExpr(i.cond).value();
+        if (condValue != Boolean.valueOf(false) && condValue != null) {
+          yield this.evaluateStmt(i.thenBranch);
+        } else {
+          yield i.elseBranch != null ? this.evaluateStmt(i.elseBranch) : new LoxNil();
+        }
+      }
       default -> throw new Error("Non-exhaustive check");
     };
   }

@@ -93,6 +93,17 @@ public class InterpreterTest {
   }
 
   @Test
+  public void testIfStmt() throws Throwable {
+    InterpreterTestUtils.assertLastStmtEquals("var x = 10; if (x) x + 1; else x - 1;", 11.0);
+    InterpreterTestUtils.assertLastStmtEquals("var x = 0; if (x) x + 1; else x - 1;", 1.0);
+    InterpreterTestUtils.assertLastStmtEquals("var x = false; var y = 1; if (x) y + 1; else y - 1;", 0.0);
+    InterpreterTestUtils.assertLastStmtEquals("var x = nil; var y = 1; if (x) y + 1; else y - 1;", 0.0);
+    InterpreterTestUtils.assertLastStmtEquals("var x = nil; var y = 1; if (x) y + 1; else y - 1;", 0.0);
+    InterpreterTestUtils.assertLastStmtEquals("var x = nil; var y = 1; if (!x) if (x) y + 1; else y + 2; else y - 1;", 3.0);
+    InterpreterTestUtils.assertLastStmtEquals("var x = nil; var y = 1; if (!x) if (x) y + 1; else y + 2; else y - 1;", 3.0);
+  }
+
+  @Test
   public void testTypeMismatch() throws Throwable {
     InterpreterTestUtils.assertErrorMessageIs("1 + \"3\"", "Unsupported operator '+' on number and string");
     InterpreterTestUtils.assertErrorMessageIs("\"1\" + 3", "Unsupported operator '+' on string and number");
