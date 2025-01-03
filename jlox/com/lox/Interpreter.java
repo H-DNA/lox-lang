@@ -36,8 +36,8 @@ public class Interpreter {
         yield new LoxNil();
       }
       case Stmt.IfStmt i -> {
-        final Object condValue = this.evaluateExpr(i.cond).value();
-        if (condValue != Boolean.valueOf(false) && condValue != null) {
+        final LoxObject condValue = this.evaluateExpr(i.cond);
+        if (ValuecheckUtils.isTruthy(condValue)) {
           yield this.evaluateStmt(i.thenBranch);
         } else {
           yield i.elseBranch != null ? this.evaluateStmt(i.elseBranch) : new LoxNil();
@@ -130,12 +130,7 @@ public class Interpreter {
     final LoxObject inner = this.evaluateExpr(un.inner);
     return switch(un.op.type) {
       case TokenType.BANG -> {
-        if (TypecheckUtils.isBoolean(inner)) {
-          yield new LoxBoolean(!((LoxBoolean)inner).value);
-        } else if (TypecheckUtils.isNil(inner)) {
-          yield new LoxBoolean(true);
-        }
-        yield new LoxBoolean(false);
+        yield new LoxBoolean(ValuecheckUtils.isFalsy(inner));
       }
       case TokenType.MINUS -> {
         if (!TypecheckUtils.isNumber(inner)) {
@@ -213,6 +208,19 @@ class TypecheckUtils {
       case LoxNil nil -> "nil";
       default -> "object";
     };
+  }
+}
+
+class ValuecheckUtils {
+  public static boolean isFalsy(LoxObject obj) {
+    if (TypecheckUtils.isBoolean(obj)) {
+      return !((LoxBoolean)obj).value;
+    }
+    return TypecheckUtils.isNil(obj);
+  }
+  
+  public static boolean isTruthy(LoxObject obj) {
+    return !ValuecheckUtils.isFalsy(obj);
   }
 }
 
