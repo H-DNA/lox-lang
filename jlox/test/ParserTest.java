@@ -25,6 +25,7 @@ public class ParserTest {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("\"false\";"), "\"false\"");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("false;"), "false");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("0;"), "0");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("nil;"), "nil");
   }
 
   @Test

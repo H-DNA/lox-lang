@@ -43,11 +43,25 @@ public class InterpreterTest {
 
     InterpreterTestUtils.assertLastStmtEquals("!!1;", true);
     InterpreterTestUtils.assertLastStmtEquals("--1;", 1.0);
+
+    InterpreterTestUtils.assertLastStmtEquals("!   nil;", true);
+    InterpreterTestUtils.assertLastStmtEquals("nil;", null);
+
+    InterpreterTestUtils.assertLastStmtEquals("!!0;", true);
+    InterpreterTestUtils.assertLastStmtEquals("!!1;", true);
+    InterpreterTestUtils.assertLastStmtEquals("!!\"a\";", true);
+    InterpreterTestUtils.assertLastStmtEquals("!!\"\";", true);
+    InterpreterTestUtils.assertLastStmtEquals("!0;", false);
+    InterpreterTestUtils.assertLastStmtEquals("!1;", false);
+    InterpreterTestUtils.assertLastStmtEquals("!\"a\";", false);
+    InterpreterTestUtils.assertLastStmtEquals("!\"\";", false);
   }
 
   @Test
   public void testGrouping() throws Throwable {
     InterpreterTestUtils.assertLastStmtEquals("(1);", 1.0);
+    InterpreterTestUtils.assertLastStmtEquals("(nil);", null);
+    InterpreterTestUtils.assertLastStmtEquals("!(nil);", true);
     InterpreterTestUtils.assertLastStmtEquals("(\"abc\");", "abc");
     InterpreterTestUtils.assertLastStmtEquals("(true);", true);
     InterpreterTestUtils.assertLastStmtEquals("(false);", false);
