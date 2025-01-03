@@ -112,6 +112,7 @@ public class InterpreterTest {
 
   @Test
   public void testVarDecl() throws Throwable {
+    InterpreterTestUtils.assertLastStmtEquals("var x; x;", null);
     InterpreterTestUtils.assertLastStmtEquals("var x = 3; x;", 3.0);
     InterpreterTestUtils.assertLastStmtEquals("var x = 3; var x = 4; x;", 4.0);
     InterpreterTestUtils.assertLastStmtEquals("var x = 1 + 2; x;", 3.0);
