@@ -26,6 +26,14 @@ public class PrettyPrinter {
           yield String.format("(if %s then %s else %s)", this.printExpr(i.cond), this.printStmt(i.thenBranch), this.printStmt(i.elseBranch));
         }
       }
+      case Stmt.BlockStmt b -> {
+        String res = "(block";
+        for (Stmt s: b.stmts) {
+          res += " " + this.printStmt(s);
+        }
+        res += ")";
+        yield res;
+      }
       default -> throw new Error("Non-exhaustive check");
     };
   }

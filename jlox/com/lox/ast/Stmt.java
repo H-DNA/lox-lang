@@ -1,5 +1,7 @@
 package com.lox.ast;
 
+import java.util.List;
+
 public abstract class Stmt extends SyntaxNode {
   public static class ExprStmt extends Stmt {
     public final Expr expr;
@@ -36,6 +38,14 @@ public abstract class Stmt extends SyntaxNode {
       this.cond = cond;
       this.thenBranch = thenBranch;
       this.elseBranch = elseBranch;
+    }
+  }
+
+  public static class BlockStmt extends Stmt {
+    public final List<Stmt> stmts;
+
+    public BlockStmt(List<Stmt> stmts) {
+      this.stmts = stmts;
     }
   }
 }

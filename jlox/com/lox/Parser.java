@@ -8,6 +8,7 @@ import com.lox.ast.Stmt;
 import com.lox.ast.Token;
 import com.lox.ast.TokenType;
 import com.lox.ast.Expr.Variable;
+import com.lox.ast.Stmt.BlockStmt;
 import com.lox.ast.Stmt.DeclStmt;
 import com.lox.ast.Stmt.ExprStmt;
 import com.lox.ast.Stmt.IfStmt;
@@ -36,19 +37,11 @@ public class Parser {
     return new Pair<>(this.stmts, this.errors);
   }
 
-  private void synchronizeStatement() {
-    assert !this.isAtEnd();
-
-    while (!this.isAtEnd() && !this.match(TokenType.RIGHT_BRACE, TokenType.SEMICOLON)) {
-      this.currentOffset += 1;
-    }
-  } 
-
   private boolean isAtEnd() {
     return this.currentOffset == tokens.size();
   }
 
-  private void synchronizeSimpleStatement() {
+  private void synchronizeStatement() {
     assert !this.isAtEnd();
 
     while (!this.isAtEnd() && !this.match(TokenType.SEMICOLON)) {
@@ -66,6 +59,7 @@ public class Parser {
   private Stmt statement() throws SynchronizationException {
     assert !this.isAtEnd();
 
+    if (this.match(TokenType.LEFT_BRACE)) return this.blockStatement();
     if (this.match(TokenType.IF)) return this.ifStatement();
     if (this.match(TokenType.PRINT)) return this.printStatement();
     return this.expressionStatement();
@@ -99,10 +93,26 @@ public class Parser {
     if (!this.match(TokenType.SEMICOLON)) {
       final Token invalidToken = this.current();
       this.errors.add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
-      this.synchronizeSimpleStatement();
+      this.synchronizeStatement();
     }
 
     return new DeclStmt(id, expr);
+  }
+
+  private BlockStmt blockStatement() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    assert this.previous().type == TokenType.IF;
+
+    final List<Stmt> stmts = new ArrayList<>();
+    while (!this.isAtEnd() && !this.match(TokenType.RIGHT_BRACE)) {
+      try {
+        stmts.add(this.declaration());
+      } catch (SynchronizationException e) {
+        this.synchronizeStatement();
+      }
+    }
+    return new BlockStmt(stmts);
   }
 
   private IfStmt ifStatement() throws SynchronizationException {
@@ -144,7 +154,7 @@ public class Parser {
     if (!this.match(TokenType.SEMICOLON)) {
       final Token invalidToken = this.current();
       this.errors.add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
-      this.synchronizeSimpleStatement();
+      this.synchronizeStatement();
     }
 
     return new PrintStmt(expr);
@@ -157,7 +167,7 @@ public class Parser {
     if (!this.match(TokenType.SEMICOLON)) {
       final Token invalidToken = this.current();
       this.errors.add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
-      this.synchronizeSimpleStatement();
+      this.synchronizeStatement();
     }
 
     return new ExprStmt(expr);

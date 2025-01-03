@@ -127,6 +127,16 @@ public class ParserTest {
   }
 
   @Test
+  public void testBlock() throws Throwable {
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("{}"), "(block)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; }"), "(define a 3)\n(block (define b 3))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; } var c = 3;"), "(define a 3)\n(block (define b 3))\n(define c 3)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("{ var a = 3; var b = a + 1; c; }"), "(block (define a 3) (define b (+ a 1)) c)");
+    ParserTestUtils.assertOneError(ParserTestUtils.parse("{"), "Expect a numeric literal, string literal, variable or grouping expression");
+    ParserTestUtils.assertOneError(ParserTestUtils.parse("{ var a = 3; "), "Expect a numeric literal, string literal, variable or grouping expression");
+  }
+
+  @Test
   public void testIfStmt() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x) x;"), "(if x then x)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x) x; else x;"), "(if x then x else x)");

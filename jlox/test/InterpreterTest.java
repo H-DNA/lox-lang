@@ -124,6 +124,16 @@ public class InterpreterTest {
     InterpreterTestUtils.assertLastStmtEquals("var x = nil; var y = 1; if (!x) if (x) y + 1; else y + 2; else y - 1;", 3.0);
     InterpreterTestUtils.assertLastStmtEquals("var x = nil; var y = 1; if (!x) if (x) y + 1; else y + 2; else y - 1;", 3.0);
   }
+  @Test
+  public void testBlockStmt() throws Throwable {
+    InterpreterTestUtils.assertLastStmtEquals("{ var c = 3; }", null);
+    InterpreterTestUtils.assertLastStmtEquals("{ var c = 3; c + 1 }", 4.0);
+    InterpreterTestUtils.assertLastStmtEquals("{ var c = 4.0; if (c) c + 1; }", 5.0);
+    InterpreterTestUtils.assertLastStmtEquals("{ var c = 4.0; if (!c) c + 1; }", null);
+    InterpreterTestUtils.assertLastStmtEquals("{ var c = 4.0; if (!c) c + 1; else c * 0 }", 0.0);
+    InterpreterTestUtils.assertLastStmtEquals("var c = nil; if (c) { 4.0; } else { 5.0 }", 5.0);
+    InterpreterTestUtils.assertLastStmtEquals("var c = true; if (c) { 4.0; } else { 5.0 }", 4.0);
+  }
 
   @Test
   public void testTypeMismatch() throws Throwable {

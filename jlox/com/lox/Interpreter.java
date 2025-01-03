@@ -44,6 +44,13 @@ public class Interpreter {
           yield i.elseBranch != null ? this.evaluateStmt(i.elseBranch) : new LoxNil();
         }
       }
+      case Stmt.BlockStmt b -> {
+        LoxObject lastValue = new LoxNil();
+        for (Stmt s: b.stmts) {
+          lastValue = this.evaluateStmt(s);
+        }
+        yield lastValue;
+      }
       default -> throw new Error("Non-exhaustive check");
     };
   }
