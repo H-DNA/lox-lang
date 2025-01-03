@@ -124,6 +124,8 @@ public class Interpreter {
       case TokenType.BANG -> {
         if (TypecheckUtils.isBoolean(inner)) {
           yield new LoxBoolean(!((LoxBoolean)inner).value);
+        } else if (TypecheckUtils.isNil(inner)) {
+          yield new LoxBoolean(true);
         }
         yield new LoxBoolean(false);
       }
