@@ -12,8 +12,10 @@ import com.lox.ast.Stmt.BlockStmt;
 import com.lox.ast.Stmt.DeclStmt;
 import com.lox.ast.Stmt.ExprStmt;
 import com.lox.ast.Stmt.ForStmt;
+import com.lox.ast.Stmt.FuncStmt;
 import com.lox.ast.Stmt.IfStmt;
 import com.lox.ast.Stmt.PrintStmt;
+import com.lox.ast.Stmt.ReturnStmt;
 import com.lox.ast.Stmt.WhileStmt;
 import com.lox.utils.Pair;
 
@@ -55,6 +57,7 @@ public class Parser {
     assert !this.isAtEnd();
 
     if (this.match(TokenType.VAR)) return this.varDeclaration();
+    if (this.match(TokenType.FUN)) return this.functionDeclaration();
     return this.statement();
   }
 
@@ -66,7 +69,64 @@ public class Parser {
     if (this.match(TokenType.WHILE)) return this.whileStatement();
     if (this.match(TokenType.FOR)) return this.forStatement();
     if (this.match(TokenType.PRINT)) return this.printStatement();
+    if (this.match(TokenType.RETURN)) return this.returnStatement();
     return this.expressionStatement();
+  }
+
+  private FuncStmt functionDeclaration() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    assert this.previous().type == TokenType.FUN;
+
+    if (!this.match(TokenType.IDENTIFIER)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an identifier", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final Token name = this.previous();
+    
+    if (!this.match(TokenType.LEFT_PAREN)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final List<Token> params = new ArrayList<>();
+    if (!this.match(TokenType.RIGHT_PAREN)) { 
+      if (!this.match(TokenType.IDENTIFIER)) {
+        final Token invalidToken = this.current();
+        this.errors.add(new ParserException("Expect an identifier", invalidToken.startOffset, invalidToken.endOffset));
+        throw new SynchronizationException();
+      }
+      params.add(this.previous());
+      while (!this.match(TokenType.RIGHT_PAREN)) { 
+        if (!this.match(TokenType.COMMA)) {
+          final Token invalidToken = this.current();
+          this.errors.add(new ParserException("Expect a comma", invalidToken.startOffset, invalidToken.endOffset));
+          throw new SynchronizationException();
+        } else if (params.size() >= 256) {
+          final Token comma = this.previous();
+          this.errors.add(new ParserException("Cannot have more than 255 parameters", comma.startOffset, comma.endOffset));
+        }
+        if (!this.match(TokenType.IDENTIFIER)) {
+          final Token invalidToken = this.current();
+          this.errors.add(new ParserException("Expect an identifier", invalidToken.startOffset, invalidToken.endOffset));
+          throw new SynchronizationException();
+        }
+        params.add(this.previous());
+      }
+    }
+
+    if (!this.match(TokenType.LEFT_BRACE)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an opening brace", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final BlockStmt body = this.blockStatement();
+
+    return new Stmt.FuncStmt(name, params, body);
   }
 
   private DeclStmt varDeclaration() throws SynchronizationException {
@@ -197,6 +257,21 @@ public class Parser {
     final Stmt elseBranch = this.statement();
 
     return new IfStmt(cond, thenBranch, elseBranch);
+  }
+
+  private ReturnStmt returnStatement() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    assert this.previous().type == TokenType.RETURN;
+
+    final Expr expr = this.expression();
+    if (!this.match(TokenType.SEMICOLON)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
+      this.synchronizeStatement();
+    }
+
+    return new ReturnStmt(expr);
   }
 
   private PrintStmt printStatement() throws SynchronizationException {

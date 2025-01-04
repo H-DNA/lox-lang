@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
+import com.lox.ast.Token;
 
 public class PrettyPrinter {
   public String print(List<Stmt> stmts) {
@@ -40,6 +41,18 @@ public class PrettyPrinter {
         res += ")";
         yield res;
       }
+      case Stmt.FuncStmt f -> {
+        String res = "(define (";
+        res += f.name.lexeme;
+        for (Token param: f.params) {
+          res += " " + param.lexeme;
+        }
+        res += ") ";
+        res += this.printStmt(f.body);
+        res += ")";
+        yield res;
+      }
+      case Stmt.ReturnStmt r -> String.format("(return %s)", this.printExpr(r.expr));
       default -> throw new Error("Non-exhaustive check");
     };
   }

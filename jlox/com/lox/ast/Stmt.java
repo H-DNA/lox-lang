@@ -19,6 +19,14 @@ public abstract class Stmt extends SyntaxNode {
     }
   }
 
+  public static class ReturnStmt extends Stmt {
+    public final Expr expr;
+
+    public ReturnStmt(Expr expr) {
+      this.expr = expr;
+    }
+  }
+
   public static class DeclStmt extends Stmt {
     public final Token id;
     public final Expr expr;
@@ -26,6 +34,18 @@ public abstract class Stmt extends SyntaxNode {
     public DeclStmt(Token id, Expr expr) {
       this.id = id;
       this.expr = expr;
+    }
+  }
+
+  public static class FuncStmt extends Stmt {
+    public final Token name;
+    public final List<Token> params;
+    public final BlockStmt body;
+
+    public FuncStmt(Token name, List<Token> params, BlockStmt body) {
+      this.name = name;
+      this.params = params;
+      this.body = body;
     }
   }
 

@@ -161,12 +161,21 @@ public class ParserTest {
   }
 
   @Test
-  public void testForCall() throws Throwable {
+  public void testCall() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("f(3);"), "(f 3)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("f();"), "(f)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("f(1, 2);"), "(f 1 2)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("f(1, 2 + 3);"), "(f 1 (+ 2 3))");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("f(1, f(1));"), "(f 1 (f 1))");
+  }
+
+  @Test
+  public void testFunc() throws Throwable {
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f() {}"), "(define (f) (block))");
+    ParserTestUtils.assertOneError(ParserTestUtils.parse("fun f(a,) {}"), "Expect an identifier");
+    ParserTestUtils.assertOneError(ParserTestUtils.parse("fun f(,) {}"), "Expect an identifier");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) {}"), "(define (f a b) (block))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) { return a + b; }"), "(define (f a b) (block (return (+ a b))))");
   }
 }
 
