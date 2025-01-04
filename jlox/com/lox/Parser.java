@@ -106,7 +106,7 @@ public class Parser {
   private BlockStmt blockStatement() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    assert this.previous().type == TokenType.IF;
+    assert this.previous().type == TokenType.LEFT_BRACE;
 
     final List<Stmt> stmts = new ArrayList<>();
     while (!this.isAtEnd() && !this.match(TokenType.RIGHT_BRACE)) {
