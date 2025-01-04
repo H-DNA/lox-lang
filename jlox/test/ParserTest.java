@@ -159,6 +159,15 @@ public class ParserTest {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("for (var x = 0; x < 10; x = x + 1) x;"), "(for (define x 0) (< x 10) (= x (+ x 1)) do x)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("for (var x = 0; x < 10; x = x + 1) { x + 1; print x; }"), "(for (define x 0) (< x 10) (= x (+ x 1)) do (block (+ x 1) (print x)))");
   }
+
+  @Test
+  public void testForCall() throws Throwable {
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("f(3);"), "(f 3)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("f();"), "(f)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("f(1, 2);"), "(f 1 2)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("f(1, 2 + 3);"), "(f 1 (+ 2 3))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("f(1, f(1));"), "(f 1 (f 1))");
+  }
 }
 
 class ParserTestUtils {

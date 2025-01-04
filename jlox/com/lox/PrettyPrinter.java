@@ -51,6 +51,13 @@ public class PrettyPrinter {
       case Expr.Literal l -> l.value.lexeme;
       case Expr.Grouping g -> String.format("(group %s)", this.printExpr(g.inner));
       case Expr.Variable v -> String.format("%s", v.var.lexeme);
+      case Expr.Call c -> {
+        String res = "(" + this.printExpr(c.callee);
+        for (Expr e: c.params) {
+          res += " " + this.printExpr(e);
+        }
+        yield res + ")";
+      }
       default -> throw new Error("Non-exhaustive check");
     };
   }

@@ -1,5 +1,7 @@
 package com.lox.ast;
 
+import java.util.List;
+
 public abstract class Expr extends SyntaxNode {
   public static class Binary extends Expr {
     public final Expr left;
@@ -44,6 +46,16 @@ public abstract class Expr extends SyntaxNode {
 
     public Grouping(Expr inner) {
       this.inner = inner;
+    }
+  }
+
+  public static class Call extends Expr {
+    public final Expr callee;
+    public final List<Expr> params;
+
+    public Call(Expr callee, List<Expr> params) {
+      this.callee = callee;
+      this.params = params;
     }
   }
 }

@@ -330,7 +330,35 @@ public class Parser {
       return new Expr.Unary(op, inner);
     }
 
-    return this.primary();
+    return this.call();
+  }
+
+  private Expr call() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    Expr callee = this.primary();
+    while (this.match(TokenType.LEFT_PAREN)) {
+      List<Expr> params = new ArrayList<>(); 
+      if (this.match(TokenType.RIGHT_PAREN)) {
+        callee = new Expr.Call(callee, params);
+        continue;
+      }
+      params.add(this.expression());
+      while (!this.match(TokenType.RIGHT_PAREN)) { 
+        if (!this.match(TokenType.COMMA)) {
+          final Token invalidToken = this.current();
+          this.errors.add(new ParserException("Expect a comma", invalidToken.startOffset, invalidToken.endOffset));
+          throw new SynchronizationException();
+        } else if (params.size() >= 256) {
+          final Token comma = this.previous();
+          this.errors.add(new ParserException("Cannot have more than 255 arguments", comma.startOffset, comma.endOffset));
+        }
+        params.add(this.expression());
+      }
+      callee = new Expr.Call(callee, params); 
+    }
+    
+    return callee;
   }
 
   private Expr primary() throws SynchronizationException {
