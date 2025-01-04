@@ -133,7 +133,7 @@ public class InterpreterTest {
   @Test
   public void testPrintStmt() throws Throwable {
     InterpreterTestUtils.assertStdoutIs("var x = 3; print x;", "3.0\n");
-    InterpreterTestUtils.assertStdoutIs("var x = \"3.02\"; print x;", "3.02\n");
+    InterpreterTestUtils.assertStdoutIs("var x = \"3.02\"; print x;", "\"3.02\"\n");
     InterpreterTestUtils.assertStdoutIs("print 1 + 2 + 3;", "6.0\n");
     InterpreterTestUtils.assertStdoutIs("var x = 10; var y = x * 2; print y + 1 + 2 + 3;", "26.0\n");
     InterpreterTestUtils.assertStdoutIs("var x = 3; print x or false;", "3.0\n");

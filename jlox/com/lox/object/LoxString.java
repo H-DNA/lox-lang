@@ -7,7 +7,13 @@ public class LoxString extends LoxObject {
     this.value = value;
   }
 
+  @Override
   public String value() {
     return this.value;
+  }
+
+  @Override
+  public String toString() {
+    return "\"" + this.value().toString() + "\"";
   }
 }

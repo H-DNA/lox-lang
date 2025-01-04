@@ -7,7 +7,13 @@ public class LoxNumber extends LoxObject {
     this.value = value;
   }
 
+  @Override
   public Number value() {
     return this.value;
+  }
+
+  @Override
+  public String toString() {
+    return this.value().toString();
   }
 }

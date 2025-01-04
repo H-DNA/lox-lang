@@ -10,4 +10,8 @@ public class LoxBoolean extends LoxObject {
   public Boolean value() {
     return this.value;
   }
+
+  public String toString() {
+    return this.value().toString();
+  }
 }
