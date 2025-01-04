@@ -1,5 +1,6 @@
 package com.lox;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,24 +10,28 @@ import com.lox.ast.Stmt;
 import com.lox.ast.TokenType;
 import com.lox.ast.Expr.Variable;
 import com.lox.object.LoxBoolean;
+import com.lox.object.LoxCallable;
 import com.lox.object.LoxNil;
 import com.lox.object.LoxNumber;
 import com.lox.object.LoxObject;
 import com.lox.object.LoxString;
 
 public class Interpreter {
-  private Environment env = new Environment();
+  private Environment globals = new Environment();
+  private Environment env = this.globals;
 
-  public Interpreter() {}
+  public Interpreter() throws InterpreterException {
+    Builtins.bootstrapFunctions(this.globals);
+  }
 
   public void evaluate(List<Stmt> stmts) throws InterpreterException {
-    for (Stmt stmt: stmts) {
+    for (Stmt stmt : stmts) {
       this.evaluateStmt(stmt);
     }
   }
 
   public LoxObject evaluateStmt(Stmt stmt) throws InterpreterException {
-    return switch(stmt) {
+    return switch (stmt) {
       case Stmt.PrintStmt p -> {
         System.out.println(this.evaluateExpr(p.expr).toString());
         yield new LoxNil();
@@ -63,7 +68,7 @@ public class Interpreter {
       case Stmt.BlockStmt b -> {
         this.env = new Environment(this.env);
         LoxObject lastValue = new LoxNil();
-        for (Stmt s: b.stmts) {
+        for (Stmt s : b.stmts) {
           lastValue = this.evaluateStmt(s);
         }
         this.env = this.env.parent;
@@ -74,12 +79,28 @@ public class Interpreter {
   }
 
   public LoxObject evaluateExpr(Expr expr) throws InterpreterException {
-    return switch(expr) {
+    return switch (expr) {
       case Expr.Binary b -> this.evaluateBinary(b);
       case Expr.Unary u -> this.evaluateUnary(u);
       case Expr.Grouping g -> this.evaluateGrouping(g);
       case Expr.Variable v -> this.evaluateVariable(v);
       case Expr.Literal l -> this.evaluateLiteral(l);
+      case Expr.Call c -> {
+        LoxObject callee = this.evaluateExpr(c.callee);
+        List<LoxObject> arguments = new ArrayList<>();
+        for (Expr arg : c.params) {
+          arguments.add(this.evaluateExpr(arg));
+        }
+        if (!TypecheckUtils.isCallable(callee)) {
+          throw new InterpreterException("Callee is not of Callable type");
+        }
+        LoxCallable function = (LoxCallable) callee;
+        if (function.arity() != arguments.size()) {
+          throw new InterpreterException(
+              String.format("Arity mismatch: Expected %s but got %s", function.arity(), arguments.size()));
+        }
+        yield function.call(this, arguments);
+      }
       default -> throw new Error("Non-exhaustive check");
     };
   }
@@ -87,7 +108,7 @@ public class Interpreter {
   private LoxObject evaluateBinary(Expr.Binary bin) throws InterpreterException {
     if (bin.op.type == TokenType.EQUAL) {
       final LoxObject right = this.evaluateExpr(bin.right);
-      this.env.assign(((Variable)bin.left).var.lexeme, right);
+      this.env.assign(((Variable) bin.left).var.lexeme, right);
       return right;
     }
     if (bin.op.type == TokenType.OR) {
@@ -108,30 +129,34 @@ public class Interpreter {
     }
     final LoxObject left = this.evaluateExpr(bin.left);
     final LoxObject right = this.evaluateExpr(bin.right);
-    return switch (bin.op.type) { 
+    return switch (bin.op.type) {
       case TokenType.PLUS -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
-          throw new InterpreterException(String.format("Unsupported operator '+' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
+          throw new InterpreterException(String.format("Unsupported operator '+' on %s and %s",
+              TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxNumber(((LoxNumber)left).value + ((LoxNumber)right).value);
+        yield new LoxNumber(((LoxNumber) left).value + ((LoxNumber) right).value);
       }
       case TokenType.MINUS -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
-          throw new InterpreterException(String.format("Unsupported operator '-' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
+          throw new InterpreterException(String.format("Unsupported operator '-' on %s and %s",
+              TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxNumber(((LoxNumber)left).value - ((LoxNumber)right).value);
+        yield new LoxNumber(((LoxNumber) left).value - ((LoxNumber) right).value);
       }
       case TokenType.STAR -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
-          throw new InterpreterException(String.format("Unsupported operator '*' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
+          throw new InterpreterException(String.format("Unsupported operator '*' on %s and %s",
+              TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxNumber(((LoxNumber)left).value * ((LoxNumber)right).value);
+        yield new LoxNumber(((LoxNumber) left).value * ((LoxNumber) right).value);
       }
       case TokenType.SLASH -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
-          throw new InterpreterException(String.format("Unsupported operator '/' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
+          throw new InterpreterException(String.format("Unsupported operator '/' on %s and %s",
+              TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxNumber(((LoxNumber)left).value / ((LoxNumber)right).value);
+        yield new LoxNumber(((LoxNumber) left).value / ((LoxNumber) right).value);
       }
       case TokenType.EQUAL_EQUAL -> {
         if (!TypecheckUtils.isSameType(left, right)) {
@@ -147,43 +172,48 @@ public class Interpreter {
       }
       case TokenType.LESS -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
-          throw new InterpreterException(String.format("Unsupported operator '<' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
+          throw new InterpreterException(String.format("Unsupported operator '<' on %s and %s",
+              TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxBoolean(((LoxNumber)left).value < ((LoxNumber)right).value);
+        yield new LoxBoolean(((LoxNumber) left).value < ((LoxNumber) right).value);
       }
       case TokenType.LESS_EQUAL -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
-          throw new InterpreterException(String.format("Unsupported operator '<=' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
+          throw new InterpreterException(String.format("Unsupported operator '<=' on %s and %s",
+              TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxBoolean(((LoxNumber)left).value <= ((LoxNumber)right).value);
+        yield new LoxBoolean(((LoxNumber) left).value <= ((LoxNumber) right).value);
       }
       case TokenType.GREATER -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
-          throw new InterpreterException(String.format("Unsupported operator '>' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
+          throw new InterpreterException(String.format("Unsupported operator '>' on %s and %s",
+              TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxBoolean(((LoxNumber)left).value > ((LoxNumber)right).value);
+        yield new LoxBoolean(((LoxNumber) left).value > ((LoxNumber) right).value);
       }
       case TokenType.GREATER_EQUAL -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
-          throw new InterpreterException(String.format("Unsupported operator '>=' on %s and %s", TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
+          throw new InterpreterException(String.format("Unsupported operator '>=' on %s and %s",
+              TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxBoolean(((LoxNumber)left).value >= ((LoxNumber)right).value);
-      } 
+        yield new LoxBoolean(((LoxNumber) left).value >= ((LoxNumber) right).value);
+      }
       default -> throw new Error(String.format("Unreachable: Unexpected binary operator '%s'", bin.op.lexeme));
     };
   }
 
   private LoxObject evaluateUnary(Expr.Unary un) throws InterpreterException {
     final LoxObject inner = this.evaluateExpr(un.inner);
-    return switch(un.op.type) {
+    return switch (un.op.type) {
       case TokenType.BANG -> {
         yield new LoxBoolean(ValuecheckUtils.isFalsy(inner));
       }
       case TokenType.MINUS -> {
         if (!TypecheckUtils.isNumber(inner)) {
-          throw new InterpreterException(String.format("Unsupported operator '-' on %s", TypecheckUtils.typenameOf(inner)));
+          throw new InterpreterException(
+              String.format("Unsupported operator '-' on %s", TypecheckUtils.typenameOf(inner)));
         }
-        yield new LoxNumber(-((LoxNumber)inner).value);
+        yield new LoxNumber(-((LoxNumber) inner).value);
       }
       default -> throw new Error(String.format("Unreachable: Unexpected unary operator '%s'", un.op.lexeme));
     };
@@ -266,12 +296,16 @@ class TypecheckUtils {
     return obj instanceof LoxNil;
   }
 
+  public static boolean isCallable(LoxObject obj) {
+    return obj instanceof LoxCallable;
+  }
+
   public static boolean isSameType(LoxObject obj1, LoxObject obj2) {
     return typenameOf(obj1) == typenameOf(obj2);
   }
 
   public static String typenameOf(LoxObject obj) {
-    return switch(obj) {
+    return switch (obj) {
       case LoxNumber n -> "number";
       case LoxString s -> "string";
       case LoxBoolean b -> "boolean";
@@ -284,11 +318,11 @@ class TypecheckUtils {
 class ValuecheckUtils {
   public static boolean isFalsy(LoxObject obj) {
     if (TypecheckUtils.isBoolean(obj)) {
-      return !((LoxBoolean)obj).value;
+      return !((LoxBoolean) obj).value;
     }
     return TypecheckUtils.isNil(obj);
   }
-  
+
   public static boolean isTruthy(LoxObject obj) {
     return !ValuecheckUtils.isFalsy(obj);
   }
@@ -296,12 +330,46 @@ class ValuecheckUtils {
 
 class StringifyUtils {
   public static String stringify(LoxObject obj) {
-    return switch(obj) {
+    return switch (obj) {
       case LoxNumber n -> String.valueOf(n.value);
       case LoxString s -> s.value;
       case LoxBoolean b -> String.valueOf(b.value);
       case LoxNil nil -> "nil";
       default -> String.valueOf(obj);
     };
+  }
+}
+
+class Builtins {
+  public static void bootstrapFunctions(Environment globals) throws InterpreterException {
+    globals.define("clock", new LoxCallable() {
+      @Override
+      public int arity() { return 0; }
+      @Override
+      public LoxObject call(Interpreter interpreter, List<LoxObject> arguments) {
+        return new LoxNumber((double)System.currentTimeMillis() / 1000.0);
+      }
+      @Override
+      public Object value() {
+        return this;
+      }
+      @Override
+      public String toString() { return "<native fn>"; }
+    });
+
+    globals.define("toString", new LoxCallable() {
+      @Override
+      public int arity() { return 1; }
+      @Override
+      public LoxObject call(Interpreter interpreter, List<LoxObject> arguments) {
+        return new LoxString(arguments.get(0).toString());
+      }
+      @Override
+      public Object value() {
+        return this;
+      }
+      @Override
+      public String toString() { return "<native fn>"; }
+    });
   }
 }

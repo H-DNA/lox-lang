@@ -209,6 +209,15 @@ public class InterpreterTest {
     InterpreterTestUtils.assertErrorMessageIs("\"1\" <= \"3\"", "Unsupported operator '<=' on string and string");
     InterpreterTestUtils.assertErrorMessageIs("\"1\" < \"3\"", "Unsupported operator '<' on string and string");
   }
+
+  @Test
+  public void testCallable() throws Throwable {
+    InterpreterTestUtils.assertLastStmtEquals("toString(1);", "1.0");
+    InterpreterTestUtils.assertLastStmtEquals("toString(true);", "true");
+    InterpreterTestUtils.assertLastStmtEquals("toString(false);", "false");
+    InterpreterTestUtils.assertLastStmtEquals("toString(nil);", "nil");
+    InterpreterTestUtils.assertLastStmtEquals("toString(clock);", "<native fn>");
+  }
 }
 
 class InterpreterTestUtils {
