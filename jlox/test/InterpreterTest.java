@@ -217,6 +217,24 @@ public class InterpreterTest {
     InterpreterTestUtils.assertLastStmtEquals("toString(false);", "false");
     InterpreterTestUtils.assertLastStmtEquals("toString(nil);", "nil");
     InterpreterTestUtils.assertLastStmtEquals("toString(clock);", "<native fn>");
+    InterpreterTestUtils.assertErrorMessageIs("toString();", "Arity mismatch: Expected 1 but got 0");
+  }
+
+  @Test
+  public void testFuncStmt() throws Throwable {
+    InterpreterTestUtils.assertErrorMessageIs("fun func() { return 3; } func(3);", "Arity mismatch: Expected 0 but got 1");
+    InterpreterTestUtils.assertLastStmtEquals("fun func() { return 3; } func();", 3.0);
+    InterpreterTestUtils.assertLastStmtEquals("fun func() { 3; } func();", null);
+    InterpreterTestUtils.assertLastStmtEquals("fun func(i) { if (i == 0) return 0; else return func(i - 1) + 1; } func(10);", 10.0);
+
+    InterpreterTestUtils.assertErrorMessageIs("return 10;", "Cannot `return` outside a function body");
+    InterpreterTestUtils.assertErrorMessageIs("{ return 10; }", "Cannot `return` outside a function body");
+    InterpreterTestUtils.assertErrorMessageIs("while (true) { return 10; }", "Cannot `return` outside a function body");
+    InterpreterTestUtils.assertLastStmtEquals("while (false) { return 10; }", null);
+
+    InterpreterTestUtils.assertLastStmtEquals("fun func(i) { if (i == 0) { return 0; } else { return func(i - 1) + 1; } } func(10);", 10.0);
+    InterpreterTestUtils.assertLastStmtEquals("fun func(i) { if (i == 0) { return 0; } else return func(i - 1) + 1; } func(10);", 10.0);
+    InterpreterTestUtils.assertLastStmtEquals("fun func(i) { if (i == 0) { return 0; } else return func(i - 1) + 1; } func(10);", 10.0);
   }
 }
 

@@ -11,6 +11,7 @@ import com.lox.ast.TokenType;
 import com.lox.ast.Expr.Variable;
 import com.lox.object.LoxBoolean;
 import com.lox.object.LoxCallable;
+import com.lox.object.LoxFunction;
 import com.lox.object.LoxNil;
 import com.lox.object.LoxNumber;
 import com.lox.object.LoxObject;
@@ -18,7 +19,7 @@ import com.lox.object.LoxString;
 
 public class Interpreter {
   private Environment globals = new Environment();
-  private Environment env = this.globals;
+  public Environment env = this.globals;
 
   public Interpreter() throws InterpreterException {
     Builtins.bootstrapFunctions(this.globals);
@@ -73,6 +74,13 @@ public class Interpreter {
         }
         this.env = this.env.parent;
         yield lastValue;
+      }
+      case Stmt.FuncStmt f -> {
+        this.env.define(f.name.lexeme, new LoxFunction(f, this.env));
+        yield new LoxNil();
+      }
+      case Stmt.ReturnStmt r -> {
+        throw new NonLocalJump.Return(this.evaluateExpr(r.expr));
       }
       default -> throw new Error("Non-exhaustive check");
     };
@@ -240,45 +248,6 @@ public class Interpreter {
   }
 }
 
-class Environment {
-  public final Environment parent;
-  private final Map<String, LoxObject> values = new HashMap<>();
-
-  Environment() {
-    this.parent = null;
-  }
-
-  Environment(Environment parent) {
-    this.parent = parent;
-  }
-
-  public void define(String name, LoxObject value) throws InterpreterException {
-    if (values.containsKey(name)) {
-      throw new InterpreterException("Redeclared variable '" + name + "'");
-    }
-    this.values.put(name, value);
-  }
-
-  public void assign(String name, LoxObject value) throws InterpreterException {
-    for (Environment env = this; env != null; env = env.parent) {
-      if (env.values.containsKey(name)) {
-        env.values.put(name, value);
-        return;
-      }
-    }
-    throw new InterpreterException("Undefined variable '" + name + "'");
-  }
-
-  public LoxObject get(String name) throws InterpreterException {
-    for (Environment env = this; env != null; env = env.parent) {
-      if (env.values.containsKey(name)) {
-        return env.values.get(name);
-      }
-    }
-    throw new InterpreterException("Undefined variable '" + name + "'");
-  }
-}
-
 class TypecheckUtils {
   public static boolean isNumber(LoxObject obj) {
     return obj instanceof LoxNumber;
@@ -344,32 +313,46 @@ class Builtins {
   public static void bootstrapFunctions(Environment globals) throws InterpreterException {
     globals.define("clock", new LoxCallable() {
       @Override
-      public int arity() { return 0; }
+      public int arity() {
+        return 0;
+      }
+
       @Override
       public LoxObject call(Interpreter interpreter, List<LoxObject> arguments) {
-        return new LoxNumber((double)System.currentTimeMillis() / 1000.0);
+        return new LoxNumber((double) System.currentTimeMillis() / 1000.0);
       }
+
       @Override
       public Object value() {
         return this;
       }
+
       @Override
-      public String toString() { return "<native fn>"; }
+      public String toString() {
+        return "<native fn>";
+      }
     });
 
     globals.define("toString", new LoxCallable() {
       @Override
-      public int arity() { return 1; }
+      public int arity() {
+        return 1;
+      }
+
       @Override
       public LoxObject call(Interpreter interpreter, List<LoxObject> arguments) {
         return new LoxString(arguments.get(0).toString());
       }
+
       @Override
       public Object value() {
         return this;
       }
+
       @Override
-      public String toString() { return "<native fn>"; }
+      public String toString() {
+        return "<native fn>";
+      }
     });
   }
 }
