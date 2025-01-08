@@ -66,8 +66,8 @@ public class ParserTest {
   @Test
   public void testBinary() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("a = b = 3;"), "(= a (= b 3))");
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("a = 2 = 3;"), "Invalid assignment target");
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("1 = a = 3;"), "Invalid assignment target");
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("a = 2 = 3;"), new String[] {"Invalid assignment target"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("1 = a = 3;"), new String[] {"Invalid assignment target"});
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("a and b or 3;"), "(or (and a b) 3)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("a or b or 3;"), "(or (or a b) 3)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("a or b and 3;"), "(or a (and b 3))");
@@ -84,18 +84,18 @@ public class ParserTest {
 
   @Test
   public void testInvalidGroup() throws Throwable {
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("(1 + 2"), "Expect a closing parenthesis ')'");
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("(1 + 2"), new String[] {"Expect a closing parenthesis ')'"});
 
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("1 + (2"), "Expect a closing parenthesis ')'");
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("1 + (2"), new String[] {"Expect a closing parenthesis ')'"});
   }
 
   @Test
   public void testInvalidPrimary() throws Throwable {
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("+1 + 2"),
-        "Expect a numeric literal, string literal, variable or grouping expression");
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("+1 + 2"),
+        new String[] {"Expect a numeric literal, string literal, variable or grouping expression"});
 
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("+2"),
-        "Expect a numeric literal, string literal, variable or grouping expression");
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("+2"),
+        new String[] {"Expect a numeric literal, string literal, variable or grouping expression"});
   }
 
   @Test
@@ -125,8 +125,8 @@ public class ParserTest {
 
   @Test
   public void testInvalidVarDecl() throws Throwable {
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("var"), "Expect an identifier");
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("var x ="), "Expect a numeric literal, string literal, variable or grouping expression");
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("var"), new String[] {"Expect an identifier"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("var x ="), new String[] {"Expect a numeric literal, string literal, variable or grouping expression"});
   }
 
   @Test
@@ -135,8 +135,8 @@ public class ParserTest {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; }"), "(define a 3)\n(block (define b 3))");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; } var c = 3;"), "(define a 3)\n(block (define b 3))\n(define c 3)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("{ var a = 3; var b = a + 1; c; }"), "(block (define a 3) (define b (+ a 1)) c)");
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("{"), "Expect a numeric literal, string literal, variable or grouping expression");
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("{ var a = 3; "), "Expect a numeric literal, string literal, variable or grouping expression");
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{"), new String[] {"Expect a numeric literal, string literal, variable or grouping expression", "EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = 3; "), new String[] {"Expect a numeric literal, string literal, variable or grouping expression", "EOF reached while parsing block statement"});
   }
 
   @Test
@@ -172,8 +172,8 @@ public class ParserTest {
   @Test
   public void testFunc() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f() {}"), "(define (f) (block))");
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("fun f(a,) {}"), "Expect an identifier");
-    ParserTestUtils.assertOneError(ParserTestUtils.parse("fun f(,) {}"), "Expect an identifier");
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(a,) {}"), new String[] {"Expect an identifier"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(,) {}"), new String[] {"Expect an identifier"});
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) {}"), "(define (f a b) (block))");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) { return a + b; }"), "(define (f a b) (block (return (+ a b))))");
   }
@@ -197,8 +197,10 @@ class ParserTestUtils {
     assertEquals(ParserTestUtils.prettyPrint(res.first), prettyPrintedText);
   }
 
-  static void assertOneError(Pair<List<Stmt>, List<ParserException>> res, String firstErrorMessage) {
-    assertEquals(res.second.size(), 1);
-    assertEquals(res.second.get(0).message, firstErrorMessage);
+  static void assertErrors(Pair<List<Stmt>, List<ParserException>> res, String[] errorMessages) {
+    assertEquals(res.second.size(), errorMessages.length);
+    for (int i = 0; i < res.second.size(); ++i) {
+      assertEquals(res.second.get(i).message, errorMessages[i]);
+    }
   }
 }

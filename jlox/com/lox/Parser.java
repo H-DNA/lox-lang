@@ -53,6 +53,14 @@ public class Parser {
     }
   }
 
+  private void synchronizeBlock() {
+    assert !this.isAtEnd();
+
+    while (!this.isAtEnd() && !this.match(TokenType.RIGHT_PAREN)) {
+      this.currentOffset += 1;
+    }
+  }
+
   private Stmt declaration() throws SynchronizationException {
     assert !this.isAtEnd();
 
@@ -105,6 +113,11 @@ public class Parser {
       }
       params.add(this.previous());
       while (!this.match(TokenType.RIGHT_PAREN)) { 
+        if (this.isAtEnd()) {
+          final Token invalidToken = this.previous();
+          this.errors.add(new ParserException("EOF reached when parsing function parameter list", invalidToken.startOffset, invalidToken.endOffset));
+          throw new SynchronizationException(); 
+        }
         if (!this.match(TokenType.COMMA)) {
           final Token invalidToken = this.current();
           this.errors.add(new ParserException("Expect a comma", invalidToken.startOffset, invalidToken.endOffset));
@@ -171,11 +184,16 @@ public class Parser {
     if (!this.match(TokenType.LEFT_BRACE)) {
       final Token invalidToken = this.current();
       this.errors.add(new ParserException("Expect an opening brace '{'", invalidToken.startOffset, invalidToken.endOffset));
-      this.synchronizeStatement();
+      throw new SynchronizationException();
     }
 
     final List<Stmt> stmts = new ArrayList<>();
-    while (!this.isAtEnd() && !this.match(TokenType.RIGHT_BRACE)) {
+    while (!this.match(TokenType.RIGHT_BRACE)) {
+      if (this.isAtEnd()) {
+        final Token invalidToken = this.previous();
+        this.errors.add(new ParserException("EOF reached while parsing block statement", invalidToken.startOffset, invalidToken.endOffset));
+        return new BlockStmt(stmts);
+      }
       try {
         stmts.add(this.declaration());
       } catch (SynchronizationException e) {
