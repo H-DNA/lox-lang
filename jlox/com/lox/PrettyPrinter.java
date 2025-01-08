@@ -5,6 +5,7 @@ import java.util.List;
 import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
 import com.lox.ast.Token;
+import com.lox.ast.Stmt.FuncStmt;
 
 public class PrettyPrinter {
   public String print(List<Stmt> stmts) {
@@ -42,7 +43,7 @@ public class PrettyPrinter {
         yield res;
       }
       case Stmt.FuncStmt f -> {
-        String res = "(define (";
+        String res = "(fun (";
         res += f.name.lexeme;
         for (Token param: f.params) {
           res += " " + param.lexeme;

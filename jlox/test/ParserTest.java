@@ -171,11 +171,17 @@ public class ParserTest {
 
   @Test
   public void testFunc() throws Throwable {
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f() {}"), "(define (f) (block))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f() {}"), "(fun (f) (block))");
     ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(a,) {}"), new String[] {"Expect an identifier"});
     ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(,) {}"), new String[] {"Expect an identifier"});
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) {}"), "(define (f a b) (block))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) { return a + b; }"), "(define (f a b) (block (return (+ a b))))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) {}"), "(fun (f a b) (block))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) { return a + b; }"), "(fun (f a b) (block (return (+ a b))))");
+  }
+
+  @Test
+  public void testClass() throws Throwable {
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {}"), "(class (C))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {fun f() {} }"), "(class (C) (fun (f) (block)))");
   }
 }
 
