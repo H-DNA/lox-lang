@@ -135,8 +135,28 @@ public class ParserTest {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; }"), "(define a 3)\n(block (define b 3))");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; } var c = 3;"), "(define a 3)\n(block (define b 3))\n(define c 3)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("{ var a = 3; var b = a + 1; c; }"), "(block (define a 3) (define b (+ a 1)) c)");
+  }
+
+  @Test
+  void testInvalidBlock() throws Throwable {
     ParserTestUtils.assertErrors(ParserTestUtils.parse("{"), new String[] {"EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var "), new String[] {"Expect an identifier", "EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a"), new String[] {"Expect '=' or an ending semicolon ';'", "EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun"), new String[] {"Expect an identifier", "EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x"), new String[] {"Expect an opening parenthesis '('", "EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x("), new String[] {"Expect an identifier", "EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x()"), new String[] {"Expect an opening brace '{'", "EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x() {"), new String[] {"EOF reached while parsing block statement", "EOF reached while parsing block statement"});
     ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = 3; "), new String[] {"EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = ; var c = 3; "), new String[] {"Expect a numeric literal, string literal, variable or grouping expression", "EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = d var c = 3; "), new String[] {"Expect an ending semicolon ';'", "EOF reached while parsing block statement"});
+  }
+
+  @Test
+  void testRecoverBlock() throws Throwable {
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("{ var a = d var c = 3; "), "(block (define a d))");
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("{ fun f() var a = b; var d = e;"), "(block (define d e))");
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("{ fun f() { var a = b; var d = e;"), "(block (fun (f) (block (define a b) (define d e))))");
   }
 
   @Test
