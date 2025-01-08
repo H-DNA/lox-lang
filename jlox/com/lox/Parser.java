@@ -56,27 +56,31 @@ public class Parser {
   private Stmt declaration() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    if (this.match(TokenType.VAR)) return this.varDeclaration();
-    if (this.match(TokenType.FUN)) return this.functionDeclaration();
+    if (this.dryMatch(TokenType.VAR)) return this.varDeclaration();
+    if (this.dryMatch(TokenType.FUN)) return this.functionDeclaration();
     return this.statement();
   }
 
   private Stmt statement() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    if (this.match(TokenType.LEFT_BRACE)) return this.blockStatement();
-    if (this.match(TokenType.IF)) return this.ifStatement();
-    if (this.match(TokenType.WHILE)) return this.whileStatement();
-    if (this.match(TokenType.FOR)) return this.forStatement();
-    if (this.match(TokenType.PRINT)) return this.printStatement();
-    if (this.match(TokenType.RETURN)) return this.returnStatement();
+    if (this.dryMatch(TokenType.LEFT_BRACE)) return this.blockStatement();
+    if (this.dryMatch(TokenType.IF)) return this.ifStatement();
+    if (this.dryMatch(TokenType.WHILE)) return this.whileStatement();
+    if (this.dryMatch(TokenType.FOR)) return this.forStatement();
+    if (this.dryMatch(TokenType.PRINT)) return this.printStatement();
+    if (this.dryMatch(TokenType.RETURN)) return this.returnStatement();
     return this.expressionStatement();
   }
 
   private FuncStmt functionDeclaration() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    assert this.previous().type == TokenType.FUN;
+    if (!this.match(TokenType.FUN)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect keyword 'fun'", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
 
     if (!this.match(TokenType.IDENTIFIER)) {
       final Token invalidToken = this.current();
@@ -118,12 +122,6 @@ public class Parser {
       }
     }
 
-    if (!this.match(TokenType.LEFT_BRACE)) {
-      final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect an opening brace", invalidToken.startOffset, invalidToken.endOffset));
-      throw new SynchronizationException();
-    }
-
     final BlockStmt body = this.blockStatement();
 
     return new Stmt.FuncStmt(name, params, body);
@@ -132,7 +130,11 @@ public class Parser {
   private DeclStmt varDeclaration() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    assert this.previous().type == TokenType.VAR;
+    if (!this.match(TokenType.VAR)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect keyword 'var'", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
 
     if (!this.match(TokenType.IDENTIFIER)) {
       final Token invalidToken = this.current();
@@ -166,7 +168,11 @@ public class Parser {
   private BlockStmt blockStatement() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    assert this.previous().type == TokenType.LEFT_BRACE;
+    if (!this.match(TokenType.LEFT_BRACE)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an opening brace '{'", invalidToken.startOffset, invalidToken.endOffset));
+      this.synchronizeStatement();
+    }
 
     final List<Stmt> stmts = new ArrayList<>();
     while (!this.isAtEnd() && !this.match(TokenType.RIGHT_BRACE)) {
@@ -182,7 +188,11 @@ public class Parser {
   private WhileStmt whileStatement() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    assert this.previous().type == TokenType.WHILE;
+    if (!this.match(TokenType.WHILE)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect keyword 'while'", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
 
     if (!this.match(TokenType.LEFT_PAREN)) {
       final Token invalidToken = this.current();
@@ -206,7 +216,11 @@ public class Parser {
   private ForStmt forStatement() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    assert this.previous().type == TokenType.FOR;
+    if (!this.match(TokenType.FOR)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect keyword 'for'", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
 
     if (!this.match(TokenType.LEFT_PAREN)) {
       final Token invalidToken = this.current();
@@ -214,7 +228,7 @@ public class Parser {
       throw new SynchronizationException();
     }
 
-    final Stmt init = this.match(TokenType.VAR) ? this.varDeclaration() : this.expressionStatement();
+    final Stmt init = this.dryMatch(TokenType.VAR) ? this.varDeclaration() : this.expressionStatement();
     final ExprStmt cond = this.expressionStatement();
     final Expr post = this.expression();
 
@@ -232,8 +246,12 @@ public class Parser {
   private IfStmt ifStatement() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    assert this.previous().type == TokenType.IF;
-
+    if (!this.match(TokenType.IF)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect keyword 'if'", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+ 
     if (!this.match(TokenType.LEFT_PAREN)) {
       final Token invalidToken = this.current();
       this.errors.add(new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
@@ -262,7 +280,11 @@ public class Parser {
   private ReturnStmt returnStatement() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    assert this.previous().type == TokenType.RETURN;
+    if (!this.match(TokenType.RETURN)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect keyword 'return'", invalidToken.startOffset, invalidToken.endOffset));
+      this.synchronizeStatement();
+    }
 
     final Expr expr = this.expression();
     if (!this.match(TokenType.SEMICOLON)) {
@@ -277,7 +299,11 @@ public class Parser {
   private PrintStmt printStatement() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    assert this.previous().type == TokenType.PRINT;
+    if (!this.match(TokenType.PRINT)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect keyword 'print'", invalidToken.startOffset, invalidToken.endOffset));
+      this.synchronizeStatement();
+    }
 
     final Expr expr = this.expression();
     if (!this.match(TokenType.SEMICOLON)) {
