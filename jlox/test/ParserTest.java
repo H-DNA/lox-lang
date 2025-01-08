@@ -135,8 +135,8 @@ public class ParserTest {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; }"), "(define a 3)\n(block (define b 3))");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; } var c = 3;"), "(define a 3)\n(block (define b 3))\n(define c 3)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("{ var a = 3; var b = a + 1; c; }"), "(block (define a 3) (define b (+ a 1)) c)");
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{"), new String[] {"Expect a numeric literal, string literal, variable or grouping expression", "EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = 3; "), new String[] {"Expect a numeric literal, string literal, variable or grouping expression", "EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{"), new String[] {"EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = 3; "), new String[] {"EOF reached while parsing block statement"});
   }
 
   @Test
@@ -173,6 +173,8 @@ public class ParserTest {
   public void testFunc() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f() {}"), "(fun (f) (block))");
     ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(a,) {}"), new String[] {"Expect an identifier"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(a, {}"), new String[] {"Expect an identifier"});
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("fun f(a, {}"), "");
     ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(,) {}"), new String[] {"Expect an identifier"});
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) {}"), "(fun (f a b) (block))");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) { return a + b; }"), "(fun (f a b) (block (return (+ a b))))");
@@ -200,6 +202,11 @@ class ParserTestUtils {
 
   static void assertNoErrorAndResultEquals(Pair<List<Stmt>, List<ParserException>> res, String prettyPrintedText) {
     assertEquals(res.second.size(), 0);
+    assertEquals(ParserTestUtils.prettyPrint(res.first), prettyPrintedText);
+  }
+
+  static void assertHasErrorsAndResultEquals(Pair<List<Stmt>, List<ParserException>> res, String prettyPrintedText) {
+    assertNotEquals(res.second.size(), 0);
     assertEquals(ParserTestUtils.prettyPrint(res.first), prettyPrintedText);
   }
 

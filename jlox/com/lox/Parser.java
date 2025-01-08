@@ -31,11 +31,14 @@ public class Parser {
 
   public Pair<List<Stmt>, List<ParserException>> parse() {
     if (this.isAtEnd()) return new Pair<>(this.stmts, this.errors);
+
+    assert this.currentOffset == 0;
+
     while (!this.isAtEnd() && !this.match(TokenType.EOF)) {
       try {
         this.stmts.add(this.declaration());
       } catch (SynchronizationException e) {
-        this.synchronizeStatement();
+        this.synchronizeStatementOrBlock();
       }
     }
     return new Pair<>(this.stmts, this.errors);
@@ -45,10 +48,18 @@ public class Parser {
     return this.currentOffset == tokens.size();
   }
 
+  private void synchronizeStatementOrBlock() {
+    assert !this.isAtEnd();
+
+    while (!this.dryMatch(TokenType.EOF) && !this.match(TokenType.SEMICOLON, TokenType.RIGHT_BRACE)) {
+      this.currentOffset += 1;
+    }
+  }
+
   private void synchronizeStatement() {
     assert !this.isAtEnd();
 
-    while (!this.isAtEnd() && !this.match(TokenType.SEMICOLON)) {
+    while (!this.dryMatch(TokenType.EOF) && !this.match(TokenType.EOF, TokenType.SEMICOLON)) {
       this.currentOffset += 1;
     }
   }
@@ -56,7 +67,7 @@ public class Parser {
   private void synchronizeBlock() {
     assert !this.isAtEnd();
 
-    while (!this.isAtEnd() && !this.match(TokenType.RIGHT_PAREN)) {
+    while (!this.dryMatch(TokenType.EOF) && !this.match(TokenType.RIGHT_PAREN)) {
       this.currentOffset += 1;
     }
   }
@@ -113,8 +124,8 @@ public class Parser {
       }
       params.add(this.previous());
       while (!this.match(TokenType.RIGHT_PAREN)) { 
-        if (this.isAtEnd()) {
-          final Token invalidToken = this.previous();
+        if (this.dryMatch(TokenType.EOF)) {
+          final Token invalidToken = this.current();
           this.errors.add(new ParserException("EOF reached when parsing function parameter list", invalidToken.startOffset, invalidToken.endOffset));
           throw new SynchronizationException(); 
         }
@@ -189,8 +200,8 @@ public class Parser {
 
     final List<Stmt> stmts = new ArrayList<>();
     while (!this.match(TokenType.RIGHT_BRACE)) {
-      if (this.isAtEnd()) {
-        final Token invalidToken = this.previous();
+      if (this.dryMatch(TokenType.EOF)) {
+        final Token invalidToken = this.current();
         this.errors.add(new ParserException("EOF reached while parsing block statement", invalidToken.startOffset, invalidToken.endOffset));
         return new BlockStmt(stmts);
       }
@@ -518,11 +529,11 @@ public class Parser {
   private void synchronizeGrouping() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    while (!this.isAtEnd() && !this.dryMatch(TokenType.RIGHT_PAREN, TokenType.RIGHT_BRACE, TokenType.SEMICOLON)) {
+    while (!this.dryMatch(TokenType.EOF, TokenType.RIGHT_PAREN, TokenType.RIGHT_BRACE, TokenType.SEMICOLON)) {
       this.currentOffset += 1;
     }
 
-    if (this.isAtEnd() || !this.match(TokenType.RIGHT_PAREN)) {
+    if (this.dryMatch(TokenType.EOF) || !this.match(TokenType.RIGHT_PAREN)) {
       throw new SynchronizationException();
     }
   }
