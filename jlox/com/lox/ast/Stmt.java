@@ -49,6 +49,16 @@ public abstract class Stmt extends SyntaxNode {
     }
   }
 
+  public static class ClsStmt extends Stmt {
+    public final Token name;
+    public final List<FuncStmt> methods;
+
+    public ClsStmt(Token name, List<FuncStmt> methods) {
+      this.name = name;
+      this.methods = methods;
+    }
+  }
+
   public static class IfStmt extends Stmt {
     public final Expr cond;
     public final Stmt thenBranch;

@@ -204,6 +204,24 @@ public class ParserTest {
   public void testClass() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {}"), "(class (C))");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {fun f() {} }"), "(class (C) (fun (f) (block)))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {fun f() {} fun g(a, b) { f(); } }"), "(class (C) (fun (f) (block)) (fun (g a b) (block (f))))");
+  }
+
+  @Test
+  public void testRecoverClass() throws Throwable {
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {"), "(class (C))");
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {fun f() {"), "(class (C) (fun (f) (block)))");
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {fun f() }"), "(class (C))");
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {fun f() } fun g() {}"), "(class (C))\n(fun (g) (block))");
+  }
+
+  @Test
+  public void testInvalidClass() throws Throwable {
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {"), new String[] {"EOF reached while parsing class body"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {fun f() {"), new String[] {"EOF reached while parsing block statement", "EOF reached while parsing class body"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {fun f() }"), new String[] {"Expect an opening brace '{'"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {fun f() } fun g() {}"), new String[] {"Expect an opening brace '{'"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C { var a = 3; fun f() } fun g() {}"), new String[] {"Expect method declaration in class body", "Expect an opening brace '{'"});
   }
 }
 

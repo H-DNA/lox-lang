@@ -9,6 +9,7 @@ import com.lox.ast.Token;
 import com.lox.ast.TokenType;
 import com.lox.ast.Expr.Variable;
 import com.lox.ast.Stmt.BlockStmt;
+import com.lox.ast.Stmt.ClsStmt;
 import com.lox.ast.Stmt.DeclStmt;
 import com.lox.ast.Stmt.ExprStmt;
 import com.lox.ast.Stmt.ForStmt;
@@ -67,7 +68,7 @@ public class Parser {
   private void synchronizeBlock() {
     assert !this.isAtEnd();
 
-    while (!this.dryMatch(TokenType.EOF) && !this.match(TokenType.RIGHT_PAREN)) {
+    while (!this.dryMatch(TokenType.EOF) && !this.match(TokenType.RIGHT_BRACE)) {
       this.currentOffset += 1;
     }
   }
@@ -77,6 +78,7 @@ public class Parser {
 
     if (this.dryMatch(TokenType.VAR)) return this.varDeclaration();
     if (this.dryMatch(TokenType.FUN)) return this.functionDeclaration();
+    if (this.dryMatch(TokenType.CLASS)) return this.classDeclaration();
     return this.statement();
   }
 
@@ -90,6 +92,54 @@ public class Parser {
     if (this.dryMatch(TokenType.PRINT)) return this.printStatement();
     if (this.dryMatch(TokenType.RETURN)) return this.returnStatement();
     return this.expressionStatement();
+  }
+
+  private ClsStmt classDeclaration() throws SynchronizationException {
+    assert !this.isAtEnd();
+
+    if (!this.match(TokenType.CLASS)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect keyword 'class'", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    if (!this.match(TokenType.IDENTIFIER)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an identifier", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final Token name = this.previous();
+    
+    if (!this.match(TokenType.LEFT_BRACE)) {
+      final Token invalidToken = this.current();
+      this.errors.add(new ParserException("Expect an opening brace '{'", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    final List<FuncStmt> methods = new ArrayList<>();
+
+    while (!this.match(TokenType.RIGHT_BRACE)) {
+      if (this.dryMatch(TokenType.EOF)) {
+        final Token invalidToken = this.current();
+        this.errors.add(new ParserException("EOF reached while parsing class body", invalidToken.startOffset, invalidToken.endOffset));
+        return new ClsStmt(name, methods);
+      }
+      try {
+        final Token curToken = this.current();
+        Stmt decl = this.declaration();
+        if (!(decl instanceof FuncStmt)) {
+          this.errors.add(new ParserException("Expect method declaration in class body", curToken.startOffset, curToken.endOffset));
+        } else {
+          methods.add((FuncStmt)decl);
+        }
+      } catch (SynchronizationException e) {
+        this.synchronizeBlock();
+        return new ClsStmt(name, methods);
+      }
+    }
+
+    return new ClsStmt(name, methods);
   }
 
   private FuncStmt functionDeclaration() throws SynchronizationException {

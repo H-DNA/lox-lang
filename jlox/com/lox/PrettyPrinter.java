@@ -54,6 +54,15 @@ public class PrettyPrinter {
         yield res;
       }
       case Stmt.ReturnStmt r -> String.format("(return %s)", this.printExpr(r.expr));
+      case Stmt.ClsStmt c -> {
+        String res = "(class (";
+        res += c.name.lexeme + ")";
+        for (FuncStmt method: c.methods) {
+          res += " " + this.printStmt(method);
+        }
+        res += ")";
+        yield res;
+      }
       default -> throw new Error("Non-exhaustive check");
     };
   }
