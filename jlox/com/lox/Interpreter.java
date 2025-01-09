@@ -182,43 +182,43 @@ public class Interpreter {
       }
       case TokenType.EQUAL_EQUAL -> {
         if (!TypecheckUtils.isSameType(left, right)) {
-          yield new LoxBoolean(false);
+          yield ValuecheckUtils.getBooleanSingleton(false);
         }
-        yield new LoxBoolean(left.value().equals(right.value()));
+        yield ValuecheckUtils.getBooleanSingleton(left.value().equals(right.value()));
       }
       case TokenType.BANG_EQUAL -> {
         if (!TypecheckUtils.isSameType(left, right)) {
-          yield new LoxBoolean(true);
+          yield ValuecheckUtils.getBooleanSingleton(true);
         }
-        yield new LoxBoolean(!left.value().equals(right.value()));
+        yield ValuecheckUtils.getBooleanSingleton(!left.value().equals(right.value()));
       }
       case TokenType.LESS -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
           throw new InterpreterException(String.format("Unsupported operator '<' on %s and %s",
               TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxBoolean(((LoxNumber) left).value < ((LoxNumber) right).value);
+        yield ValuecheckUtils.getBooleanSingleton(((LoxNumber) left).value < ((LoxNumber) right).value);
       }
       case TokenType.LESS_EQUAL -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
           throw new InterpreterException(String.format("Unsupported operator '<=' on %s and %s",
               TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxBoolean(((LoxNumber) left).value <= ((LoxNumber) right).value);
+        yield ValuecheckUtils.getBooleanSingleton(((LoxNumber) left).value <= ((LoxNumber) right).value);
       }
       case TokenType.GREATER -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
           throw new InterpreterException(String.format("Unsupported operator '>' on %s and %s",
               TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxBoolean(((LoxNumber) left).value > ((LoxNumber) right).value);
+        yield ValuecheckUtils.getBooleanSingleton(((LoxNumber) left).value > ((LoxNumber) right).value);
       }
       case TokenType.GREATER_EQUAL -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
           throw new InterpreterException(String.format("Unsupported operator '>=' on %s and %s",
               TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield new LoxBoolean(((LoxNumber) left).value >= ((LoxNumber) right).value);
+        yield ValuecheckUtils.getBooleanSingleton(((LoxNumber) left).value >= ((LoxNumber) right).value);
       }
       default -> throw new Error(String.format("Unreachable: Unexpected binary operator '%s'", bin.op.lexeme));
     };
@@ -228,7 +228,7 @@ public class Interpreter {
     final LoxObject inner = this.evaluateExpr(un.inner);
     return switch (un.op.type) {
       case TokenType.BANG -> {
-        yield new LoxBoolean(ValuecheckUtils.isFalsy(inner));
+        yield ValuecheckUtils.getBooleanSingleton(ValuecheckUtils.isFalsy(inner));
       }
       case TokenType.MINUS -> {
         if (!TypecheckUtils.isNumber(inner)) {
@@ -252,7 +252,7 @@ public class Interpreter {
     return switch (lit.value.literal) {
       case Double d -> new LoxNumber(d);
       case String s -> new LoxString(s);
-      case Boolean b -> new LoxBoolean(b);
+      case Boolean b -> ValuecheckUtils.getBooleanSingleton(b);
       default -> throw new Error(String.format("Unreachable: Unexpected literal type"));
     };
   }
@@ -302,6 +302,10 @@ class ValuecheckUtils {
 
   public static boolean isTruthy(LoxObject obj) {
     return !ValuecheckUtils.isFalsy(obj);
+  }
+  
+  public static LoxBoolean getBooleanSingleton(boolean b) {
+    return b ? LoxBoolean.trueSingleton : LoxBoolean.falseSingleton;
   }
 }
 
