@@ -1,7 +1,9 @@
 package com.lox.object;
 
 public class LoxNil extends LoxObject {
-  public LoxNil() {
+  public final static LoxNil singleton = new LoxNil();
+
+  LoxNil() {
     super(BuiltinClasses.LNil);
   }
 

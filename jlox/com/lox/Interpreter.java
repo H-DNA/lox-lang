@@ -37,26 +37,26 @@ public class Interpreter {
     return switch (stmt) {
       case Stmt.PrintStmt p -> {
         System.out.println(this.evaluateExpr(p.expr).toString());
-        yield new LoxNil();
+        yield LoxNil.singleton;
       }
       case Stmt.ExprStmt e -> this.evaluateExpr(e.expr);
       case Stmt.DeclStmt d -> {
-        this.env.define(d.id.lexeme, d.expr == null ? new LoxNil() : this.evaluateExpr(d.expr));
-        yield new LoxNil();
+        this.env.define(d.id.lexeme, d.expr == null ? LoxNil.singleton : this.evaluateExpr(d.expr));
+        yield LoxNil.singleton;
       }
       case Stmt.IfStmt i -> {
         final LoxObject condValue = this.evaluateExpr(i.cond);
         if (ValuecheckUtils.isTruthy(condValue)) {
           yield this.evaluateStmt(i.thenBranch);
         } else {
-          yield i.elseBranch != null ? this.evaluateStmt(i.elseBranch) : new LoxNil();
+          yield i.elseBranch != null ? this.evaluateStmt(i.elseBranch) : LoxNil.singleton;
         }
       }
       case Stmt.WhileStmt w -> {
         while (ValuecheckUtils.isTruthy(this.evaluateExpr(w.cond))) {
           this.evaluateStmt(w.body);
         }
-        yield new LoxNil();
+        yield LoxNil.singleton;
       }
       case Stmt.ForStmt f -> {
         this.env = new Environment(this.env);
@@ -66,11 +66,11 @@ public class Interpreter {
           this.evaluateExpr(f.post);
         }
         this.env = this.env.parent;
-        yield new LoxNil();
+        yield LoxNil.singleton;
       }
       case Stmt.BlockStmt b -> {
         this.env = new Environment(this.env);
-        LoxObject lastValue = new LoxNil();
+        LoxObject lastValue = LoxNil.singleton;
         for (Stmt s : b.stmts) {
           lastValue = this.evaluateStmt(s);
         }
@@ -79,7 +79,7 @@ public class Interpreter {
       }
       case Stmt.FuncStmt f -> {
         this.env.define(f.name.lexeme, new LoxFunction(f, this.env));
-        yield new LoxNil();
+        yield LoxNil.singleton;
       }
       case Stmt.ReturnStmt r -> {
         throw new NonLocalJump.Return(this.evaluateExpr(r.expr));
@@ -88,7 +88,7 @@ public class Interpreter {
         this.env.define(c.name.lexeme, null);
         LoxClass cls = new LoxClass(c.name.lexeme);
         this.env.assign(c.name.lexeme, cls);
-        yield new LoxNil();
+        yield LoxNil.singleton;
       }
       default -> throw new Error("Non-exhaustive check");
     };
@@ -241,7 +241,7 @@ public class Interpreter {
 
   private LoxObject evaluateLiteral(Expr.Literal lit) {
     if (lit.value.literal == null) {
-      return new LoxNil();
+      return LoxNil.singleton;
     }
     return switch (lit.value.literal) {
       case Double d -> new LoxNumber(d);

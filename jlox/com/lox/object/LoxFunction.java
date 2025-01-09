@@ -33,7 +33,7 @@ public class LoxFunction extends LoxCallable {
 
     try {
       interpreter.evaluate(this.func.body.stmts);
-      return new LoxNil();
+      return LoxNil.singleton;
     } catch (NonLocalJump.Return r) {
       return r.value;
     } finally {

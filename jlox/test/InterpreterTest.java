@@ -253,7 +253,7 @@ class InterpreterTestUtils {
     List<Stmt> stmts = parser.parse().first; 
 
     Interpreter interpreter = new Interpreter();
-    LoxObject res = new LoxNil();
+    LoxObject res = LoxNil.singleton;
     for (Stmt stmt: stmts) {
       res = interpreter.evaluateStmt(stmt);
     }
@@ -267,7 +267,7 @@ class InterpreterTestUtils {
     List<Stmt> stmts = parser.parse().first; 
 
     Interpreter interpreter = new Interpreter();
-    LoxObject res = new LoxNil();
+    LoxObject res = LoxNil.singleton;
     
     try {
       for (Stmt stmt: stmts) {
