@@ -10,7 +10,7 @@ public class LoxClass extends LoxCallable {
   public final LoxClass supercls;
 
   public LoxClass(String name) {
-    super();
+    super(BuiltinClasses.LClass);
     this.name = name;
     this.supercls = BuiltinClasses.LObject;
   }

@@ -11,6 +11,7 @@ public class BuiltinClasses {
   public static LoxClass LNil = new LoxClass("Nil", BuiltinClasses.LObject);
   public static LoxClass LCallable = new LoxClass("Callable", BuiltinClasses.LObject);
   public static LoxClass LFunction = new LoxClass("Function", BuiltinClasses.LCallable);
+  public static LoxClass LClass = new LoxClass("Class", BuiltinClasses.LCallable);
 
   public static void register(Environment env) {
     try {
