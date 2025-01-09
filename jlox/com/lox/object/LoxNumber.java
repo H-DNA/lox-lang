@@ -4,6 +4,7 @@ public class LoxNumber extends LoxObject {
   public final double value;
 
   public LoxNumber(double value) {
+    super(BuiltinClasses.LNumber);
     this.value = value;
   }
 

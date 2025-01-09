@@ -1,7 +1,9 @@
 package com.lox.object;
 
 public class LoxNil extends LoxObject {
-  public LoxNil() {}
+  public LoxNil() {
+    super(BuiltinClasses.LNil);
+  }
 
   @Override
   public Object value() {

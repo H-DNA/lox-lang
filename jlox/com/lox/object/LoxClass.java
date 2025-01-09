@@ -7,9 +7,17 @@ import com.lox.InterpreterException;
 
 public class LoxClass extends LoxCallable {
   public final String name;
+  public final LoxClass supercls;
 
   public LoxClass(String name) {
+    super();
     this.name = name;
+    this.supercls = BuiltinClasses.LObject;
+  }
+
+  public LoxClass(String name, LoxClass supercls) {
+    this.name = name;
+    this.supercls = supercls;
   }
 
   @Override

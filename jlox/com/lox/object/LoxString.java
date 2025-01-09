@@ -4,6 +4,7 @@ public class LoxString extends LoxObject {
   public final String value;
 
   public LoxString(String value) {
+    super(BuiltinClasses.LString);
     this.value = value;
   }
 

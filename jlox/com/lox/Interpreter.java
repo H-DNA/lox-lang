@@ -9,6 +9,7 @@ import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
 import com.lox.ast.TokenType;
 import com.lox.ast.Expr.Variable;
+import com.lox.object.BuiltinClasses;
 import com.lox.object.LoxBoolean;
 import com.lox.object.LoxCallable;
 import com.lox.object.LoxClass;
@@ -361,5 +362,7 @@ class Builtins {
         return "<native fn>";
       }
     });
+
+    BuiltinClasses.register(globals);
   }
 }

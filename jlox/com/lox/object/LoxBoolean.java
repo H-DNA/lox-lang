@@ -4,6 +4,7 @@ public class LoxBoolean extends LoxObject {
   public final boolean value;
 
   public LoxBoolean(boolean value) {
+    super(BuiltinClasses.LBoolean);
     this.value = value;
   }
 

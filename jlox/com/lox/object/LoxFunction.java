@@ -14,6 +14,7 @@ public class LoxFunction extends LoxCallable {
   private FuncStmt func;
   
   public LoxFunction(FuncStmt func, Environment env) {
+    super(BuiltinClasses.LFunction);
     this.func = func;
     this.env = env;
   }
