@@ -118,6 +118,11 @@ public class Interpreter {
         yield function.call(this, arguments);
       }
       case Expr.Get g -> this.evaluateExpr(g.object).get(g.property.lexeme);
+      case Expr.Set s -> {
+        final LoxObject value = this.evaluateExpr(s.value);
+        this.evaluateExpr(s.object).set(s.property.lexeme, value);
+        yield value;
+      }
       default -> throw new Error("Non-exhaustive check");
     };
   }

@@ -249,6 +249,14 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("print (3).a;", "nil\n");
     InterpreterTestUtils.assertStdoutIs("class C { } print C().a;", "nil\n");
   }
+
+  @Test
+  public void testSetExpr() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("class C { } print C().a = 3;", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { } print C().a = 3; print C().a", "3.0\nnil\n");
+    InterpreterTestUtils.assertStdoutIs("class C { } var c = C(); c.a = 3; print c.a;", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { } var c = C(); c.a = 3; print c.a = 4.0; print c.a;", "4.0\n4.0\n");
+  }
 }
 
 class InterpreterTestUtils {
