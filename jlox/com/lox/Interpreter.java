@@ -9,6 +9,7 @@ import com.lox.ast.Expr;
 import com.lox.ast.Stmt;
 import com.lox.ast.TokenType;
 import com.lox.ast.Expr.Variable;
+import com.lox.ast.Stmt.FuncStmt;
 import com.lox.object.BuiltinClasses;
 import com.lox.object.LoxBoolean;
 import com.lox.object.LoxCallable;
@@ -85,9 +86,12 @@ public class Interpreter {
         throw new NonLocalJump.Return(this.evaluateExpr(r.expr));
       }
       case Stmt.ClsStmt c -> {
-        this.env.define(c.name.lexeme, null);
-        LoxClass cls = new LoxClass(c.name.lexeme);
-        this.env.assign(c.name.lexeme, cls);
+        List<LoxFunction> methods = new ArrayList<>();
+        for (FuncStmt func: c.methods) {
+          methods.add(new LoxFunction(func, this.env));
+        }
+        LoxClass cls = new LoxClass(c.name.lexeme, methods);
+        this.env.define(c.name.lexeme, cls);
         yield LoxNil.singleton;
       }
       default -> throw new Error("Non-exhaustive check");

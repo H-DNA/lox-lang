@@ -22,10 +22,19 @@ public abstract class LoxObject {
 
   private Map<String, LoxObject> fields;
   public LoxObject get(String prop) throws InterpreterException {
-    if (!this.fields.containsKey(prop)) {
-      return LoxNil.singleton;
+    if (this.fields.containsKey(prop)) {
+      return this.fields.get(prop);
     }
-    return this.fields.get(prop);
+    LoxFunction unboundedFunc = null;
+    LoxClass curCls = this.cls;
+    while (unboundedFunc == null && curCls != BuiltinClasses.LObject) {
+      unboundedFunc = curCls.lookupMethod(prop);
+      curCls = curCls.supercls;
+    }
+    if (unboundedFunc == null) {
+      unboundedFunc = BuiltinClasses.LObject.lookupMethod(prop);
+    }
+    return unboundedFunc == null ? LoxNil.singleton : new LoxBoundedFunction(this, unboundedFunc);
   }
   public void set(String prop, LoxObject value) throws InterpreterException {
     this.fields.put(prop, value);

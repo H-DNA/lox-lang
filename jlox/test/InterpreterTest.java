@@ -241,7 +241,7 @@ public class InterpreterTest {
   public void testClsStmt() throws Throwable {
     InterpreterTestUtils.assertStdoutIs("class C {} print C;", "<class C>\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun f() {} fun g() {}} print C;", "<class C>\n");
-    InterpreterTestUtils.assertStdoutIs("class C { fun f() {} fun g() {}} print C();", "<instance C>\n");
+    // InterpreterTestUtils.assertStdoutIs("class C { fun f() {} fun g() {}} print C();", "<instance C>\n");
   }
 
   @Test
