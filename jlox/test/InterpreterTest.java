@@ -198,16 +198,16 @@ public class InterpreterTest {
 
   @Test
   public void testTypeMismatch() throws Throwable {
-    InterpreterTestUtils.assertErrorMessageIs("1 + \"3\"", "Unsupported operator '+' on number and string");
-    InterpreterTestUtils.assertErrorMessageIs("\"1\" + 3", "Unsupported operator '+' on string and number");
-    InterpreterTestUtils.assertErrorMessageIs("\"1\" + \"3\"", "Unsupported operator '+' on string and string");
-    InterpreterTestUtils.assertErrorMessageIs("\"1\" * \"3\"", "Unsupported operator '*' on string and string");
-    InterpreterTestUtils.assertErrorMessageIs("\"1\" - \"3\"", "Unsupported operator '-' on string and string");
-    InterpreterTestUtils.assertErrorMessageIs("\"1\" / \"3\"", "Unsupported operator '/' on string and string");
-    InterpreterTestUtils.assertErrorMessageIs("\"1\" > \"3\"", "Unsupported operator '>' on string and string");
-    InterpreterTestUtils.assertErrorMessageIs("\"1\" >= \"3\"", "Unsupported operator '>=' on string and string");
-    InterpreterTestUtils.assertErrorMessageIs("\"1\" <= \"3\"", "Unsupported operator '<=' on string and string");
-    InterpreterTestUtils.assertErrorMessageIs("\"1\" < \"3\"", "Unsupported operator '<' on string and string");
+    InterpreterTestUtils.assertErrorMessageIs("1 + \"3\"", "Unsupported operator '+' on Number and String");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" + 3", "Unsupported operator '+' on String and Number");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" + \"3\"", "Unsupported operator '+' on String and String");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" * \"3\"", "Unsupported operator '*' on String and String");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" - \"3\"", "Unsupported operator '-' on String and String");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" / \"3\"", "Unsupported operator '/' on String and String");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" > \"3\"", "Unsupported operator '>' on String and String");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" >= \"3\"", "Unsupported operator '>=' on String and String");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" <= \"3\"", "Unsupported operator '<=' on String and String");
+    InterpreterTestUtils.assertErrorMessageIs("\"1\" < \"3\"", "Unsupported operator '<' on String and String");
   }
 
   @Test

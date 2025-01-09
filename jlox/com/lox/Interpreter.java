@@ -258,23 +258,23 @@ public class Interpreter {
 
 class TypecheckUtils {
   public static boolean isNumber(LoxObject obj) {
-    return obj instanceof LoxNumber;
+    return obj.instanceOf(BuiltinClasses.LNumber);
   }
 
   public static boolean isString(LoxObject obj) {
-    return obj instanceof LoxString;
+    return obj.instanceOf(BuiltinClasses.LString);
   }
 
   public static boolean isBoolean(LoxObject obj) {
-    return obj instanceof LoxBoolean;
+    return obj.instanceOf(BuiltinClasses.LBoolean);
   }
 
   public static boolean isNil(LoxObject obj) {
-    return obj instanceof LoxNil;
+    return obj.instanceOf(BuiltinClasses.LNil);
   }
 
   public static boolean isCallable(LoxObject obj) {
-    return obj instanceof LoxCallable;
+    return obj.instanceOf(BuiltinClasses.LCallable);
   }
 
   public static boolean isSameType(LoxObject obj1, LoxObject obj2) {
@@ -282,13 +282,7 @@ class TypecheckUtils {
   }
 
   public static String typenameOf(LoxObject obj) {
-    return switch (obj) {
-      case LoxNumber n -> "number";
-      case LoxString s -> "string";
-      case LoxBoolean b -> "boolean";
-      case LoxNil nil -> "nil";
-      default -> "object";
-    };
+    return obj.cls.name;
   }
 }
 
