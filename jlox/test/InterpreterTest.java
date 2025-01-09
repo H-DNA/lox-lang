@@ -241,15 +241,40 @@ public class InterpreterTest {
   public void testClsStmt() throws Throwable {
     InterpreterTestUtils.assertStdoutIs("class C {} print C;", "<class C>\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun f() {} fun g() {}} print C;", "<class C>\n");
-    // InterpreterTestUtils.assertStdoutIs("class C { fun f() {} fun g() {}} print C();", "<instance C>\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f() {} fun g() {}} print C();", "<instance C>\n");
   }
 
   @Test
   public void testGetExpr() throws Throwable {
     InterpreterTestUtils.assertStdoutIs("print (3).a;", "nil\n");
     InterpreterTestUtils.assertStdoutIs("class C { } print C().a;", "nil\n");
+    InterpreterTestUtils.assertStdoutIs("class C { } print C().a;", "nil\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f() {} } print C().a;", "nil\n");
   }
 
+  @Test
+  public void testMethod() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("class C { fun f() {} } print C().f;", "<bounded function f>\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f() {} } print C().f();", "nil\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f(a) { this.a = a; } fun g() { return this.a; } } C().f(10); print C().g();", "nil\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f(a) { this.a = a; } fun g() { this.f(4); return this.a; } } var c = C(); c.f(10); print c.g();", "4.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f(a) { this.a = a; } fun g() { this.f(this.a + 1); return this.a; } } var c = C(); c.f(10); print c.g();", "11.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f(a) { this.a = a; } fun g() { return this.a; } } var c = C(); c.f(10); print c.g();", "10.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f() { return this; } } print C().f();", "<instance C>\n");
+    InterpreterTestUtils.assertStdoutIs("fun g() { return 3; } class C { fun g() { return g(); } } var c = C(); print c.g();", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun g() { fun g() { return 3; } return g(); } } var c = C(); print c.g();", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun g(a) { this.a = a; } } var c = C(); c.g(1); print c.a; c.g(2); print c.a;", "1.0\n2.0\n");
+    InterpreterTestUtils.assertErrorMessageIs("fun g() { return this; } class C { fun g() { return g(); } } var c = C(); print c.g();", "Undefined variable 'this'");
+  }
+
+  @Test
+  public void testExtractMethod() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("class C { fun g(a) { this.a = a; } } var c = C(); var g = c.g; g(1); print c.a; g(2); print c.a;", "1.0\n2.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun g(a) { this.a = a; } } var c = C(); var g = c.g; print g == c.g;", "false\n");
+    InterpreterTestUtils.assertStdoutIs("fun f() { print \"f\"; } class C {} var c = C(); c.f = f; c.f();", "\"f\"\n");
+    InterpreterTestUtils.assertErrorMessageIs("fun f() { print this; } class C {} var c = C(); c.f = f; c.f();", "Undefined variable 'this'");
+  }
+  
   @Test
   public void testSetExpr() throws Throwable {
     InterpreterTestUtils.assertStdoutIs("class C { } print C().a = 3;", "3.0\n");
