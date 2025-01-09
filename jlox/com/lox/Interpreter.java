@@ -117,6 +117,7 @@ public class Interpreter {
         }
         yield function.call(this, arguments);
       }
+      case Expr.Get g -> this.evaluateExpr(g.object).get(g.property.lexeme);
       default -> throw new Error("Non-exhaustive check");
     };
   }

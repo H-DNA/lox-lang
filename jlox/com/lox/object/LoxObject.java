@@ -1,5 +1,10 @@
 package com.lox.object;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.lox.InterpreterException;
+
 public abstract class LoxObject {
   public abstract Object value();
   public abstract String toString();
@@ -13,9 +18,21 @@ public abstract class LoxObject {
     }
     return cls == BuiltinClasses.LObject;
   }
-  public LoxClass cls;
+  public final LoxClass cls;
+
+  private Map<String, LoxObject> fields;
+  public LoxObject get(String prop) {
+    if (!this.fields.containsKey(prop)) {
+      return LoxNil.singleton;
+    }
+    return this.fields.get(prop);
+  }
+  public void set(String prop, LoxObject value) {
+    this.fields.put(prop, value);
+  }
 
   public LoxObject(LoxClass cls) {
     this.cls = cls;
+    this.fields = new HashMap<>();
   }
 }

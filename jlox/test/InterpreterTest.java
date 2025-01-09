@@ -243,6 +243,12 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("class C { fun f() {} fun g() {}} print C;", "<class C>\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun f() {} fun g() {}} print C();", "<instance C>\n");
   }
+
+  @Test
+  public void testGetExpr() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("print (3).a;", "nil\n");
+    InterpreterTestUtils.assertStdoutIs("class C { } print C().a;", "nil\n");
+  }
 }
 
 class InterpreterTestUtils {
