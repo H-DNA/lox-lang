@@ -90,7 +90,16 @@ public class Interpreter {
         for (FuncStmt func: c.methods) {
           methods.add(new LoxFunction(func, this.env));
         }
-        LoxClass cls = new LoxClass(c.name.lexeme, methods);
+        LoxClass cls = null;
+        if (c.supercls == null) {
+          cls = new LoxClass(c.name.lexeme, methods);
+        } else {
+          LoxObject supercls = this.env.get(c.supercls.lexeme);
+          if (!(supercls instanceof LoxClass)) {
+            throw new InterpreterException(String.format("'%s' is not a class", c.supercls.lexeme));
+          }
+          cls = new LoxClass(c.name.lexeme, (LoxClass)supercls, methods);
+        }
         this.env.define(c.name.lexeme, cls);
         yield LoxNil.singleton;
       }

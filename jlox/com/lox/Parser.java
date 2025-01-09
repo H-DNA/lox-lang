@@ -110,6 +110,16 @@ public class Parser {
     }
 
     final Token name = this.previous();
+
+    Token supercls = null;
+    if (this.match(TokenType.LESS)) {
+      if (!this.match(TokenType.IDENTIFIER)) {
+        final Token invalidToken = this.current();
+        this.errors.add(new ParserException("Expect an identifier", invalidToken.startOffset, invalidToken.endOffset));
+      } else {
+        supercls = this.previous();
+      }
+    }
     
     if (!this.match(TokenType.LEFT_BRACE)) {
       final Token invalidToken = this.current();
@@ -123,7 +133,7 @@ public class Parser {
       if (this.dryMatch(TokenType.EOF)) {
         final Token invalidToken = this.current();
         this.errors.add(new ParserException("EOF reached while parsing class body", invalidToken.startOffset, invalidToken.endOffset));
-        return new ClsStmt(name, methods);
+        return new ClsStmt(name, supercls, methods);
       }
       try {
         final Token curToken = this.current();
@@ -135,11 +145,11 @@ public class Parser {
         }
       } catch (SynchronizationException e) {
         this.synchronizeBlock();
-        return new ClsStmt(name, methods);
+        return new ClsStmt(name, supercls, methods);
       }
     }
 
-    return new ClsStmt(name, methods);
+    return new ClsStmt(name, supercls, methods);
   }
 
   private FuncStmt functionDeclaration() throws SynchronizationException {

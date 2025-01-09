@@ -51,10 +51,12 @@ public abstract class Stmt extends SyntaxNode {
 
   public static class ClsStmt extends Stmt {
     public final Token name;
+    public final Token supercls;
     public final List<FuncStmt> methods;
 
-    public ClsStmt(Token name, List<FuncStmt> methods) {
+    public ClsStmt(Token name, Token supercls, List<FuncStmt> methods) {
       this.name = name;
+      this.supercls = supercls;
       this.methods = methods;
     }
   }

@@ -274,6 +274,13 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("fun f() { print \"f\"; } class C {} var c = C(); c.f = f; c.f();", "\"f\"\n");
     InterpreterTestUtils.assertErrorMessageIs("fun f() { print this; } class C {} var c = C(); c.f = f; c.f();", "Undefined variable 'this'");
   }
+
+  @Test
+  public void testSuperclass() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("class C { fun g(a) { this.a = a; } } class D < C {} var d = D(); var g = d.g; g(1); print d.a; g(2); print d.a;", "1.0\n2.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun g() { print this.a; } } class D < C {} var d = D(); d.a = 3; d.g();", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun g() { print this.f(); } } class D < C { fun f() { return 4.0; } } var d = D(); d.g();", "4.0\n");
+  }
   
   @Test
   public void testSetExpr() throws Throwable {

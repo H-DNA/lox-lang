@@ -207,6 +207,14 @@ public class ParserTest {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {fun f() {} fun g(a, b) { f(); } }"), "(class (C) (fun (f) (block)) (fun (g a b) (block (f))))");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C { fun f() { return this.g(1, 2); } fun g(a, b) { return f(); } }"), "(class (C) (fun (f) (block (return ((. this g) 1 2)))) (fun (g a b) (block (return (f)))))");
   }
+  
+  @Test
+  public void testSuperclass() throws Throwable {
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {} class D < C {}"), "(class (C))\n(class (< D C))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {} class D < C { fun f() {} }"), "(class (C))\n(class (< D C) (fun (f) (block)))");
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class D < { fun f() {} }"), new String[] {"Expect an identifier"});
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {} class D < { fun f() {} }"), "(class (C))\n(class (D) (fun (f) (block)))");
+  }
 
   @Test
   public void testRecoverClass() throws Throwable {

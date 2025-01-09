@@ -56,7 +56,7 @@ public class PrettyPrinter {
       case Stmt.ReturnStmt r -> String.format("(return %s)", this.printExpr(r.expr));
       case Stmt.ClsStmt c -> {
         String res = "(class (";
-        res += c.name.lexeme + ")";
+        res += c.supercls == null ? c.name.lexeme + ")" : "< " + c.name.lexeme + " " + c.supercls.lexeme + ")";
         for (FuncStmt method: c.methods) {
           res += " " + this.printStmt(method);
         }
