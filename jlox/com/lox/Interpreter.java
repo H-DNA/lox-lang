@@ -11,6 +11,7 @@ import com.lox.ast.TokenType;
 import com.lox.ast.Expr.Variable;
 import com.lox.object.LoxBoolean;
 import com.lox.object.LoxCallable;
+import com.lox.object.LoxClass;
 import com.lox.object.LoxFunction;
 import com.lox.object.LoxNil;
 import com.lox.object.LoxNumber;
@@ -81,6 +82,12 @@ public class Interpreter {
       }
       case Stmt.ReturnStmt r -> {
         throw new NonLocalJump.Return(this.evaluateExpr(r.expr));
+      }
+      case Stmt.ClsStmt c -> {
+        this.env.define(c.name.lexeme, null);
+        LoxClass cls = new LoxClass(c.name.lexeme);
+        this.env.assign(c.name.lexeme, cls);
+        yield new LoxNil();
       }
       default -> throw new Error("Non-exhaustive check");
     };

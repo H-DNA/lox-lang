@@ -236,6 +236,13 @@ public class InterpreterTest {
     InterpreterTestUtils.assertLastStmtEquals("fun func(i) { if (i == 0) { return 0; } else return func(i - 1) + 1; } func(10);", 10.0);
     InterpreterTestUtils.assertLastStmtEquals("fun func(i) { if (i == 0) { return 0; } else return func(i - 1) + 1; } func(10);", 10.0);
   }
+
+  @Test
+  public void testClsStmt() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("class C {} print C;", "<class C>\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f() {} fun g() {}} print C;", "<class C>\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f() {} fun g() {}} print C();", "<instance C>\n");
+  }
 }
 
 class InterpreterTestUtils {
