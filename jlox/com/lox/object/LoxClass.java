@@ -32,6 +32,16 @@ public class LoxClass extends LoxCallable {
 
   @Override
   public LoxObject call(Interpreter interpreter, List<LoxObject> arguments) throws InterpreterException {
-    return new LoxInstance(this);
+    return new LoxObject(this) {
+      @Override
+      public String toString() {
+        return String.format("<instance %s>", this.cls.name);
+      }
+
+      @Override
+      public Object value() {
+        return this;
+      }
+    };
   }
 }
