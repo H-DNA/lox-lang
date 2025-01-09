@@ -1,9 +1,9 @@
 JUNIT_JAR := vendors/junit-platform-console-standalone-1.11.3.jar
-DIR := com/lox
+DIR := com/lox cli
 BUILD_DIR := build
 TEST_DIR := test
 
-SOURCES := $(wildcard $(DIR)/**/*.java) $(wildcard $(DIR)/*.java)
+SOURCES := $(foreach dir, $(DIR), $(wildcard $(dir)/**/*.java) $(wildcard $(dir)/*.java))
 TESTS := $(wildcard $(TEST_DIR)/*.java)
 CLASSES := $(addprefix $(BUILD_DIR)/, $(SOURCES:.java=.class))
 
@@ -12,6 +12,9 @@ JAVA_OPTIONS := -Werror
 default: $(SOURCES)
 	@ mkdir -p $(BUILD_DIR)
 	@ javac -d $(BUILD_DIR) $(SOURCES)
+
+run: default
+	@ cd $(BUILD_DIR) && java Jlox
 
 test: $(SOURCES) $(JUNIT_JAR) $(TESTS)
 	@ mkdir -p $(BUILD_DIR)
