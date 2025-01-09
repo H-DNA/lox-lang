@@ -517,7 +517,17 @@ public class Parser {
     assert !this.isAtEnd();
 
     Expr callee = this.primary();
-    while (this.match(TokenType.LEFT_PAREN)) {
+    while (this.match(TokenType.LEFT_PAREN, TokenType.DOT)) {
+      if (this.previous().type == TokenType.DOT) {
+        if (!this.match(TokenType.IDENTIFIER)) {
+          final Token invalidToken = this.current();
+          this.errors.add(new ParserException("Expect a property name", invalidToken.startOffset, invalidToken.endOffset));
+          throw new SynchronizationException();
+        }
+        final Token property = this.previous();
+        callee = new Expr.Get(callee, property);
+        continue;
+      }
       List<Expr> params = new ArrayList<>(); 
       if (this.match(TokenType.RIGHT_PAREN)) {
         callee = new Expr.Call(callee, params);

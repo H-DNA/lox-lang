@@ -58,4 +58,14 @@ public abstract class Expr extends SyntaxNode {
       this.params = params;
     }
   }
+
+  public static class Get extends Expr {
+    public final Expr object;
+    public final Token property;
+
+    public Get(Expr object, Token property) {
+      this.object = object;
+      this.property = property;
+    }
+  }
 }

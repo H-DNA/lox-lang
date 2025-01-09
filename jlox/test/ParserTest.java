@@ -223,6 +223,14 @@ public class ParserTest {
     ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {fun f() } fun g() {}"), new String[] {"Expect an opening brace '{'"});
     ParserTestUtils.assertErrors(ParserTestUtils.parse("class C { var a = 3; fun f() } fun g() {}"), new String[] {"Expect method declaration in class body", "Expect an opening brace '{'"});
   }
+
+  @Test
+  public void testGetExpr() throws Throwable {
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c().b().a;"), "(. ((. (c) b)) a)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c.b().a;"), "(. ((. c b)) a)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c.b.a;"), "(. (. c b) a)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c.b.a();"), "((. (. c b) a))");
+  }
 }
 
 class ParserTestUtils {
