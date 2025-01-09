@@ -363,6 +363,9 @@ class Builtins {
       }
     });
 
-    BuiltinClasses.register(globals);
+    globals.define("String", BuiltinClasses.LString);
+    globals.define("Boolean", BuiltinClasses.LBoolean);
+    globals.define("Number", BuiltinClasses.LNumber);
+    globals.define("Object", BuiltinClasses.LObject);
   }
 }

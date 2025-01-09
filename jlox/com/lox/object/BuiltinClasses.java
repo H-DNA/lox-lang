@@ -12,15 +12,4 @@ public class BuiltinClasses {
   public static LoxClass LCallable = new LoxClass("Callable", BuiltinClasses.LObject);
   public static LoxClass LFunction = new LoxClass("Function", BuiltinClasses.LCallable);
   public static LoxClass LClass = new LoxClass("Class", BuiltinClasses.LCallable);
-
-  public static void register(Environment env) {
-    try {
-      env.define("Object", LObject);
-      env.define("Number", LNumber);
-      env.define("String", LString);
-      env.define("Boolean", LBoolean);
-    } catch (InterpreterException e) {
-      throw new Error("Unable to bootstrap builtin classes");
-    }
-  }
 }
