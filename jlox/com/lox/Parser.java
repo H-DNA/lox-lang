@@ -420,8 +420,11 @@ public class Parser {
     if (this.match(TokenType.EQUAL)) {
       Token op = this.previous();
       Expr right = this.assignment();
-      if (left instanceof Variable) {
+      if (left instanceof Expr.Variable) {
         return new Expr.Binary(left, op, right);
+      } else if (left instanceof Expr.Get) {
+        final Expr.Get get = (Expr.Get)left;
+        return new Expr.Set(get.object, get.property, right);
       } else {
         this.errors.add(new ParserException("Invalid assignment target", op.startOffset, op.endOffset));
       }

@@ -231,6 +231,13 @@ public class ParserTest {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c.b.a;"), "(. (. c b) a)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c.b.a();"), "((. (. c b) a))");
   }
+
+  @Test
+  public void testSetExpr() throws Throwable {
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c().b().a = 3;"), "(= (. ((. (c) b)) a) 3)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c.b().a = 10;"), "(= (. ((. c b)) a) 10)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c.b.a = 10;"), "(= (. (. c b) a) 10)");
+  }
 }
 
 class ParserTestUtils {
