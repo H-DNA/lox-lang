@@ -256,6 +256,16 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("class C { } print C().a = 3; print C().a", "3.0\nnil\n");
     InterpreterTestUtils.assertStdoutIs("class C { } var c = C(); c.a = 3; print c.a;", "3.0\n");
     InterpreterTestUtils.assertStdoutIs("class C { } var c = C(); c.a = 3; print c.a = 4.0; print c.a;", "4.0\n4.0\n");
+
+    InterpreterTestUtils.assertErrorMessageIs("(3).a = 3;", "Number is immutable");
+    InterpreterTestUtils.assertErrorMessageIs("var a = 3; a.a = 3;", "Number is immutable");
+    InterpreterTestUtils.assertErrorMessageIs("var a = 3 + 1; a.a = 3;", "Number is immutable");
+    InterpreterTestUtils.assertErrorMessageIs("var a = 3 + 1; (a + 1).a = 3;", "Number is immutable");
+
+    InterpreterTestUtils.assertErrorMessageIs("nil.a = 3;", "Nil is immutable");
+    InterpreterTestUtils.assertErrorMessageIs("true.a = 3;", "Boolean is immutable");
+    InterpreterTestUtils.assertErrorMessageIs("false.a = 3;", "Boolean is immutable");
+    InterpreterTestUtils.assertErrorMessageIs("\"abcd\".a = 3;", "String is immutable");
   }
 }
 

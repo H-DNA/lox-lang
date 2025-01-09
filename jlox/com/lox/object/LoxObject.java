@@ -21,13 +21,13 @@ public abstract class LoxObject {
   public final LoxClass cls;
 
   private Map<String, LoxObject> fields;
-  public LoxObject get(String prop) {
+  public LoxObject get(String prop) throws InterpreterException {
     if (!this.fields.containsKey(prop)) {
       return LoxNil.singleton;
     }
     return this.fields.get(prop);
   }
-  public void set(String prop, LoxObject value) {
+  public void set(String prop, LoxObject value) throws InterpreterException {
     this.fields.put(prop, value);
   }
 
