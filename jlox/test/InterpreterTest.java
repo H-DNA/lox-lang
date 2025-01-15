@@ -311,10 +311,19 @@ public class InterpreterTest {
   }
 
   @Test
-  public void testConstructorInheritance() throws Throwable {
+  public void testSuperConstructor() throws Throwable {
     InterpreterTestUtils.assertStdoutIs("class C { fun constructor() { this.a = 3; } } class D < C { fun a() { return 10; } } var d = D(); print d.a;", "3.0\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun constructor() { this.a = 3; } } class D < C { fun b() { return this.a; } } var d = D(); print d.b();", "3.0\n");
-    InterpreterTestUtils.assertStdoutIs("class C { fun constructor() { this.b(); } } class D < C { fun b() { return this.a = 3; } } var d = D(); print d.a;", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor() { this.b(); } } class D < C { fun constructor() { super(); this.a = 3; } fun b() { this.d = 10; } } var d = D(); print d.a; print d.d", "3.0\n10.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor() { this.c = 3; } } class D < C { fun constructor() { super(); this.d = 10; } } var d = D(); print d.c; print d.d;", "3.0\n10.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor() { this.c = 3; } } class C2 < C {} class D < C2 { fun constructor() { super(); this.d = 10; } } var d = D(); print d.c; print d.d;", "3.0\n10.0\n");
+    InterpreterTestUtils.assertStdoutIs("class B { fun constructor() { this.b = 4; } } class C < B { fun constructor() { super(); this.c = 3; } } class D < C { fun constructor() { super(); this.d = 10; } } var d = D(); print d.b; print d.c; print d.d;", "4.0\n3.0\n10.0\n");
+  }
+
+  @Test
+  public void testSuperMethod() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("class B { fun p() { print \"b\"; } } class C < B { fun p() { super.p(); print \"c\"; }} var c = C(); c.p();", "\"b\"\n\"c\"\n");
+    InterpreterTestUtils.assertStdoutIs("class B { fun p() { print \"b\"; } } class C < B { fun p() { super.p(); print \"c\"; }} class D < C { fun p() { super.p(); print \"d\"; }} var d = D(); d.p();", "\"b\"\n\"c\"\n\"d\"\n");
   }
 }
 

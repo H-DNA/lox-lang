@@ -10,11 +10,13 @@ import com.lox.ast.Token;
 
 public class LoxBoundedFunction extends LoxCallable {
   private LoxObject owner;
+  private LoxObject cls;
   private LoxFunction func;
   
-  public LoxBoundedFunction(LoxObject owner, LoxFunction func) {
+  public LoxBoundedFunction(LoxObject owner, LoxClass cls, LoxFunction func) {
     super(BuiltinClasses.LBoundedFunction);
     this.owner = owner;
+    this.cls = cls;
     this.func = func;
   }
 
@@ -23,6 +25,7 @@ public class LoxBoundedFunction extends LoxCallable {
 
     final Environment paramEnv = new Environment(func.env);
     paramEnv.define("this", this.owner);
+    paramEnv.define("$CLASS", this.cls);
     for (int i = 0; i < this.func.func.params.size(); ++i) {
       paramEnv.define(this.func.func.params.get(i).lexeme, arguments.get(i));
     }

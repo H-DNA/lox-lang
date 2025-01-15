@@ -12,6 +12,7 @@ import com.lox.ast.Expr.Variable;
 import com.lox.ast.Stmt.FuncStmt;
 import com.lox.object.BuiltinClasses;
 import com.lox.object.LoxBoolean;
+import com.lox.object.LoxBoundedFunction;
 import com.lox.object.LoxCallable;
 import com.lox.object.LoxClass;
 import com.lox.object.LoxFunction;
@@ -135,6 +136,23 @@ public class Interpreter {
         final LoxObject value = this.evaluateExpr(s.value);
         this.evaluateExpr(s.object).set(s.property.lexeme, value);
         yield value;
+      }
+      case Expr.SuperGet s -> {
+        final LoxObject thisObj = this.env.get("this");
+        final LoxBoundedFunction method = thisObj.getMethod(s.member.lexeme, ((LoxClass)this.env.get("$CLASS")).supercls);
+        yield method == null ? LoxNil.singleton : method;
+      }
+      case Expr.SuperCall s -> {
+        final LoxObject thisObj = this.env.get("this");
+        List<LoxObject> arguments = new ArrayList<>();
+        for (Expr arg : s.params) {
+          arguments.add(this.evaluateExpr(arg));
+        }
+        final LoxBoundedFunction constructor = thisObj.getMethod("constructor", ((LoxClass)this.env.get("$CLASS")).supercls);
+        if (constructor != null) {
+          constructor.call(this, arguments);
+        }
+        yield LoxNil.singleton;
       }
       default -> throw new Error("Non-exhaustive check");
     };
