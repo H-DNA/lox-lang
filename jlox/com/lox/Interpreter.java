@@ -10,178 +10,344 @@ import com.lox.ast.Stmt;
 import com.lox.ast.TokenType;
 import com.lox.ast.Expr.Variable;
 import com.lox.ast.Stmt.FuncStmt;
-import com.lox.object.BuiltinClasses;
 import com.lox.object.LoxBoolean;
-import com.lox.object.LoxBoundedFunction;
-import com.lox.object.LoxCallable;
+import com.lox.object.LoxBoundFunction;
 import com.lox.object.LoxClass;
 import com.lox.object.LoxFunction;
 import com.lox.object.LoxNil;
 import com.lox.object.LoxNumber;
 import com.lox.object.LoxObject;
 import com.lox.object.LoxString;
+import com.lox.utils.Pair;
 
 public class Interpreter {
-  private Environment globals = new Environment();
-  public Environment env = this.globals;
+  public static final Environment globals = new Environment();
+  static {
+    try {
+      Interpreter.globals.define("clock", new LoxFunction.LoxForeignFunction("clock") {
+        @Override
+        public int arity() {
+          return 0;
+        }
 
-  public Interpreter() throws InterpreterException {
-    Builtins.bootstrapFunctions(this.globals);
-  }
+        @Override
+        public LoxObject call(List<LoxObject> arguments) {
+          return new LoxNumber((double) System.currentTimeMillis() / 1000.0);
+        }
+      });
 
-  public void evaluate(List<Stmt> stmts) throws InterpreterException {
-    for (Stmt stmt : stmts) {
-      this.evaluateStmt(stmt);
+      Interpreter.globals.define("toString", new LoxFunction.LoxForeignFunction("toString") {
+        @Override
+        public int arity() {
+          return 1;
+        }
+
+        @Override
+        public LoxObject call(List<LoxObject> arguments) {
+          return new LoxString(arguments.get(0).toString());
+        }
+      });
+
+      Interpreter.globals.define("String", LoxString.OBJECT);
+      Interpreter.globals.define("Boolean", LoxBoolean.OBJECT);
+      Interpreter.globals.define("Number", LoxNumber.OBJECT);
+      Interpreter.globals.define("Object", LoxObject.OBJECT);
+    } catch (InterpreterException e) {
+      throw new RuntimeException(e.message);
     }
   }
 
-  public LoxObject evaluateStmt(Stmt stmt) throws InterpreterException {
+  private Context ctx = new Context();
+
+  public void evaluate(List<Stmt> stmts) throws InterpreterException {
+    Environment env = new Environment(Interpreter.globals);
+    for (Stmt stmt : stmts) {
+      this.evaluateStmt(stmt, env);
+    }
+  }
+
+  public void evaluate(List<Stmt> stmts, Environment env) throws InterpreterException {
+    for (Stmt stmt : stmts) {
+      this.evaluateStmt(stmt, env);
+    }
+  }
+
+  public LoxObject evaluateStmt(Stmt stmt, Environment env) throws InterpreterException {
     return switch (stmt) {
       case Stmt.PrintStmt p -> {
-        System.out.println(this.evaluateExpr(p.expr).toString());
-        yield LoxNil.singleton;
+        System.out.println(this.evaluateExpr(p.expr, env).toString());
+        yield LoxNil.NIL;
       }
-      case Stmt.ExprStmt e -> this.evaluateExpr(e.expr);
+      case Stmt.ExprStmt e -> this.evaluateExpr(e.expr, env);
       case Stmt.DeclStmt d -> {
-        this.env.define(d.id.lexeme, d.expr == null ? LoxNil.singleton : this.evaluateExpr(d.expr));
-        yield LoxNil.singleton;
+        env.define(d.id.lexeme, d.expr == null ? LoxNil.NIL : this.evaluateExpr(d.expr, env));
+        yield LoxNil.NIL;
       }
       case Stmt.IfStmt i -> {
-        final LoxObject condValue = this.evaluateExpr(i.cond);
+        final LoxObject condValue = this.evaluateExpr(i.cond, env);
+        final Environment blockEnv = new Environment(env);
         if (ValueUtils.isTruthy(condValue)) {
-          yield this.evaluateStmt(i.thenBranch);
+          yield this.evaluateStmt(i.thenBranch, blockEnv);
         } else {
-          yield i.elseBranch != null ? this.evaluateStmt(i.elseBranch) : LoxNil.singleton;
+          yield i.elseBranch != null ? this.evaluateStmt(i.elseBranch, blockEnv) : LoxNil.NIL;
         }
       }
       case Stmt.WhileStmt w -> {
-        while (ValueUtils.isTruthy(this.evaluateExpr(w.cond))) {
-          this.evaluateStmt(w.body);
+        final Environment blockEnv = new Environment(env);
+        while (ValueUtils.isTruthy(this.evaluateExpr(w.cond, blockEnv))) {
+          this.evaluateStmt(w.body, blockEnv);
         }
-        yield LoxNil.singleton;
+        yield LoxNil.NIL;
       }
       case Stmt.ForStmt f -> {
-        this.env = new Environment(this.env);
-        this.evaluateStmt(f.init);
-        while (ValueUtils.isTruthy(this.evaluateStmt(f.cond))) {
-          this.evaluateStmt(f.body);
-          this.evaluateExpr(f.post);
+        final Environment blockEnv = new Environment(env);
+        this.evaluateStmt(f.init, blockEnv);
+        while (ValueUtils.isTruthy(this.evaluateStmt(f.cond, blockEnv))) {
+          this.evaluateStmt(f.body, blockEnv);
+          this.evaluateExpr(f.post, blockEnv);
         }
-        this.env = this.env.parent;
-        yield LoxNil.singleton;
+        yield LoxNil.NIL;
       }
       case Stmt.BlockStmt b -> {
-        this.env = new Environment(this.env);
-        LoxObject lastValue = LoxNil.singleton;
+        final Environment blockEnv = new Environment(env);
+        LoxObject lastValue = LoxNil.NIL;
         for (Stmt s : b.stmts) {
-          lastValue = this.evaluateStmt(s);
+          lastValue = this.evaluateStmt(s, blockEnv);
         }
-        this.env = this.env.parent;
         yield lastValue;
       }
       case Stmt.FuncStmt f -> {
-        this.env.define(f.name.lexeme, new LoxFunction(f, this.env));
-        yield LoxNil.singleton;
+        env.define(f.name.lexeme, new LoxFunction.LoxUserFunction(f, env));
+        yield LoxNil.NIL;
       }
       case Stmt.ReturnStmt r -> {
-        throw new NonLocalJump.Return(this.evaluateExpr(r.expr));
+        throw new NonLocalJump.Return(this.evaluateExpr(r.expr, env));
       }
       case Stmt.ClsStmt c -> {
         List<LoxFunction> methods = new ArrayList<>();
-        for (FuncStmt func: c.methods) {
-          methods.add(new LoxFunction(func, this.env));
+        for (FuncStmt func : c.methods) {
+          methods.add(new LoxFunction.LoxUserFunction(func, env));
         }
         LoxClass cls = null;
         if (c.supercls == null) {
           cls = new LoxClass(c.name.lexeme, methods);
         } else {
-          LoxObject supercls = this.env.get(c.supercls.lexeme);
+          LoxObject supercls = env.get(c.supercls.lexeme);
           if (!(supercls instanceof LoxClass)) {
             throw new InterpreterException(String.format("'%s' is not a class", c.supercls.lexeme));
           }
-          cls = new LoxClass(c.name.lexeme, (LoxClass)supercls, methods);
+          cls = new LoxClass(c.name.lexeme, (LoxClass) supercls, methods);
         }
-        this.env.define(c.name.lexeme, cls);
-        yield LoxNil.singleton;
+        env.define(c.name.lexeme, cls);
+        yield LoxNil.NIL;
       }
       default -> throw new Error("Non-exhaustive check");
     };
   }
 
-  public LoxObject evaluateExpr(Expr expr) throws InterpreterException {
+  public LoxObject evaluateExpr(Expr expr, Environment env) throws InterpreterException {
     return switch (expr) {
-      case Expr.Binary b -> this.evaluateBinary(b);
-      case Expr.Unary u -> this.evaluateUnary(u);
-      case Expr.Grouping g -> this.evaluateGrouping(g);
-      case Expr.Variable v -> this.evaluateVariable(v);
-      case Expr.Literal l -> this.evaluateLiteral(l);
+      case Expr.Binary b -> this.evaluateBinary(b, env);
+      case Expr.Unary u -> this.evaluateUnary(u, env);
+      case Expr.Grouping g -> this.evaluateGrouping(g, env);
+      case Expr.Variable v -> this.evaluateVariable(v, env);
+      case Expr.Literal l -> this.evaluateLiteral(l, env);
+      case Expr.This t -> {
+        if (this.ctx.thisObj == null) {
+          throw new InterpreterException("Cannot access `this` inside an unbound function");
+        }
+        yield this.ctx.thisObj;
+      }
       case Expr.Call c -> {
-        LoxObject callee = this.evaluateExpr(c.callee);
+        LoxObject callee = this.evaluateExpr(c.callee, env);
         List<LoxObject> arguments = new ArrayList<>();
         for (Expr arg : c.params) {
-          arguments.add(this.evaluateExpr(arg));
+          arguments.add(this.evaluateExpr(arg, env));
         }
-        if (!TypecheckUtils.isCallable(callee)) {
+        if (callee instanceof LoxFunction) {
+          yield switch (callee) {
+            case LoxFunction.LoxUserFunction u -> this.evaluateUserFunction(u, arguments, env);
+            case LoxFunction.LoxForeignFunction f -> this.evaluateForeignFunction(f, arguments, env);
+            case LoxBoundFunction b -> this.evaluateBoundFunction(b, arguments, env);
+            default -> throw new Error("Unhandled LoxFunction subclass");
+          };
+        } else if (callee instanceof LoxClass) {
+          yield this.evaluateClassConstructor((LoxClass) callee, arguments, env);
+        } else {
           throw new InterpreterException("Callee is not of Callable type");
         }
-        LoxCallable function = (LoxCallable) callee;
-        if (function.arity() != arguments.size()) {
-          throw new InterpreterException(
-              String.format("Arity mismatch: Expected %s but got %s", function.arity(), arguments.size()));
-        }
-        yield function.call(this, arguments);
       }
-      case Expr.Get g -> this.evaluateExpr(g.object).get(g.property.lexeme);
+      case Expr.Get g -> this.evaluateExpr(g.object, env).get(g.property.lexeme);
       case Expr.Set s -> {
-        final LoxObject value = this.evaluateExpr(s.value);
-        this.evaluateExpr(s.object).set(s.property.lexeme, value);
+        final LoxObject value = this.evaluateExpr(s.value, env);
+        this.evaluateExpr(s.object, env).set(s.property.lexeme, value);
         yield value;
       }
       case Expr.SuperGet s -> {
-        final LoxObject thisObj = this.env.get("this");
-        final LoxBoundedFunction method = thisObj.getMethod(s.member.lexeme, ((LoxClass)this.env.get("$CLASS")).supercls);
-        yield method == null ? LoxNil.singleton : method;
+        final LoxFunction thisFunc = this.ctx.thisFunc;
+        if (!(thisFunc instanceof LoxBoundFunction)) {
+          throw new InterpreterException("Cannot access `super` inside an unbound function");
+        }
+        final LoxObject thisObj = ((LoxBoundFunction) thisFunc).owner;
+        final LoxClass thisCls = ((LoxBoundFunction) thisFunc).ownerCls;
+
+        final LoxBoundFunction method = thisObj.getMethod(s.member.lexeme, thisCls.supercls);
+        yield method == null ? LoxNil.NIL : method;
       }
       case Expr.SuperCall s -> {
-        final LoxObject thisObj = this.env.get("this");
+        final LoxFunction thisFunc = this.ctx.thisFunc;
+        if (!(thisFunc instanceof LoxBoundFunction)) {
+          throw new InterpreterException("Cannot access `super` inside an unbound function");
+        }
+        final LoxObject thisObj = ((LoxBoundFunction) thisFunc).owner;
+        final LoxClass thisCls = ((LoxBoundFunction) thisFunc).ownerCls;
+
         List<LoxObject> arguments = new ArrayList<>();
         for (Expr arg : s.params) {
-          arguments.add(this.evaluateExpr(arg));
+          arguments.add(this.evaluateExpr(arg, env));
         }
-        final LoxBoundedFunction constructor = thisObj.getMethod("constructor", ((LoxClass)this.env.get("$CLASS")).supercls);
+        final LoxBoundFunction constructor = thisObj.getMethod("constructor", thisCls.supercls);
         if (constructor != null) {
-          constructor.call(this, arguments);
+          this.evaluateBoundFunction(constructor, arguments, env);
         }
-        yield LoxNil.singleton;
+        yield LoxNil.NIL;
       }
       default -> throw new Error("Non-exhaustive check");
     };
   }
 
-  private LoxObject evaluateBinary(Expr.Binary bin) throws InterpreterException {
+  private LoxObject evaluateClassConstructor(LoxClass kls, List<LoxObject> args, Environment env)
+      throws InterpreterException {
+    final LoxObject blankObj = new LoxObject() {
+      @Override
+      public String toString() {
+        return String.format("<instance %s>", this.cls().name);
+      }
+
+      @Override
+      public LoxClass cls() {
+        return kls;
+      }
+    };
+
+    final Pair<LoxFunction, LoxClass> res = kls.lookupMethod("constructor");
+    if (res == null) {
+      if (args.size() > 0) {
+        throw new InterpreterException(String.format("Expected %s argument(s) but got %s", 0, args.size()));
+      }
+      return blankObj;
+    }
+
+    final LoxBoundFunction boundConstructor = new LoxBoundFunction(res.second, blankObj, res.first);
+    this.evaluateBoundFunction(boundConstructor, args, env);
+
+    return blankObj;
+  }
+
+  private LoxObject evaluateUserFunction(LoxFunction.LoxUserFunction func, List<LoxObject> args, Environment env)
+      throws InterpreterException {
+    if (func.arity() != args.size()) {
+      throw new InterpreterException(String.format("Expected %s argument(s) but got %s", func.arity(), args.size()));
+    }
+
+    final LoxFunction oldThisFunc = this.ctx.thisFunc;
+    final LoxObject oldThis = this.ctx.thisObj;
+    try {
+      this.ctx.thisFunc = func;
+      this.ctx.thisObj = null;
+
+      final Environment bodyEnv = new Environment(func.env());
+      for (int i = 0; i < func.node.params.size(); ++i) {
+        bodyEnv.define(func.node.params.get(i).lexeme, args.get(i));
+      }
+
+      this.evaluate(func.node.body.stmts, bodyEnv);
+      return LoxNil.NIL;
+    } catch (NonLocalJump.Return r) {
+      return r.value;
+    } finally {
+      this.ctx.thisFunc = oldThisFunc;
+      this.ctx.thisObj = oldThis;
+    }
+  }
+
+  private LoxObject evaluateForeignFunction(LoxFunction.LoxForeignFunction func, List<LoxObject> args, Environment env)
+      throws InterpreterException {
+    if (func.arity() != args.size()) {
+      throw new InterpreterException(String.format("Expected %s argument(s) but got %s", func.arity(), args.size()));
+    }
+
+    final LoxFunction oldThisFunc = this.ctx.thisFunc;
+    final LoxObject oldThis = this.ctx.thisObj;
+    try {
+      this.ctx.thisFunc = func;
+      this.ctx.thisObj = null;
+      return func.call(args);
+    } finally {
+      this.ctx.thisFunc = oldThisFunc;
+      this.ctx.thisObj = oldThis;
+    }
+  }
+
+  private LoxObject evaluateBoundFunction(LoxBoundFunction func, List<LoxObject> args, Environment env)
+      throws InterpreterException {
+    if (func.arity() != args.size()) {
+      throw new InterpreterException(String.format("Expected %s arguments but got %s", func.arity(), args.size()));
+    }
+
+    final LoxObject oldThis = this.ctx.thisObj;
+    final LoxFunction oldThisFunc = this.ctx.thisFunc;
+    try {
+      this.ctx.thisObj = func.owner;
+      this.ctx.thisFunc = func;
+
+      return switch (func.funcObj) {
+        case LoxFunction.LoxUserFunction u -> {
+          final Environment bodyEnv = new Environment(func.env());
+          try {
+            for (int i = 0; i < u.node.params.size(); ++i) {
+              bodyEnv.define(u.node.params.get(i).lexeme, args.get(i));
+            }
+
+            this.evaluate(u.node.body.stmts, bodyEnv);
+            yield LoxNil.NIL;
+          } catch (NonLocalJump.Return r) {
+            yield r.value;
+          }
+        }
+        case LoxFunction.LoxForeignFunction f -> f.call(args);
+        default -> throw new Error("Unhandled LoxFunction subclass");
+      };
+    } finally {
+      this.ctx.thisObj = oldThis;
+      this.ctx.thisFunc = oldThisFunc;
+    }
+  }
+
+  private LoxObject evaluateBinary(Expr.Binary bin, Environment env) throws InterpreterException {
     if (bin.op.type == TokenType.EQUAL) {
-      final LoxObject right = this.evaluateExpr(bin.right);
-      this.env.assign(((Variable) bin.left).var.lexeme, right);
+      final LoxObject right = this.evaluateExpr(bin.right, env);
+      env.assign(((Variable) bin.left).var.lexeme, right);
       return right;
     }
     if (bin.op.type == TokenType.OR) {
-      final LoxObject left = this.evaluateExpr(bin.left);
+      final LoxObject left = this.evaluateExpr(bin.left, env);
       if (ValueUtils.isTruthy(left)) {
         return left;
       }
-      final LoxObject right = this.evaluateExpr(bin.right);
+      final LoxObject right = this.evaluateExpr(bin.right, env);
       return right;
     }
     if (bin.op.type == TokenType.AND) {
-      final LoxObject left = this.evaluateExpr(bin.left);
+      final LoxObject left = this.evaluateExpr(bin.left, env);
       if (ValueUtils.isFalsy(left)) {
         return left;
       }
-      final LoxObject right = this.evaluateExpr(bin.right);
+      final LoxObject right = this.evaluateExpr(bin.right, env);
       return right;
     }
-    final LoxObject left = this.evaluateExpr(bin.left);
-    final LoxObject right = this.evaluateExpr(bin.right);
+    final LoxObject left = this.evaluateExpr(bin.left, env);
+    final LoxObject right = this.evaluateExpr(bin.right, env);
     return switch (bin.op.type) {
       case TokenType.PLUS -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
@@ -255,8 +421,8 @@ public class Interpreter {
     };
   }
 
-  private LoxObject evaluateUnary(Expr.Unary un) throws InterpreterException {
-    final LoxObject inner = this.evaluateExpr(un.inner);
+  private LoxObject evaluateUnary(Expr.Unary un, Environment env) throws InterpreterException {
+    final LoxObject inner = this.evaluateExpr(un.inner, env);
     return switch (un.op.type) {
       case TokenType.BANG -> {
         yield ValueUtils.getLoxBool(ValueUtils.isFalsy(inner));
@@ -272,13 +438,13 @@ public class Interpreter {
     };
   }
 
-  private LoxObject evaluateGrouping(Expr.Grouping gr) throws InterpreterException {
-    return this.evaluateExpr(gr.inner);
+  private LoxObject evaluateGrouping(Expr.Grouping gr, Environment env) throws InterpreterException {
+    return this.evaluateExpr(gr.inner, env);
   }
 
-  private LoxObject evaluateLiteral(Expr.Literal lit) {
+  private LoxObject evaluateLiteral(Expr.Literal lit, Environment env) {
     if (lit.value.literal == null) {
-      return LoxNil.singleton;
+      return LoxNil.NIL;
     }
     return switch (lit.value.literal) {
       case Double d -> new LoxNumber(d);
@@ -288,38 +454,43 @@ public class Interpreter {
     };
   }
 
-  private LoxObject evaluateVariable(Expr.Variable var) throws InterpreterException {
-    return this.env.get(var.var.lexeme);
+  private LoxObject evaluateVariable(Expr.Variable var, Environment env) throws InterpreterException {
+    return env.get(var.var.lexeme);
   }
+}
+
+class Context {
+  public LoxObject thisObj = null;
+  public LoxFunction thisFunc = null;
 }
 
 class TypecheckUtils {
   public static boolean isNumber(LoxObject obj) {
-    return obj.instanceOf(BuiltinClasses.LNumber);
+    return obj.instanceOf(LoxNumber.OBJECT);
   }
 
   public static boolean isString(LoxObject obj) {
-    return obj.instanceOf(BuiltinClasses.LString);
+    return obj.instanceOf(LoxString.OBJECT);
   }
 
   public static boolean isBoolean(LoxObject obj) {
-    return obj.instanceOf(BuiltinClasses.LBoolean);
+    return obj.instanceOf(LoxBoolean.OBJECT);
   }
 
   public static boolean isNil(LoxObject obj) {
-    return obj.instanceOf(BuiltinClasses.LNil);
+    return obj.instanceOf(LoxNil.OBJECT);
   }
 
   public static boolean isCallable(LoxObject obj) {
-    return obj.instanceOf(BuiltinClasses.LCallable);
+    return obj.instanceOf(LoxFunction.OBJECT) || obj.instanceOf(LoxClass.OBJECT);
   }
 
   public static boolean isSameType(LoxObject obj1, LoxObject obj2) {
-    return obj1.cls == obj2.cls;
+    return obj1.cls() == obj2.cls();
   }
 
   public static String typenameOf(LoxObject obj) {
-    return obj.cls.name;
+    return obj.cls().name;
   }
 }
 
@@ -334,9 +505,9 @@ class ValueUtils {
   public static boolean isTruthy(LoxObject obj) {
     return !ValueUtils.isFalsy(obj);
   }
-  
+
   public static LoxBoolean getLoxBool(boolean b) {
-    return b ? LoxBoolean.trueSingleton : LoxBoolean.falseSingleton;
+    return b ? LoxBoolean.TRUE : LoxBoolean.FALSE;
   }
 
   public static boolean equals(LoxObject o1, LoxObject o2) {
@@ -344,16 +515,16 @@ class ValueUtils {
       return false;
     }
     if (TypecheckUtils.isNumber(o1)) {
-      return ((LoxNumber)o1).value == ((LoxNumber)o2).value;
+      return ((LoxNumber) o1).value == ((LoxNumber) o2).value;
     }
     if (TypecheckUtils.isNil(o1)) {
       return true;
     }
     if (TypecheckUtils.isBoolean(o1)) {
-      return ((LoxBoolean)o1).value == ((LoxBoolean)o2).value;
+      return ((LoxBoolean) o1).value == ((LoxBoolean) o2).value;
     }
     if (TypecheckUtils.isString(o1)) {
-      return ((LoxString)o1).value == ((LoxString)o2).value;
+      return ((LoxString) o1).value == ((LoxString) o2).value;
     }
     return o1 == o2;
   }
@@ -368,48 +539,5 @@ class StringifyUtils {
       case LoxNil nil -> "nil";
       default -> String.valueOf(obj);
     };
-  }
-}
-
-class Builtins {
-  public static void bootstrapFunctions(Environment globals) throws InterpreterException {
-    globals.define("clock", new LoxCallable() {
-      @Override
-      public int arity() {
-        return 0;
-      }
-
-      @Override
-      public LoxObject call(Interpreter interpreter, List<LoxObject> arguments) {
-        return new LoxNumber((double) System.currentTimeMillis() / 1000.0);
-      }
-
-      @Override
-      public String toString() {
-        return "<native fn>";
-      }
-    });
-
-    globals.define("toString", new LoxCallable() {
-      @Override
-      public int arity() {
-        return 1;
-      }
-
-      @Override
-      public LoxObject call(Interpreter interpreter, List<LoxObject> arguments) {
-        return new LoxString(arguments.get(0).toString());
-      }
-
-      @Override
-      public String toString() {
-        return "<native fn>";
-      }
-    });
-
-    globals.define("String", BuiltinClasses.LString);
-    globals.define("Boolean", BuiltinClasses.LBoolean);
-    globals.define("Number", BuiltinClasses.LNumber);
-    globals.define("Object", BuiltinClasses.LObject);
   }
 }

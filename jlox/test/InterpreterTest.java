@@ -197,6 +197,8 @@ public class InterpreterTest {
 
     InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = a + 1; } print a;", "3.0\n");
     InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = a + 1; print a; }", "4.0\n");
+    InterpreterTestUtils.assertStdoutIs("var outer; { var a = 3; fun inner() { return a; } outer = inner; } print outer();", "3.0\n");
+    InterpreterTestUtils.assertErrorMessageIs("var outer; { fun inner() { return a; } outer = inner; } { var a = 3; print outer(); }", "Undefined variable 'a'");
   }
 
   @Test
@@ -219,13 +221,13 @@ public class InterpreterTest {
     InterpreterTestUtils.assertLastStmtEquals("toString(true);", "true");
     InterpreterTestUtils.assertLastStmtEquals("toString(false);", "false");
     InterpreterTestUtils.assertLastStmtEquals("toString(nil);", "nil");
-    InterpreterTestUtils.assertLastStmtEquals("toString(clock);", "<native fn>");
-    InterpreterTestUtils.assertErrorMessageIs("toString();", "Arity mismatch: Expected 1 but got 0");
+    InterpreterTestUtils.assertLastStmtEquals("toString(clock);", "<native function 'clock'>");
+    InterpreterTestUtils.assertErrorMessageIs("toString();", "Expected 1 argument(s) but got 0");
   }
 
   @Test
   public void testFuncStmt() throws Throwable {
-    InterpreterTestUtils.assertErrorMessageIs("fun func() { return 3; } func(3);", "Arity mismatch: Expected 0 but got 1");
+    InterpreterTestUtils.assertErrorMessageIs("fun func() { return 3; } func(3);", "Expected 0 argument(s) but got 1");
     InterpreterTestUtils.assertLastStmtEquals("fun func() { return 3; } func();", 3.0);
     InterpreterTestUtils.assertLastStmtEquals("fun func() { 3; } func();", null);
     InterpreterTestUtils.assertLastStmtEquals("fun func(i) { if (i == 0) return 0; else return func(i - 1) + 1; } func(10);", 10.0);
@@ -257,7 +259,7 @@ public class InterpreterTest {
 
   @Test
   public void testMethod() throws Throwable {
-    InterpreterTestUtils.assertStdoutIs("class C { fun f() {} } print C().f;", "<bounded function f>\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f() {} } print C().f;", "<bound function f>\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun f() {} } print C().f();", "nil\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun f(a) { this.a = a; } fun g() { return this.a; } } C().f(10); print C().g();", "nil\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun f(a) { this.a = a; } fun g() { this.f(4); return this.a; } } var c = C(); c.f(10); print c.g();", "4.0\n");
@@ -267,7 +269,7 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("fun g() { return 3; } class C { fun g() { return g(); } } var c = C(); print c.g();", "3.0\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun g() { fun g() { return 3; } return g(); } } var c = C(); print c.g();", "3.0\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun g(a) { this.a = a; } } var c = C(); c.g(1); print c.a; c.g(2); print c.a;", "1.0\n2.0\n");
-    InterpreterTestUtils.assertErrorMessageIs("fun g() { return this; } class C { fun g() { return g(); } } var c = C(); print c.g();", "Undefined variable 'this'");
+    InterpreterTestUtils.assertErrorMessageIs("fun g() { return this; } class C { fun g() { return g(); } } var c = C(); print c.g();", "Cannot access `this` inside an unbound function");
   }
 
   @Test
@@ -275,7 +277,7 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("class C { fun g(a) { this.a = a; } } var c = C(); var g = c.g; g(1); print c.a; g(2); print c.a;", "1.0\n2.0\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun g(a) { this.a = a; } } var c = C(); var g = c.g; print g == c.g;", "false\n");
     InterpreterTestUtils.assertStdoutIs("fun f() { print \"f\"; } class C {} var c = C(); c.f = f; c.f();", "\"f\"\n");
-    InterpreterTestUtils.assertErrorMessageIs("fun f() { print this; } class C {} var c = C(); c.f = f; c.f();", "Undefined variable 'this'");
+    InterpreterTestUtils.assertErrorMessageIs("fun f() { print this; } class C {} var c = C(); c.f = f; c.f();", "Cannot access `this` inside an unbound function");
   }
 
   @Test
@@ -354,9 +356,10 @@ class InterpreterTestUtils {
     List<Stmt> stmts = parser.parse().first; 
 
     Interpreter interpreter = new Interpreter();
-    LoxObject res = LoxNil.singleton;
+    Environment env = new Environment(Interpreter.globals);
+    LoxObject res = LoxNil.NIL;
     for (Stmt stmt: stmts) {
-      res = interpreter.evaluateStmt(stmt);
+      res = interpreter.evaluateStmt(stmt, env);
     }
     assertEquals(rawValueOf(res), target);
   }
@@ -368,11 +371,12 @@ class InterpreterTestUtils {
     List<Stmt> stmts = parser.parse().first; 
 
     Interpreter interpreter = new Interpreter();
-    LoxObject res = LoxNil.singleton;
+    Environment env = new Environment(Interpreter.globals);
+    LoxObject res = LoxNil.NIL;
     
     try {
       for (Stmt stmt: stmts) {
-        res = interpreter.evaluateStmt(stmt);
+        res = interpreter.evaluateStmt(stmt, env);
       }
     } catch (InterpreterException e) {
       assertEquals(e.message, target);

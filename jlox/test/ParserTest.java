@@ -33,6 +33,7 @@ public class ParserTest {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("a;"), "a");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("a1;"), "a1");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("_a1;"), "_a1");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("this;"), "this");
   }
 
   @Test

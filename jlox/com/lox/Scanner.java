@@ -329,5 +329,6 @@ class ScannerUtils {
     keywords.put("var", TokenType.VAR);
     keywords.put("while", TokenType.WHILE);
     keywords.put("super", TokenType.SUPER);
+    keywords.put("this", TokenType.THIS);
   }
 }

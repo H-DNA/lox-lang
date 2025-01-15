@@ -72,6 +72,7 @@ public class PrettyPrinter {
       case Expr.Unary u -> String.format("(%s %s)", u.op.lexeme, this.printExpr(u.inner));
       case Expr.Binary b -> String.format("(%s %s %s)", b.op.lexeme, this.printExpr(b.left), this.printExpr(b.right));
       case Expr.Literal l -> l.value.lexeme;
+      case Expr.This t -> "this";
       case Expr.Grouping g -> String.format("(group %s)", this.printExpr(g.inner));
       case Expr.Variable v -> String.format("%s", v.var.lexeme);
       case Expr.Call c -> {

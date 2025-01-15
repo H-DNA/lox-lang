@@ -96,4 +96,7 @@ public abstract class Expr extends SyntaxNode {
       this.member = member;
     }
   }
+
+  public static class This extends Expr {
+  }
 }

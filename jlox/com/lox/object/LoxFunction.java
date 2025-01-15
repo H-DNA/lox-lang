@@ -1,51 +1,84 @@
 package com.lox.object;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.lox.Environment;
 import com.lox.Interpreter;
 import com.lox.InterpreterException;
 import com.lox.NonLocalJump;
-import com.lox.ast.Token;
 import com.lox.ast.Stmt.FuncStmt;
 
-public class LoxFunction extends LoxCallable {
-  Environment env;
-  FuncStmt func;
-  
-  public LoxFunction(FuncStmt func, Environment env) {
-    super(BuiltinClasses.LFunction);
-    this.func = func;
-    this.env = env;
+public abstract class LoxFunction extends LoxObject {
+  public static final LoxClass OBJECT = new LoxClass("Function", LoxObject.OBJECT, new ArrayList<>());
+
+  public abstract String name();
+
+  public abstract int arity();
+
+  public abstract Environment env();
+
+  @Override
+  public LoxClass cls() {
+    return LoxFunction.OBJECT;
   }
 
-  public LoxObject call(Interpreter interpreter, List<LoxObject> arguments) throws InterpreterException {
-    assert this.arity() == arguments.size();
+  public static abstract class LoxForeignFunction extends LoxFunction {
+    public final String fname;
 
-    final Environment paramEnv = new Environment(this.env);
-    for (int i = 0; i < this.func.params.size(); ++i) {
-      paramEnv.define(this.func.params.get(i).lexeme, arguments.get(i));
+    public LoxForeignFunction(String name) {
+      super();
+      this.fname = name;
     }
 
-    final Environment bodyEnv = new Environment(paramEnv);
-    final Environment lastEnv = interpreter.env;
-    interpreter.env = bodyEnv;
+    public abstract LoxObject call(List<LoxObject> arguments) throws InterpreterException;
 
-    try {
-      interpreter.evaluate(this.func.body.stmts);
-      return LoxNil.singleton;
-    } catch (NonLocalJump.Return r) {
-      return r.value;
-    } finally {
-      interpreter.env = lastEnv;
+    @Override
+    public String name() {
+      return this.fname;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("<native function '%s'>", this.fname);
+    }
+
+    public Environment env() {
+      return Interpreter.globals;
     }
   }
 
-  public int arity() {
-    return func.params.size();
-  }
+  public static class LoxUserFunction extends LoxFunction {
+    public Environment enclosingEnv;
+    public FuncStmt node;
 
-  public String toString() {
-    return String.format("<function %s>", func.name.lexeme);
+    public LoxUserFunction(FuncStmt node, Environment env) {
+      this.node = node;
+      this.enclosingEnv = env;
+    }
+
+    public Environment env() {
+      return this.enclosingEnv;
+    }
+
+    @Override
+    public String name() {
+      return this.node.name.lexeme;
+    }
+
+    @Override
+    public LoxClass cls() {
+      return LoxFunction.OBJECT;
+    }
+
+    @Override
+    public int arity() {
+      return this.node.params.size();
+    }
+
+    @Override
+    public String toString() {
+      return String.format("<function %s>", this.node.name.lexeme);
+    }
   }
 }

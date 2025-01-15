@@ -628,6 +628,8 @@ public class Parser {
       return new Expr.Variable(identifier);
     } else if (this.dryMatch(TokenType.SUPER)) {
       return superExpr();
+    } else if (this.match(TokenType.THIS)) {
+      return new Expr.This();
     }
 
     this.errors.add(new ParserException("Expect a literal, variable or grouping expression", this.current().startOffset,
