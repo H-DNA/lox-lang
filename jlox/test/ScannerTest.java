@@ -68,7 +68,7 @@ public class ScannerTest {
   @Test
   public void testKeywords() {
     String source = """
-          and class else false for fun if nil or return true var while
+          and class else false for fun if nil or return true var while super
         """;
 
     Scanner scanner = new Scanner(source);
@@ -81,7 +81,7 @@ public class ScannerTest {
     assertEquals(errors.size(), 0);
 
     // Test tokens
-    assertEquals(tokens.size(), 14); // 13 keywords + 1 EOF
+    assertEquals(tokens.size(), 15); // 14 keywords + 1 EOF
 
     assertEquals(tokens.get(0).type, TokenType.AND);
     assertEquals(tokens.get(0).lexeme, "and");
@@ -135,8 +135,12 @@ public class ScannerTest {
     assertEquals(tokens.get(12).lexeme, "while");
     assertEquals(tokens.get(12).literal, null);
 
-    assertEquals(tokens.get(13).type, TokenType.EOF);
+    assertEquals(tokens.get(13).type, TokenType.SUPER);
+    assertEquals(tokens.get(13).lexeme, "super");
     assertEquals(tokens.get(13).literal, null);
+
+    assertEquals(tokens.get(14).type, TokenType.EOF);
+    assertEquals(tokens.get(14).literal, null);
   }
 
   @Test

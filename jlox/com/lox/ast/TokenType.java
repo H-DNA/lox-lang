@@ -38,6 +38,7 @@ public enum TokenType {
   OR,
   PRINT,
   RETURN,
+  SUPER,
   TRUE,
   VAR,
   WHILE,
