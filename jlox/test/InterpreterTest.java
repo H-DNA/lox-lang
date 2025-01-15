@@ -299,6 +299,23 @@ public class InterpreterTest {
     InterpreterTestUtils.assertErrorMessageIs("false.a = 3;", "Boolean is immutable");
     InterpreterTestUtils.assertErrorMessageIs("\"abcd\".a = 3;", "String is immutable");
   }
+
+  @Test
+  public void testConstructor() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor() { this.a = 3; } } var c = C(); print c.a;", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor() { } } var c = C(); print c.a;", "nil\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor(a) { this.a = a; } } var c = C(\"abc\"); print c.a;", "\"abc\"\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor(a, b) { this.sum = a + b; } } var c = C(1, 2); print c.sum;", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor(a, b) { this.a = a; this.b = b; this.sum = this.sum(); } fun sum() { return this.a + this.b; } } var c = C(1, 2); print c.a; print c.b; print c.sum;", "1.0\n2.0\n3.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor(a, b) { this.a = a; return b; this.b = b; } } var c = C(1, 2); print c.a; print c.b;", "1.0\nnil\n");
+  }
+
+  @Test
+  public void testConstructorInheritance() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor() { this.a = 3; } } class D < C { fun a() { return 10; } } var d = D(); print d.a;", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor() { this.a = 3; } } class D < C { fun b() { return this.a; } } var d = D(); print d.b();", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun constructor() { this.b(); } } class D < C { fun b() { return this.a = 3; } } var d = D(); print d.a;", "3.0\n");
+  }
 }
 
 class InterpreterTestUtils {

@@ -31,8 +31,18 @@ public class LoxClass extends LoxCallable {
     }
   }
 
-  public LoxFunction lookupMethod(String name) {
+  public LoxFunction lookupOwnMethod(String name) {
     return this.methods.getOrDefault(name, null);
+  }
+
+  public LoxFunction lookupMethod(String name) {
+    LoxFunction unboundedFunc = null;
+    LoxClass curCls = this;
+    while (unboundedFunc == null && curCls != BuiltinClasses.LObject) {
+      unboundedFunc = curCls.lookupOwnMethod(name);
+      curCls = curCls.supercls;
+    }
+    return unboundedFunc == null ? BuiltinClasses.LObject.lookupOwnMethod(name) : unboundedFunc;
   }
 
   @Override
@@ -42,12 +52,13 @@ public class LoxClass extends LoxCallable {
 
   @Override
   public int arity() {
-    return 0;
+    final LoxFunction constructor = this.lookupOwnMethod("constructor");
+    return constructor == null ? 0 : constructor.arity();
   }
 
   @Override
   public LoxObject call(Interpreter interpreter, List<LoxObject> arguments) throws InterpreterException {
-    return new LoxObject(this) {
+    final LoxObject blankObj = new LoxObject(this) {
       @Override
       public String toString() {
         return String.format("<instance %s>", this.cls.name);
@@ -58,5 +69,15 @@ public class LoxClass extends LoxCallable {
         return this;
       }
     };
+
+    final LoxFunction constructor = this.lookupMethod("constructor");
+    if (constructor == null) {
+      return blankObj;
+    }
+
+    final LoxBoundedFunction boundedConstructor = new LoxBoundedFunction(blankObj, constructor);
+    boundedConstructor.call(interpreter, arguments);
+
+    return blankObj;
   }
 }

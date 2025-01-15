@@ -25,15 +25,7 @@ public abstract class LoxObject {
     if (this.fields.containsKey(prop)) {
       return this.fields.get(prop);
     }
-    LoxFunction unboundedFunc = null;
-    LoxClass curCls = this.cls;
-    while (unboundedFunc == null && curCls != BuiltinClasses.LObject) {
-      unboundedFunc = curCls.lookupMethod(prop);
-      curCls = curCls.supercls;
-    }
-    if (unboundedFunc == null) {
-      unboundedFunc = BuiltinClasses.LObject.lookupMethod(prop);
-    }
+    LoxFunction unboundedFunc = this.cls.lookupMethod(prop);
     return unboundedFunc == null ? LoxNil.singleton : new LoxBoundedFunction(this, unboundedFunc);
   }
   public void set(String prop, LoxObject value) throws InterpreterException {
