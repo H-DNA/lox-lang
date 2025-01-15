@@ -48,14 +48,14 @@ public class Interpreter {
       }
       case Stmt.IfStmt i -> {
         final LoxObject condValue = this.evaluateExpr(i.cond);
-        if (ValuecheckUtils.isTruthy(condValue)) {
+        if (ValueUtils.isTruthy(condValue)) {
           yield this.evaluateStmt(i.thenBranch);
         } else {
           yield i.elseBranch != null ? this.evaluateStmt(i.elseBranch) : LoxNil.singleton;
         }
       }
       case Stmt.WhileStmt w -> {
-        while (ValuecheckUtils.isTruthy(this.evaluateExpr(w.cond))) {
+        while (ValueUtils.isTruthy(this.evaluateExpr(w.cond))) {
           this.evaluateStmt(w.body);
         }
         yield LoxNil.singleton;
@@ -63,7 +63,7 @@ public class Interpreter {
       case Stmt.ForStmt f -> {
         this.env = new Environment(this.env);
         this.evaluateStmt(f.init);
-        while (ValuecheckUtils.isTruthy(this.evaluateStmt(f.cond))) {
+        while (ValueUtils.isTruthy(this.evaluateStmt(f.cond))) {
           this.evaluateStmt(f.body);
           this.evaluateExpr(f.post);
         }
@@ -166,7 +166,7 @@ public class Interpreter {
     }
     if (bin.op.type == TokenType.OR) {
       final LoxObject left = this.evaluateExpr(bin.left);
-      if (ValuecheckUtils.isTruthy(left)) {
+      if (ValueUtils.isTruthy(left)) {
         return left;
       }
       final LoxObject right = this.evaluateExpr(bin.right);
@@ -174,7 +174,7 @@ public class Interpreter {
     }
     if (bin.op.type == TokenType.AND) {
       final LoxObject left = this.evaluateExpr(bin.left);
-      if (ValuecheckUtils.isFalsy(left)) {
+      if (ValueUtils.isFalsy(left)) {
         return left;
       }
       final LoxObject right = this.evaluateExpr(bin.right);
@@ -213,43 +213,43 @@ public class Interpreter {
       }
       case TokenType.EQUAL_EQUAL -> {
         if (!TypecheckUtils.isSameType(left, right)) {
-          yield ValuecheckUtils.getBooleanSingleton(false);
+          yield ValueUtils.getLoxBool(false);
         }
-        yield ValuecheckUtils.getBooleanSingleton(left.value().equals(right.value()));
+        yield ValueUtils.getLoxBool(ValueUtils.equals(left, right));
       }
       case TokenType.BANG_EQUAL -> {
         if (!TypecheckUtils.isSameType(left, right)) {
-          yield ValuecheckUtils.getBooleanSingleton(true);
+          yield ValueUtils.getLoxBool(true);
         }
-        yield ValuecheckUtils.getBooleanSingleton(!left.value().equals(right.value()));
+        yield ValueUtils.getLoxBool(!ValueUtils.equals(left, right));
       }
       case TokenType.LESS -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
           throw new InterpreterException(String.format("Unsupported operator '<' on %s and %s",
               TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield ValuecheckUtils.getBooleanSingleton(((LoxNumber) left).value < ((LoxNumber) right).value);
+        yield ValueUtils.getLoxBool(((LoxNumber) left).value < ((LoxNumber) right).value);
       }
       case TokenType.LESS_EQUAL -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
           throw new InterpreterException(String.format("Unsupported operator '<=' on %s and %s",
               TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield ValuecheckUtils.getBooleanSingleton(((LoxNumber) left).value <= ((LoxNumber) right).value);
+        yield ValueUtils.getLoxBool(((LoxNumber) left).value <= ((LoxNumber) right).value);
       }
       case TokenType.GREATER -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
           throw new InterpreterException(String.format("Unsupported operator '>' on %s and %s",
               TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield ValuecheckUtils.getBooleanSingleton(((LoxNumber) left).value > ((LoxNumber) right).value);
+        yield ValueUtils.getLoxBool(((LoxNumber) left).value > ((LoxNumber) right).value);
       }
       case TokenType.GREATER_EQUAL -> {
         if (!TypecheckUtils.isNumber(left) || !TypecheckUtils.isNumber(right)) {
           throw new InterpreterException(String.format("Unsupported operator '>=' on %s and %s",
               TypecheckUtils.typenameOf(left), TypecheckUtils.typenameOf(right)));
         }
-        yield ValuecheckUtils.getBooleanSingleton(((LoxNumber) left).value >= ((LoxNumber) right).value);
+        yield ValueUtils.getLoxBool(((LoxNumber) left).value >= ((LoxNumber) right).value);
       }
       default -> throw new Error(String.format("Unreachable: Unexpected binary operator '%s'", bin.op.lexeme));
     };
@@ -259,7 +259,7 @@ public class Interpreter {
     final LoxObject inner = this.evaluateExpr(un.inner);
     return switch (un.op.type) {
       case TokenType.BANG -> {
-        yield ValuecheckUtils.getBooleanSingleton(ValuecheckUtils.isFalsy(inner));
+        yield ValueUtils.getLoxBool(ValueUtils.isFalsy(inner));
       }
       case TokenType.MINUS -> {
         if (!TypecheckUtils.isNumber(inner)) {
@@ -283,7 +283,7 @@ public class Interpreter {
     return switch (lit.value.literal) {
       case Double d -> new LoxNumber(d);
       case String s -> new LoxString(s);
-      case Boolean b -> ValuecheckUtils.getBooleanSingleton(b);
+      case Boolean b -> ValueUtils.getLoxBool(b);
       default -> throw new Error(String.format("Unreachable: Unexpected literal type"));
     };
   }
@@ -315,7 +315,7 @@ class TypecheckUtils {
   }
 
   public static boolean isSameType(LoxObject obj1, LoxObject obj2) {
-    return typenameOf(obj1) == typenameOf(obj2);
+    return obj1.cls == obj2.cls;
   }
 
   public static String typenameOf(LoxObject obj) {
@@ -323,7 +323,7 @@ class TypecheckUtils {
   }
 }
 
-class ValuecheckUtils {
+class ValueUtils {
   public static boolean isFalsy(LoxObject obj) {
     if (TypecheckUtils.isBoolean(obj)) {
       return !((LoxBoolean) obj).value;
@@ -332,11 +332,30 @@ class ValuecheckUtils {
   }
 
   public static boolean isTruthy(LoxObject obj) {
-    return !ValuecheckUtils.isFalsy(obj);
+    return !ValueUtils.isFalsy(obj);
   }
   
-  public static LoxBoolean getBooleanSingleton(boolean b) {
+  public static LoxBoolean getLoxBool(boolean b) {
     return b ? LoxBoolean.trueSingleton : LoxBoolean.falseSingleton;
+  }
+
+  public static boolean equals(LoxObject o1, LoxObject o2) {
+    if (!TypecheckUtils.isSameType(o1, o2)) {
+      return false;
+    }
+    if (TypecheckUtils.isNumber(o1)) {
+      return ((LoxNumber)o1).value == ((LoxNumber)o2).value;
+    }
+    if (TypecheckUtils.isNil(o1)) {
+      return true;
+    }
+    if (TypecheckUtils.isBoolean(o1)) {
+      return ((LoxBoolean)o1).value == ((LoxBoolean)o2).value;
+    }
+    if (TypecheckUtils.isString(o1)) {
+      return ((LoxString)o1).value == ((LoxString)o2).value;
+    }
+    return o1 == o2;
   }
 }
 
@@ -366,11 +385,6 @@ class Builtins {
       }
 
       @Override
-      public Object value() {
-        return this;
-      }
-
-      @Override
       public String toString() {
         return "<native fn>";
       }
@@ -385,11 +399,6 @@ class Builtins {
       @Override
       public LoxObject call(Interpreter interpreter, List<LoxObject> arguments) {
         return new LoxString(arguments.get(0).toString());
-      }
-
-      @Override
-      public Object value() {
-        return this;
       }
 
       @Override

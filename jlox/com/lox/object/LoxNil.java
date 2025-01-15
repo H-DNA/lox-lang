@@ -10,11 +10,6 @@ public class LoxNil extends LoxObject {
   }
 
   @Override
-  public Object value() {
-    return null;
-  }
-
-  @Override
   public String toString() {
     return "nil";
   }

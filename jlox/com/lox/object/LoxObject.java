@@ -7,7 +7,6 @@ import com.lox.InterpreterException;
 import com.lox.utils.Pair;
 
 public abstract class LoxObject {
-  public abstract Object value();
   public abstract String toString();
   public boolean instanceOf(LoxClass cls) {
     return this.cls.isSubclass(cls);

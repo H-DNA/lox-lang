@@ -11,13 +11,8 @@ public class LoxString extends LoxObject {
   }
 
   @Override
-  public String value() {
-    return this.value;
-  }
-
-  @Override
   public String toString() {
-    return "\"" + this.value().toString() + "\"";
+    return "\"" + this.value + "\"";
   }
 
   @Override

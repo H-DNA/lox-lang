@@ -11,13 +11,8 @@ public class LoxBoolean extends LoxObject {
   }
 
   @Override
-  public Boolean value() {
-    return this.value;
-  }
-
-  @Override
   public String toString() {
-    return this.value().toString();
+    return String.valueOf(this.value);
   }
 
   @Override

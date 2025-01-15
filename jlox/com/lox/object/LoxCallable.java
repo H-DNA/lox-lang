@@ -6,9 +6,6 @@ import com.lox.Interpreter;
 import com.lox.InterpreterException;
 
 public abstract class LoxCallable extends LoxObject {
-  public Object value() {
-    return this;
-  }
   public LoxCallable(LoxClass cls) {
     super(cls);
   }

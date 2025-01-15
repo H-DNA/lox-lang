@@ -94,11 +94,6 @@ public class LoxClass extends LoxCallable {
       public String toString() {
         return String.format("<instance %s>", this.cls.name);
       }
-
-      @Override
-      public Object value() {
-        return this;
-      }
     };
 
     final Pair<LoxFunction, LoxClass> res = this.lookupMethod("constructor");

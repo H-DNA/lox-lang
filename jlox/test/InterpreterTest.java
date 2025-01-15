@@ -13,8 +13,11 @@ import com.lox.ast.Stmt;
 import com.lox.ast.SyntaxNode;
 import com.lox.ast.Token;
 import com.lox.ast.TokenType;
+import com.lox.object.LoxBoolean;
 import com.lox.object.LoxNil;
+import com.lox.object.LoxNumber;
 import com.lox.object.LoxObject;
+import com.lox.object.LoxString;
 import com.lox.utils.Pair;
 
 import org.junit.jupiter.api.*;
@@ -328,6 +331,22 @@ public class InterpreterTest {
 }
 
 class InterpreterTestUtils {
+  static Object rawValueOf(LoxObject obj) {
+    if (obj instanceof LoxNumber) {
+      return ((LoxNumber)obj).value;
+    }
+    if (obj instanceof LoxString) {
+      return ((LoxString)obj).value;
+    }
+    if (obj instanceof LoxNil) {
+      return null;
+    }
+    if (obj instanceof LoxBoolean) {
+      return ((LoxBoolean)obj).value;
+    }
+    return obj;
+  }
+
   static void assertLastStmtEquals(String source, Object target) throws Throwable {
     Scanner scanner = new Scanner(source);
     List<Token> tokens = scanner.tokenize().first;
@@ -339,7 +358,7 @@ class InterpreterTestUtils {
     for (Stmt stmt: stmts) {
       res = interpreter.evaluateStmt(stmt);
     }
-    assertEquals(res.value(), target);
+    assertEquals(rawValueOf(res), target);
   }
 
   static void assertErrorMessageIs(String source, String target) throws Throwable {

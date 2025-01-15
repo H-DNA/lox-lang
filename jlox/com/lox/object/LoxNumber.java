@@ -11,13 +11,8 @@ public class LoxNumber extends LoxObject {
   }
 
   @Override
-  public Number value() {
-    return this.value;
-  }
-
-  @Override
   public String toString() {
-    return this.value().toString();
+    return String.valueOf(this.value);
   }
 
   @Override
