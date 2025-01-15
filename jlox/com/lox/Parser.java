@@ -31,7 +31,8 @@ public class Parser {
   }
 
   public Pair<List<Stmt>, List<ParserException>> parse() {
-    if (this.isAtEnd()) return new Pair<>(this.stmts, this.errors);
+    if (this.isAtEnd())
+      return new Pair<>(this.stmts, this.errors);
 
     assert this.currentOffset == 0;
 
@@ -76,21 +77,30 @@ public class Parser {
   private Stmt declaration() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    if (this.dryMatch(TokenType.VAR)) return this.varDeclaration();
-    if (this.dryMatch(TokenType.FUN)) return this.functionDeclaration();
-    if (this.dryMatch(TokenType.CLASS)) return this.classDeclaration();
+    if (this.dryMatch(TokenType.VAR))
+      return this.varDeclaration();
+    if (this.dryMatch(TokenType.FUN))
+      return this.functionDeclaration();
+    if (this.dryMatch(TokenType.CLASS))
+      return this.classDeclaration();
     return this.statement();
   }
 
   private Stmt statement() throws SynchronizationException {
     assert !this.isAtEnd();
 
-    if (this.dryMatch(TokenType.LEFT_BRACE)) return this.blockStatement();
-    if (this.dryMatch(TokenType.IF)) return this.ifStatement();
-    if (this.dryMatch(TokenType.WHILE)) return this.whileStatement();
-    if (this.dryMatch(TokenType.FOR)) return this.forStatement();
-    if (this.dryMatch(TokenType.PRINT)) return this.printStatement();
-    if (this.dryMatch(TokenType.RETURN)) return this.returnStatement();
+    if (this.dryMatch(TokenType.LEFT_BRACE))
+      return this.blockStatement();
+    if (this.dryMatch(TokenType.IF))
+      return this.ifStatement();
+    if (this.dryMatch(TokenType.WHILE))
+      return this.whileStatement();
+    if (this.dryMatch(TokenType.FOR))
+      return this.forStatement();
+    if (this.dryMatch(TokenType.PRINT))
+      return this.printStatement();
+    if (this.dryMatch(TokenType.RETURN))
+      return this.returnStatement();
     return this.expressionStatement();
   }
 
@@ -120,10 +130,11 @@ public class Parser {
         supercls = this.previous();
       }
     }
-    
+
     if (!this.match(TokenType.LEFT_BRACE)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect an opening brace '{'", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors
+          .add(new ParserException("Expect an opening brace '{'", invalidToken.startOffset, invalidToken.endOffset));
       throw new SynchronizationException();
     }
 
@@ -132,16 +143,18 @@ public class Parser {
     while (!this.match(TokenType.RIGHT_BRACE)) {
       if (this.dryMatch(TokenType.EOF)) {
         final Token invalidToken = this.current();
-        this.errors.add(new ParserException("EOF reached while parsing class body", invalidToken.startOffset, invalidToken.endOffset));
+        this.errors.add(new ParserException("EOF reached while parsing class body", invalidToken.startOffset,
+            invalidToken.endOffset));
         return new ClsStmt(name, supercls, methods);
       }
       try {
         final Token curToken = this.current();
         Stmt decl = this.declaration();
         if (!(decl instanceof FuncStmt)) {
-          this.errors.add(new ParserException("Expect method declaration in class body", curToken.startOffset, curToken.endOffset));
+          this.errors.add(
+              new ParserException("Expect method declaration in class body", curToken.startOffset, curToken.endOffset));
         } else {
-          methods.add((FuncStmt)decl);
+          methods.add((FuncStmt) decl);
         }
       } catch (SynchronizationException e) {
         this.synchronizeBlock();
@@ -168,26 +181,28 @@ public class Parser {
     }
 
     final Token name = this.previous();
-    
+
     if (!this.match(TokenType.LEFT_PAREN)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors.add(
+          new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
       throw new SynchronizationException();
     }
 
     final List<Token> params = new ArrayList<>();
-    if (!this.match(TokenType.RIGHT_PAREN)) { 
+    if (!this.match(TokenType.RIGHT_PAREN)) {
       if (!this.match(TokenType.IDENTIFIER)) {
         final Token invalidToken = this.current();
         this.errors.add(new ParserException("Expect an identifier", invalidToken.startOffset, invalidToken.endOffset));
         throw new SynchronizationException();
       }
       params.add(this.previous());
-      while (!this.match(TokenType.RIGHT_PAREN)) { 
+      while (!this.dryMatch(TokenType.EOF) && !this.match(TokenType.RIGHT_PAREN)) {
         if (this.dryMatch(TokenType.EOF)) {
           final Token invalidToken = this.current();
-          this.errors.add(new ParserException("EOF reached when parsing function parameter list", invalidToken.startOffset, invalidToken.endOffset));
-          throw new SynchronizationException(); 
+          this.errors.add(new ParserException("EOF reached when parsing function parameter list",
+              invalidToken.startOffset, invalidToken.endOffset));
+          throw new SynchronizationException();
         }
         if (!this.match(TokenType.COMMA)) {
           final Token invalidToken = this.current();
@@ -195,11 +210,13 @@ public class Parser {
           throw new SynchronizationException();
         } else if (params.size() >= 256) {
           final Token comma = this.previous();
-          this.errors.add(new ParserException("Cannot have more than 255 parameters", comma.startOffset, comma.endOffset));
+          this.errors
+              .add(new ParserException("Cannot have more than 255 parameters", comma.startOffset, comma.endOffset));
         }
         if (!this.match(TokenType.IDENTIFIER)) {
           final Token invalidToken = this.current();
-          this.errors.add(new ParserException("Expect an identifier", invalidToken.startOffset, invalidToken.endOffset));
+          this.errors
+              .add(new ParserException("Expect an identifier", invalidToken.startOffset, invalidToken.endOffset));
           throw new SynchronizationException();
         }
         params.add(this.previous());
@@ -234,15 +251,17 @@ public class Parser {
 
     if (!this.match(TokenType.EQUAL)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect '=' or an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors.add(new ParserException("Expect '=' or an ending semicolon ';'", invalidToken.startOffset,
+          invalidToken.endOffset));
       throw new SynchronizationException();
     }
-    
+
     final Expr expr = this.expression();
 
     if (!this.match(TokenType.SEMICOLON)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors
+          .add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
       this.synchronizeStatement();
     }
 
@@ -254,7 +273,8 @@ public class Parser {
 
     if (!this.match(TokenType.LEFT_BRACE)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect an opening brace '{'", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors
+          .add(new ParserException("Expect an opening brace '{'", invalidToken.startOffset, invalidToken.endOffset));
       throw new SynchronizationException();
     }
 
@@ -262,7 +282,8 @@ public class Parser {
     while (!this.match(TokenType.RIGHT_BRACE)) {
       if (this.dryMatch(TokenType.EOF)) {
         final Token invalidToken = this.current();
-        this.errors.add(new ParserException("EOF reached while parsing block statement", invalidToken.startOffset, invalidToken.endOffset));
+        this.errors.add(new ParserException("EOF reached while parsing block statement", invalidToken.startOffset,
+            invalidToken.endOffset));
         return new BlockStmt(stmts);
       }
       try {
@@ -285,7 +306,8 @@ public class Parser {
 
     if (!this.match(TokenType.LEFT_PAREN)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors.add(
+          new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
       throw new SynchronizationException();
     }
 
@@ -293,7 +315,8 @@ public class Parser {
 
     if (!this.match(TokenType.RIGHT_PAREN)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors.add(
+          new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
       throw new SynchronizationException();
     }
 
@@ -313,7 +336,8 @@ public class Parser {
 
     if (!this.match(TokenType.LEFT_PAREN)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors.add(
+          new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
       throw new SynchronizationException();
     }
 
@@ -323,7 +347,8 @@ public class Parser {
 
     if (!this.match(TokenType.RIGHT_PAREN)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors.add(
+          new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
       throw new SynchronizationException();
     }
 
@@ -340,10 +365,11 @@ public class Parser {
       this.errors.add(new ParserException("Expect keyword 'if'", invalidToken.startOffset, invalidToken.endOffset));
       throw new SynchronizationException();
     }
- 
+
     if (!this.match(TokenType.LEFT_PAREN)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors.add(
+          new ParserException("Expect an opening parenthesis '('", invalidToken.startOffset, invalidToken.endOffset));
       throw new SynchronizationException();
     }
 
@@ -351,7 +377,8 @@ public class Parser {
 
     if (!this.match(TokenType.RIGHT_PAREN)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors.add(
+          new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
       throw new SynchronizationException();
     }
 
@@ -378,7 +405,8 @@ public class Parser {
     final Expr expr = this.expression();
     if (!this.match(TokenType.SEMICOLON)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors
+          .add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
       this.synchronizeStatement();
     }
 
@@ -397,7 +425,8 @@ public class Parser {
     final Expr expr = this.expression();
     if (!this.match(TokenType.SEMICOLON)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors
+          .add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
       this.synchronizeStatement();
     }
 
@@ -410,7 +439,8 @@ public class Parser {
     final Expr expr = this.expression();
     if (!this.match(TokenType.SEMICOLON)) {
       final Token invalidToken = this.current();
-      this.errors.add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
+      this.errors
+          .add(new ParserException("Expect an ending semicolon ';'", invalidToken.startOffset, invalidToken.endOffset));
       this.synchronizeStatement();
     }
 
@@ -433,7 +463,7 @@ public class Parser {
       if (left instanceof Expr.Variable) {
         return new Expr.Binary(left, op, right);
       } else if (left instanceof Expr.Get) {
-        final Expr.Get get = (Expr.Get)left;
+        final Expr.Get get = (Expr.Get) left;
         return new Expr.Set(get.object, get.property, right);
       } else {
         this.errors.add(new ParserException("Invalid assignment target", op.startOffset, op.endOffset));
@@ -534,33 +564,35 @@ public class Parser {
       if (this.previous().type == TokenType.DOT) {
         if (!this.match(TokenType.IDENTIFIER)) {
           final Token invalidToken = this.current();
-          this.errors.add(new ParserException("Expect a property name", invalidToken.startOffset, invalidToken.endOffset));
+          this.errors
+              .add(new ParserException("Expect a property name", invalidToken.startOffset, invalidToken.endOffset));
           throw new SynchronizationException();
         }
         final Token property = this.previous();
         callee = new Expr.Get(callee, property);
         continue;
       }
-      List<Expr> params = new ArrayList<>(); 
+      List<Expr> params = new ArrayList<>();
       if (this.match(TokenType.RIGHT_PAREN)) {
         callee = new Expr.Call(callee, params);
         continue;
       }
       params.add(this.expression());
-      while (!this.match(TokenType.RIGHT_PAREN)) { 
+      while (!this.match(TokenType.RIGHT_PAREN)) {
         if (!this.match(TokenType.COMMA)) {
           final Token invalidToken = this.current();
           this.errors.add(new ParserException("Expect a comma", invalidToken.startOffset, invalidToken.endOffset));
           throw new SynchronizationException();
         } else if (params.size() >= 256) {
           final Token comma = this.previous();
-          this.errors.add(new ParserException("Cannot have more than 255 arguments", comma.startOffset, comma.endOffset));
+          this.errors
+              .add(new ParserException("Cannot have more than 255 arguments", comma.startOffset, comma.endOffset));
         }
         params.add(this.expression());
       }
-      callee = new Expr.Call(callee, params); 
+      callee = new Expr.Call(callee, params);
     }
-    
+
     return callee;
   }
 
@@ -586,16 +618,20 @@ public class Parser {
       final Expr inner = this.expression();
       if (!this.match(TokenType.RIGHT_PAREN)) {
         final Token invalidToken = this.current();
-        this.errors.add(new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
+        this.errors.add(
+            new ParserException("Expect a closing parenthesis ')'", invalidToken.startOffset, invalidToken.endOffset));
         this.synchronizeGrouping();
       }
       return new Expr.Grouping(inner);
     } else if (this.match(TokenType.IDENTIFIER)) {
       final Token identifier = this.previous();
       return new Expr.Variable(identifier);
+    } else if (this.dryMatch(TokenType.SUPER)) {
+      return superExpr();
     }
 
-    this.errors.add(new ParserException("Expect a literal, variable or grouping expression", this.current().startOffset, this.current().endOffset));
+    this.errors.add(new ParserException("Expect a literal, variable or grouping expression", this.current().startOffset,
+        this.current().endOffset));
     throw new SynchronizationException();
   }
 
@@ -611,6 +647,54 @@ public class Parser {
     }
   }
 
+  private Expr superExpr() throws SynchronizationException {
+    if (!this.match(TokenType.SUPER)) {
+      final Token invalidToken = this.current();
+      this.errors
+          .add(new ParserException("Expect the super keyword", invalidToken.startOffset, invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    if (!this.dryMatch(TokenType.DOT, TokenType.LEFT_PAREN)) {
+      final Token invalidToken = this.current();
+      this.errors
+          .add(new ParserException("Expect `super()` or `super.<property>`", invalidToken.startOffset,
+              invalidToken.endOffset));
+      throw new SynchronizationException();
+    }
+
+    if (this.match(TokenType.DOT)) {
+      if (!this.match(TokenType.IDENTIFIER)) {
+        final Token invalidToken = this.current();
+        this.errors
+            .add(new ParserException("Expect a property", invalidToken.startOffset, invalidToken.endOffset));
+        throw new SynchronizationException();
+      }
+      Token member = this.previous();
+      return new Expr.SuperGet(member);
+    }
+
+    List<Expr> params = new ArrayList<>();
+    this.match(TokenType.LEFT_PAREN);
+    if (this.match(TokenType.RIGHT_PAREN)) {
+      return new Expr.SuperCall(params);
+    }
+    params.add(this.expression());
+    while (!this.match(TokenType.RIGHT_PAREN)) {
+      if (!this.match(TokenType.COMMA)) {
+        final Token invalidToken = this.current();
+        this.errors.add(new ParserException("Expect a comma", invalidToken.startOffset, invalidToken.endOffset));
+        throw new SynchronizationException();
+      } else if (params.size() >= 256) {
+        final Token comma = this.previous();
+        this.errors
+            .add(new ParserException("Cannot have more than 255 arguments", comma.startOffset, comma.endOffset));
+      }
+      params.add(this.expression());
+    }
+    return new Expr.SuperCall(params);
+  }
+
   private Token previous() {
     assert this.currentOffset <= this.tokens.size();
 
@@ -624,11 +708,11 @@ public class Parser {
   }
 
   // Match without advancing the current offset
-  private boolean dryMatch(TokenType ...types) {
+  private boolean dryMatch(TokenType... types) {
     assert !this.isAtEnd();
 
     final TokenType currentType = this.tokens.get(this.currentOffset).type;
-    for (TokenType type: types) {
+    for (TokenType type : types) {
       if (type.equals(currentType)) {
         return true;
       }
@@ -637,10 +721,11 @@ public class Parser {
   }
 
   private boolean match(TokenType... types) {
-    if (this.isAtEnd()) return false;
+    if (this.isAtEnd())
+      return false;
 
     final TokenType currentType = this.tokens.get(this.currentOffset).type;
-    for (TokenType type: types) {
+    for (TokenType type : types) {
       if (type.equals(currentType)) {
         this.currentOffset += 1;
         return true;
@@ -650,4 +735,5 @@ public class Parser {
   }
 }
 
-class SynchronizationException extends Exception {}
+class SynchronizationException extends Exception {
+}

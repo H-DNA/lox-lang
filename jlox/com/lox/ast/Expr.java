@@ -80,4 +80,20 @@ public abstract class Expr extends SyntaxNode {
       this.value = value;
     }
   }
+
+  public static class SuperCall extends Expr {
+    public final List<Expr> params;
+
+    public SuperCall(List<Expr> params) {
+      this.params = params;
+    }
+  }
+
+  public static class SuperGet extends Expr {
+    public final Token member;
+
+    public SuperGet(Token member) {
+      this.member = member;
+    }
+  }
 }

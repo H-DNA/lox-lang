@@ -66,8 +66,8 @@ public class ParserTest {
   @Test
   public void testBinary() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("a = b = 3;"), "(= a (= b 3))");
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("a = 2 = 3;"), new String[] {"Invalid assignment target"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("1 = a = 3;"), new String[] {"Invalid assignment target"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("a = 2 = 3;"), new String[] { "Invalid assignment target" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("1 = a = 3;"), new String[] { "Invalid assignment target" });
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("a and b or 3;"), "(or (and a b) 3)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("a or b or 3;"), "(or (or a b) 3)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("a or b and 3;"), "(or a (and b 3))");
@@ -78,24 +78,26 @@ public class ParserTest {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 * 2 + 3;"), "(+ (* 1 2) 3)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("(1 + 2) * 3;"), "(* (group (+ 1 2)) 3)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 - 2 == 3;"), "(== (- 1 2) 3)");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 - 2 * 4 == 3 / 5;"), "(== (- 1 (* 2 4)) (/ 3 5))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 - 2 * 4 == 3 / 5 != 6 >= 3;"), "(!= (== (- 1 (* 2 4)) (/ 3 5)) (>= 6 3))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 - 2 * 4 == 3 / 5;"),
+        "(== (- 1 (* 2 4)) (/ 3 5))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("1 - 2 * 4 == 3 / 5 != 6 >= 3;"),
+        "(!= (== (- 1 (* 2 4)) (/ 3 5)) (>= 6 3))");
   }
 
   @Test
   public void testInvalidGroup() throws Throwable {
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("(1 + 2"), new String[] {"Expect a closing parenthesis ')'"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("(1 + 2"), new String[] { "Expect a closing parenthesis ')'" });
 
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("1 + (2"), new String[] {"Expect a closing parenthesis ')'"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("1 + (2"), new String[] { "Expect a closing parenthesis ')'" });
   }
 
   @Test
   public void testInvalidPrimary() throws Throwable {
     ParserTestUtils.assertErrors(ParserTestUtils.parse("+1 + 2"),
-        new String[] {"Expect a literal, variable or grouping expression"});
+        new String[] { "Expect a literal, variable or grouping expression" });
 
     ParserTestUtils.assertErrors(ParserTestUtils.parse("+2"),
-        new String[] {"Expect a literal, variable or grouping expression"});
+        new String[] { "Expect a literal, variable or grouping expression" });
   }
 
   @Test
@@ -125,59 +127,85 @@ public class ParserTest {
 
   @Test
   public void testInvalidVarDecl() throws Throwable {
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("var"), new String[] {"Expect an identifier"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("var x ="), new String[] {"Expect a literal, variable or grouping expression"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("var"), new String[] { "Expect an identifier" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("var x ="),
+        new String[] { "Expect a literal, variable or grouping expression" });
   }
 
   @Test
   public void testBlock() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("{}"), "(block)");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; }"), "(define a 3)\n(block (define b 3))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; } var c = 3;"), "(define a 3)\n(block (define b 3))\n(define c 3)");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("{ var a = 3; var b = a + 1; c; }"), "(block (define a 3) (define b (+ a 1)) c)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; }"),
+        "(define a 3)\n(block (define b 3))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("var a = 3; { var b = 3; } var c = 3;"),
+        "(define a 3)\n(block (define b 3))\n(define c 3)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("{ var a = 3; var b = a + 1; c; }"),
+        "(block (define a 3) (define b (+ a 1)) c)");
   }
 
   @Test
   void testInvalidBlock() throws Throwable {
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{"), new String[] {"EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var "), new String[] {"Expect an identifier", "EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a"), new String[] {"Expect '=' or an ending semicolon ';'", "EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun"), new String[] {"Expect an identifier", "EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x"), new String[] {"Expect an opening parenthesis '('", "EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x("), new String[] {"Expect an identifier", "EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x()"), new String[] {"Expect an opening brace '{'", "EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x() {"), new String[] {"EOF reached while parsing block statement", "EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = 3; "), new String[] {"EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = ; var c = 3; "), new String[] {"Expect a literal, variable or grouping expression", "EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = d var c = 3; "), new String[] {"Expect an ending semicolon ';'", "EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{"),
+        new String[] { "EOF reached while parsing block statement" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var "),
+        new String[] { "Expect an identifier", "EOF reached while parsing block statement" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a"),
+        new String[] { "Expect '=' or an ending semicolon ';'", "EOF reached while parsing block statement" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun"),
+        new String[] { "Expect an identifier", "EOF reached while parsing block statement" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x"),
+        new String[] { "Expect an opening parenthesis '('", "EOF reached while parsing block statement" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x("),
+        new String[] { "Expect an identifier", "EOF reached while parsing block statement" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x()"),
+        new String[] { "Expect an opening brace '{'", "EOF reached while parsing block statement" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x() {"),
+        new String[] { "EOF reached while parsing block statement", "EOF reached while parsing block statement" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = 3; "),
+        new String[] { "EOF reached while parsing block statement" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = ; var c = 3; "), new String[] {
+        "Expect a literal, variable or grouping expression", "EOF reached while parsing block statement" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = d var c = 3; "),
+        new String[] { "Expect an ending semicolon ';'", "EOF reached while parsing block statement" });
   }
 
   @Test
   void testRecoverBlock() throws Throwable {
-    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("{ var a = d var c = 3; "), "(block (define a d))");
-    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("{ fun f() var a = b; var d = e;"), "(block (define d e))");
-    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("{ fun f() { var a = b; var d = e;"), "(block (fun (f) (block (define a b) (define d e))))");
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("{ var a = d var c = 3; "),
+        "(block (define a d))");
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("{ fun f() var a = b; var d = e;"),
+        "(block (define d e))");
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("{ fun f() { var a = b; var d = e;"),
+        "(block (fun (f) (block (define a b) (define d e))))");
   }
 
   @Test
   public void testIfStmt() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x) x;"), "(if x then x)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x) x; else x;"), "(if x then x else x)");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x == 1) x + 1; else x - 1;"), "(if (== x 1) then (+ x 1) else (- x 1))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x == 1) if (x != 2) 3; else 2;"), "(if (== x 1) then (if (!= x 2) then 3 else 2))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x == 1) if (x != 2) 3; else 2; else x - 1;"), "(if (== x 1) then (if (!= x 2) then 3 else 2) else (- x 1))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x == 1) x + 1; else x - 1;"),
+        "(if (== x 1) then (+ x 1) else (- x 1))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("if (x == 1) if (x != 2) 3; else 2;"),
+        "(if (== x 1) then (if (!= x 2) then 3 else 2))");
+    ParserTestUtils.assertNoErrorAndResultEquals(
+        ParserTestUtils.parse("if (x == 1) if (x != 2) 3; else 2; else x - 1;"),
+        "(if (== x 1) then (if (!= x 2) then 3 else 2) else (- x 1))");
   }
 
   @Test
   public void testWhileStmt() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("while (x) x;"), "(while x do x)");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("while (x) { x + 1; print x; }"), "(while x do (block (+ x 1) (print x)))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("while (x) { x + 1; print x; }"),
+        "(while x do (block (+ x 1) (print x)))");
   }
 
   @Test
   public void testForStmt() throws Throwable {
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("for (var x = 0; x < 10; x = x + 1) x;"), "(for (define x 0) (< x 10) (= x (+ x 1)) do x)");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("for (var x = 0; x < 10; x = x + 1) { x + 1; print x; }"), "(for (define x 0) (< x 10) (= x (+ x 1)) do (block (+ x 1) (print x)))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("for (var x = 0; x < 10; x = x + 1) x;"),
+        "(for (define x 0) (< x 10) (= x (+ x 1)) do x)");
+    ParserTestUtils.assertNoErrorAndResultEquals(
+        ParserTestUtils.parse("for (var x = 0; x < 10; x = x + 1) { x + 1; print x; }"),
+        "(for (define x 0) (< x 10) (= x (+ x 1)) do (block (+ x 1) (print x)))");
   }
 
   @Test
@@ -192,45 +220,61 @@ public class ParserTest {
   @Test
   public void testFunc() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f() {}"), "(fun (f) (block))");
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(a,) {}"), new String[] {"Expect an identifier"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(a, {}"), new String[] {"Expect an identifier"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(a,) {}"), new String[] { "Expect an identifier" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(a, {}"), new String[] { "Expect an identifier" });
     ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("fun f(a, {}"), "");
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(,) {}"), new String[] {"Expect an identifier"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("fun f(,) {}"), new String[] { "Expect an identifier" });
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) {}"), "(fun (f a b) (block))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) { return a + b; }"), "(fun (f a b) (block (return (+ a b))))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("fun f(a, b) { return a + b; }"),
+        "(fun (f a b) (block (return (+ a b))))");
   }
 
   @Test
   public void testClass() throws Throwable {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {}"), "(class (C))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {fun f() {} }"), "(class (C) (fun (f) (block)))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {fun f() {} fun g(a, b) { f(); } }"), "(class (C) (fun (f) (block)) (fun (g a b) (block (f))))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C { fun f() { return this.g(1, 2); } fun g(a, b) { return f(); } }"), "(class (C) (fun (f) (block (return ((. this g) 1 2)))) (fun (g a b) (block (return (f)))))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {fun f() {} }"),
+        "(class (C) (fun (f) (block)))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {fun f() {} fun g(a, b) { f(); } }"),
+        "(class (C) (fun (f) (block)) (fun (g a b) (block (f))))");
+    ParserTestUtils.assertNoErrorAndResultEquals(
+        ParserTestUtils.parse("class C { fun f() { return this.g(1, 2); } fun g(a, b) { return f(); } }"),
+        "(class (C) (fun (f) (block (return ((. this g) 1 2)))) (fun (g a b) (block (return (f)))))");
   }
-  
+
   @Test
   public void testSuperclass() throws Throwable {
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {} class D < C {}"), "(class (C))\n(class (< D C))");
-    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {} class D < C { fun f() {} }"), "(class (C))\n(class (< D C) (fun (f) (block)))");
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("class D < { fun f() {} }"), new String[] {"Expect an identifier"});
-    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {} class D < { fun f() {} }"), "(class (C))\n(class (D) (fun (f) (block)))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {} class D < C {}"),
+        "(class (C))\n(class (< D C))");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("class C {} class D < C { fun f() {} }"),
+        "(class (C))\n(class (< D C) (fun (f) (block)))");
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class D < { fun f() {} }"),
+        new String[] { "Expect an identifier" });
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {} class D < { fun f() {} }"),
+        "(class (C))\n(class (D) (fun (f) (block)))");
   }
 
   @Test
   public void testRecoverClass() throws Throwable {
     ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {"), "(class (C))");
-    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {fun f() {"), "(class (C) (fun (f) (block)))");
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {fun f() {"),
+        "(class (C) (fun (f) (block)))");
     ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {fun f() }"), "(class (C))");
-    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {fun f() } fun g() {}"), "(class (C))\n(fun (g) (block))");
+    ParserTestUtils.assertHasErrorsAndResultEquals(ParserTestUtils.parse("class C {fun f() } fun g() {}"),
+        "(class (C))\n(fun (g) (block))");
   }
 
   @Test
   public void testInvalidClass() throws Throwable {
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {"), new String[] {"EOF reached while parsing class body"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {fun f() {"), new String[] {"EOF reached while parsing block statement", "EOF reached while parsing class body"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {fun f() }"), new String[] {"Expect an opening brace '{'"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {fun f() } fun g() {}"), new String[] {"Expect an opening brace '{'"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C { var a = 3; fun f() } fun g() {}"), new String[] {"Expect method declaration in class body", "Expect an opening brace '{'"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {"),
+        new String[] { "EOF reached while parsing class body" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {fun f() {"),
+        new String[] { "EOF reached while parsing block statement", "EOF reached while parsing class body" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {fun f() }"),
+        new String[] { "Expect an opening brace '{'" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C {fun f() } fun g() {}"),
+        new String[] { "Expect an opening brace '{'" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("class C { var a = 3; fun f() } fun g() {}"),
+        new String[] { "Expect method declaration in class body", "Expect an opening brace '{'" });
   }
 
   @Test
@@ -246,6 +290,21 @@ public class ParserTest {
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c().b().a = 3;"), "(= (. ((. (c) b)) a) 3)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c.b().a = 10;"), "(= (. ((. c b)) a) 10)");
     ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("c.b.a = 10;"), "(= (. (. c b) a) 10)");
+  }
+
+  @Test
+  public void testSuper() throws Throwable {
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("super();"), "(super)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("super(23);"), "(super 23)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("super(23, 34);"), "(super 23 34)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("super.member(23, 34);"),
+        "((. super member) 23 34)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("super.member;"), "(. super member)");
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("super;"), new String[] { "Expect `super()` or `super.<property>`" });
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("super + 3;"), new String[] { "Expect `super()` or `super.<property>`" });
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("super() + 3;"), "(+ (super) 3)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("super()().a;"), "(. ((super)) a)");
+    ParserTestUtils.assertNoErrorAndResultEquals(ParserTestUtils.parse("super().b();"), "((. (super) b))");
   }
 }
 

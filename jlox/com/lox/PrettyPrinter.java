@@ -83,6 +83,14 @@ public class PrettyPrinter {
       }
       case Expr.Get g -> String.format("(. %s %s)", this.printExpr(g.object), g.property.lexeme);
       case Expr.Set s -> String.format("(= (. %s %s) %s)", this.printExpr(s.object), s.property.lexeme, this.printExpr(s.value));
+      case Expr.SuperCall s -> {
+        String res = "(super";
+        for (Expr e: s.params) {
+          res += " " + this.printExpr(e);
+        }
+        yield res + ")";
+      }
+      case Expr.SuperGet s -> String.format("(. super %s)", s.member.lexeme);
       default -> throw new Error("Non-exhaustive check");
     };
   }
