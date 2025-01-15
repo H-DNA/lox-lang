@@ -595,7 +595,7 @@ public class Parser {
       return new Expr.Variable(identifier);
     }
 
-    this.errors.add(new ParserException("Expect a numeric literal, string literal, variable or grouping expression", this.current().startOffset, this.current().endOffset));
+    this.errors.add(new ParserException("Expect a literal, variable or grouping expression", this.current().startOffset, this.current().endOffset));
     throw new SynchronizationException();
   }
 

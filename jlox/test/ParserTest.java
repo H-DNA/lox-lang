@@ -92,10 +92,10 @@ public class ParserTest {
   @Test
   public void testInvalidPrimary() throws Throwable {
     ParserTestUtils.assertErrors(ParserTestUtils.parse("+1 + 2"),
-        new String[] {"Expect a numeric literal, string literal, variable or grouping expression"});
+        new String[] {"Expect a literal, variable or grouping expression"});
 
     ParserTestUtils.assertErrors(ParserTestUtils.parse("+2"),
-        new String[] {"Expect a numeric literal, string literal, variable or grouping expression"});
+        new String[] {"Expect a literal, variable or grouping expression"});
   }
 
   @Test
@@ -126,7 +126,7 @@ public class ParserTest {
   @Test
   public void testInvalidVarDecl() throws Throwable {
     ParserTestUtils.assertErrors(ParserTestUtils.parse("var"), new String[] {"Expect an identifier"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("var x ="), new String[] {"Expect a numeric literal, string literal, variable or grouping expression"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("var x ="), new String[] {"Expect a literal, variable or grouping expression"});
   }
 
   @Test
@@ -148,7 +148,7 @@ public class ParserTest {
     ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x()"), new String[] {"Expect an opening brace '{'", "EOF reached while parsing block statement"});
     ParserTestUtils.assertErrors(ParserTestUtils.parse("{ fun x() {"), new String[] {"EOF reached while parsing block statement", "EOF reached while parsing block statement"});
     ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = 3; "), new String[] {"EOF reached while parsing block statement"});
-    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = ; var c = 3; "), new String[] {"Expect a numeric literal, string literal, variable or grouping expression", "EOF reached while parsing block statement"});
+    ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = ; var c = 3; "), new String[] {"Expect a literal, variable or grouping expression", "EOF reached while parsing block statement"});
     ParserTestUtils.assertErrors(ParserTestUtils.parse("{ var a = d var c = 3; "), new String[] {"Expect an ending semicolon ';'", "EOF reached while parsing block statement"});
   }
 
