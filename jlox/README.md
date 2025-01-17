@@ -6,7 +6,41 @@ A Java reimplementation of the Lox programming language, with some modifications
 
 ### Tokens
 
-### Grammar
+#### Keywords
+
+#### Number literals
+
+#### String literals
+
+#### Boolean literals
+
+#### User-defined identifiers
+
+#### Operator
+
+#### Delimiters
+
+### Syntax
+
+#### Grammar
+
+#### Variables
+
+#### Functions
+
+#### Classes
+
+### Type system
+
+### Semantics
+
+#### Scoping
+
+#### `this`
+
+#### Inheritance
+
+#### `super`
 
 ## Approach
 
