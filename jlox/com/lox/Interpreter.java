@@ -155,8 +155,7 @@ public class Interpreter {
         final LoxObject thisObj = ((LoxBoundFunction) thisFunc).owner;
         final LoxClass thisCls = ((LoxBoundFunction) thisFunc).ownerCls;
 
-        final LoxBoundFunction method = thisObj.getMethod(s.member.lexeme, thisCls.supercls);
-        yield method == null ? LoxNil.NIL : method;
+        yield thisObj.getMethod(s.member.lexeme, thisCls.supercls);
       }
       case Expr.SuperCall s -> {
         final LoxFunction thisFunc = this.ctx.thisFunc;
@@ -170,9 +169,9 @@ public class Interpreter {
         for (Expr arg : s.params) {
           arguments.add(this.evaluateExpr(arg, env));
         }
-        final LoxBoundFunction constructor = thisObj.getMethod("constructor", thisCls.supercls);
-        if (constructor != null) {
-          this.evaluateBoundFunction(constructor, arguments, env);
+        final LoxObject constructor = thisObj.getMethod("constructor", thisCls.supercls);
+        if (!TypecheckUtils.isNil(constructor)) {
+          this.evaluateBoundFunction((LoxBoundFunction)constructor, arguments, env);
         }
         yield LoxNil.NIL;
       }

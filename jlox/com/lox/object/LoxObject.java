@@ -35,16 +35,16 @@ public abstract class LoxObject {
     this.fields.put(prop, value);
   }
 
-  public LoxBoundFunction getMethod(String prop) throws InterpreterException {
+  public LoxObject getMethod(String prop) throws InterpreterException {
     Pair<LoxFunction, LoxClass> res = this.cls().lookupMethod(prop);
-    return res == null ? null : new LoxBoundFunction(res.second, this, res.first);
+    return res == null ? LoxNil.NIL : new LoxBoundFunction(res.second, this, res.first);
   }
-  public LoxBoundFunction getMethod(String prop, LoxClass startCls) throws InterpreterException {
-    if (startCls != null && !this.cls().isSubclass(startCls)) {
+  public LoxObject getMethod(String prop, LoxClass startCls) throws InterpreterException {
+    if (!this.cls().isSubclass(startCls)) {
       throw new Error("Lookup method must start from a superclass");
     }
 
     Pair<LoxFunction, LoxClass> res = this.cls().lookupMethod(prop, startCls);
-    return res == null ? null : new LoxBoundFunction(res.second, this, res.first);
+    return res == null ? LoxNil.NIL : new LoxBoundFunction(res.second, this, res.first);
   }
 }

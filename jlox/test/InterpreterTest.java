@@ -329,6 +329,7 @@ public class InterpreterTest {
   public void testSuperMethod() throws Throwable {
     InterpreterTestUtils.assertStdoutIs("class B { fun p() { print \"b\"; } } class C < B { fun p() { super.p(); print \"c\"; }} var c = C(); c.p();", "\"b\"\n\"c\"\n");
     InterpreterTestUtils.assertStdoutIs("class B { fun p() { print \"b\"; } } class C < B { fun p() { super.p(); print \"c\"; }} class D < C { fun p() { super.p(); print \"d\"; }} var d = D(); d.p();", "\"b\"\n\"c\"\n\"d\"\n");
+    InterpreterTestUtils.assertErrorMessageIs("class B { fun p() { super.p(); }} B().p();", "Callee is not of Callable type");
   }
 }
 

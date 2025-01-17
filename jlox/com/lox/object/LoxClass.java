@@ -67,17 +67,17 @@ public class LoxClass extends LoxObject {
     return res == null ? LoxObject.OBJECT.lookupOwnMethod(name) : res;
   }
   public Pair<LoxFunction, LoxClass> lookupMethod(String name, LoxClass startCls) {
-    if (startCls != null && !this.isSubclass(startCls)) {
+    if (!this.isSubclass(startCls)) {
       throw new Error("Lookup method must start from a superclass");
     }
 
     Pair<LoxFunction, LoxClass> res = null;
-    LoxClass curCls = startCls == null ? this : startCls;
+    LoxClass curCls = startCls;
     while (res == null && curCls != LoxObject.OBJECT) {
       res = curCls.lookupOwnMethod(name);
       curCls = curCls.supercls;
     }
-    return res == null ? new Pair(LoxObject.OBJECT.lookupOwnMethod(name), LoxObject.OBJECT) : res;
+    return res == null ? LoxObject.OBJECT.lookupOwnMethod(name) : res;
   }
 
   @Override
