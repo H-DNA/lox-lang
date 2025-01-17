@@ -333,6 +333,11 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("class B { fun p() { print \"b\"; } } class C < B { fun p() { super.p(); print \"c\"; }} class D < C { fun p() { super.p(); print \"d\"; }} var d = D(); d.p();", "\"b\"\n\"c\"\n\"d\"\n");
     InterpreterTestUtils.assertErrorMessageIs("class B { fun p() { super.p(); }} B().p();", "Callee is not of Callable type");
   }
+
+  @Test
+  public void testSpecialSymbols() throws Throwable {
+    InterpreterTestUtils.assertStdoutIs("class C { fun p() { return __CLASS__; } } var c = C(); print c.p();", "<class C>\n");
+  }
 }
 
 class InterpreterTestUtils {
