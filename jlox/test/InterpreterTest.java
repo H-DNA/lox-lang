@@ -356,7 +356,7 @@ class InterpreterTestUtils {
     List<Stmt> stmts = parser.parse().first; 
 
     Interpreter interpreter = new Interpreter();
-    Environment env = new Environment(Interpreter.globals);
+    Environment env = new Environment();
     LoxObject res = LoxNil.NIL;
     for (Stmt stmt: stmts) {
       res = interpreter.evaluateStmt(stmt, env);
@@ -371,7 +371,7 @@ class InterpreterTestUtils {
     List<Stmt> stmts = parser.parse().first; 
 
     Interpreter interpreter = new Interpreter();
-    Environment env = new Environment(Interpreter.globals);
+    Environment env = new Environment();
     LoxObject res = LoxNil.NIL;
     
     try {

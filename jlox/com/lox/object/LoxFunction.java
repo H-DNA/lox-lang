@@ -44,7 +44,7 @@ public abstract class LoxFunction extends LoxObject {
     }
 
     public Environment env() {
-      return Interpreter.globals;
+      return Environment.globals;
     }
   }
 

@@ -21,46 +21,10 @@ import com.lox.object.LoxString;
 import com.lox.utils.Pair;
 
 public class Interpreter {
-  public static final Environment globals = new Environment();
-  static {
-    try {
-      Interpreter.globals.define("clock", new LoxFunction.LoxForeignFunction("clock") {
-        @Override
-        public int arity() {
-          return 0;
-        }
-
-        @Override
-        public LoxObject call(List<LoxObject> arguments) {
-          return new LoxNumber((double) System.currentTimeMillis() / 1000.0);
-        }
-      });
-
-      Interpreter.globals.define("toString", new LoxFunction.LoxForeignFunction("toString") {
-        @Override
-        public int arity() {
-          return 1;
-        }
-
-        @Override
-        public LoxObject call(List<LoxObject> arguments) {
-          return new LoxString(arguments.get(0).toString());
-        }
-      });
-
-      Interpreter.globals.define("String", LoxString.OBJECT);
-      Interpreter.globals.define("Boolean", LoxBoolean.OBJECT);
-      Interpreter.globals.define("Number", LoxNumber.OBJECT);
-      Interpreter.globals.define("Object", LoxObject.OBJECT);
-    } catch (InterpreterException e) {
-      throw new RuntimeException(e.message);
-    }
-  }
-
   private Context ctx = new Context();
 
   public void evaluate(List<Stmt> stmts) throws InterpreterException {
-    Environment env = new Environment(Interpreter.globals);
+    Environment env = new Environment();
     for (Stmt stmt : stmts) {
       this.evaluateStmt(stmt, env);
     }

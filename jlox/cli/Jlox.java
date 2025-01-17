@@ -39,12 +39,12 @@ public class Jlox {
       throw new Error("Failed to construct interpreter");
     }
     byte[] bytes = Files.readAllBytes(Paths.get(path));
-    run(interpreter, new Environment(Interpreter.globals), new String(bytes, Charset.defaultCharset()));
+    run(interpreter, new Environment(), new String(bytes, Charset.defaultCharset()));
   }
 
   public static void runPrompt() throws IOException {
     Interpreter interpreter;
-    Environment env = new Environment(Interpreter.globals);
+    Environment env = new Environment();
     try {
       interpreter = new Interpreter();
     } catch (Exception e) {
