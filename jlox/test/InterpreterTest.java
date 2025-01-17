@@ -200,6 +200,7 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("var outer; { var a = 3; fun inner() { return a; } outer = inner; } print outer();", "3.0\n");
     InterpreterTestUtils.assertErrorMessageIs("var outer; { fun inner() { return a; } outer = inner; } { var a = 3; print outer(); }", "Undefined variable 'a'");
     InterpreterTestUtils.assertStdoutIs("class C { fun g() { return this; }} var g = C().g; print g();  }", "<instance C>\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun g() { return super(); }} var g = C().g; print g();  }", "nil\n");
   }
 
   @Test
