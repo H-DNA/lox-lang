@@ -11,7 +11,6 @@ import com.lox.ast.TokenType;
 import com.lox.ast.Expr.Variable;
 import com.lox.ast.Stmt.FuncStmt;
 import com.lox.object.LoxBoolean;
-import com.lox.object.LoxBoundFunction;
 import com.lox.object.LoxClass;
 import com.lox.object.LoxFunction;
 import com.lox.object.LoxNil;
@@ -116,12 +115,7 @@ public class Interpreter {
       case Expr.Grouping g -> this.evaluateGrouping(g, env);
       case Expr.Variable v -> this.evaluateVariable(v, env);
       case Expr.Literal l -> this.evaluateLiteral(l, env);
-      case Expr.This t -> {
-        if (this.ctx.thisObj == null) {
-          throw new InterpreterException("Cannot access `this` inside an unbound function");
-        }
-        yield this.ctx.thisObj;
-      }
+      case Expr.This t -> env.get(SpecialSymbols.THIS_OBJECT);
       case Expr.Call c -> {
         LoxObject callee = this.evaluateExpr(c.callee, env);
         List<LoxObject> arguments = new ArrayList<>();
@@ -129,12 +123,7 @@ public class Interpreter {
           arguments.add(this.evaluateExpr(arg, env));
         }
         if (callee instanceof LoxFunction) {
-          yield switch (callee) {
-            case LoxFunction.LoxUserFunction u -> this.evaluateUserFunction(u, arguments, env);
-            case LoxFunction.LoxForeignFunction f -> this.evaluateForeignFunction(f, arguments, env);
-            case LoxBoundFunction b -> this.evaluateBoundFunction(b, arguments, env);
-            default -> throw new Error("Unhandled LoxFunction subclass");
-          };
+          yield this.evaluateFunctionCall((LoxFunction) callee, arguments, env);
         } else if (callee instanceof LoxClass) {
           yield this.evaluateClassConstructor((LoxClass) callee, arguments, env);
         } else {
@@ -148,30 +137,22 @@ public class Interpreter {
         yield value;
       }
       case Expr.SuperGet s -> {
-        final LoxFunction thisFunc = this.ctx.thisFunc;
-        if (!(thisFunc instanceof LoxBoundFunction)) {
-          throw new InterpreterException("Cannot access `super` inside an unbound function");
-        }
-        final LoxObject thisObj = ((LoxBoundFunction) thisFunc).owner;
-        final LoxClass thisCls = ((LoxBoundFunction) thisFunc).ownerCls;
+        final LoxClass superCls = (LoxClass) env.get(SpecialSymbols.SUPER_CLASS);
+        final LoxObject thisObj = env.get(SpecialSymbols.THIS_OBJECT);
 
-        yield thisObj.getMethod(s.member.lexeme, thisCls.supercls);
+        yield thisObj.getMethod(s.member.lexeme, superCls);
       }
       case Expr.SuperCall s -> {
-        final LoxFunction thisFunc = this.ctx.thisFunc;
-        if (!(thisFunc instanceof LoxBoundFunction)) {
-          throw new InterpreterException("Cannot access `super` inside an unbound function");
-        }
-        final LoxObject thisObj = ((LoxBoundFunction) thisFunc).owner;
-        final LoxClass thisCls = ((LoxBoundFunction) thisFunc).ownerCls;
+        final LoxClass superCls = (LoxClass) env.get(SpecialSymbols.SUPER_CLASS);
+        final LoxObject thisObj = env.get(SpecialSymbols.THIS_OBJECT);
 
         List<LoxObject> arguments = new ArrayList<>();
         for (Expr arg : s.params) {
           arguments.add(this.evaluateExpr(arg, env));
         }
-        final LoxObject constructor = thisObj.getMethod("constructor", thisCls.supercls);
+        final LoxObject constructor = thisObj.getMethod("constructor", superCls);
         if (!TypecheckUtils.isNil(constructor)) {
-          this.evaluateBoundFunction((LoxBoundFunction)constructor, arguments, env);
+          this.evaluateFunctionCall((LoxFunction) constructor, arguments, env);
         }
         yield LoxNil.NIL;
       }
@@ -193,18 +174,26 @@ public class Interpreter {
       }
     };
 
-    final Pair<LoxFunction, LoxClass> res = kls.lookupMethod("constructor");
-    if (res == null) {
+    final LoxObject res = blankObj.getMethod("constructor");
+    if (res == LoxNil.NIL) {
       if (args.size() > 0) {
         throw new InterpreterException(String.format("Expected %s argument(s) but got %s", 0, args.size()));
       }
       return blankObj;
     }
 
-    final LoxBoundFunction boundConstructor = new LoxBoundFunction(res.second, blankObj, res.first);
-    this.evaluateBoundFunction(boundConstructor, args, env);
+    this.evaluateFunctionCall((LoxFunction) res, args, env);
 
     return blankObj;
+  }
+
+  private LoxObject evaluateFunctionCall(LoxFunction callee, List<LoxObject> args, Environment env)
+      throws InterpreterException {
+    return switch (callee) {
+      case LoxFunction.LoxUserFunction u -> this.evaluateUserFunction(u, args, env);
+      case LoxFunction.LoxForeignFunction f -> this.evaluateForeignFunction(f, args, env);
+      default -> throw new Error("Unhandled LoxFunction subclass");
+    };
   }
 
   private LoxObject evaluateUserFunction(LoxFunction.LoxUserFunction func, List<LoxObject> args, Environment env)
@@ -213,12 +202,7 @@ public class Interpreter {
       throw new InterpreterException(String.format("Expected %s argument(s) but got %s", func.arity(), args.size()));
     }
 
-    final LoxFunction oldThisFunc = this.ctx.thisFunc;
-    final LoxObject oldThis = this.ctx.thisObj;
     try {
-      this.ctx.thisFunc = func;
-      this.ctx.thisObj = null;
-
       final Environment bodyEnv = new Environment(func.env());
       for (int i = 0; i < func.node.params.size(); ++i) {
         bodyEnv.define(func.node.params.get(i).lexeme, args.get(i));
@@ -228,9 +212,6 @@ public class Interpreter {
       return LoxNil.NIL;
     } catch (NonLocalJump.Return r) {
       return r.value;
-    } finally {
-      this.ctx.thisFunc = oldThisFunc;
-      this.ctx.thisObj = oldThis;
     }
   }
 
@@ -240,51 +221,7 @@ public class Interpreter {
       throw new InterpreterException(String.format("Expected %s argument(s) but got %s", func.arity(), args.size()));
     }
 
-    final LoxFunction oldThisFunc = this.ctx.thisFunc;
-    final LoxObject oldThis = this.ctx.thisObj;
-    try {
-      this.ctx.thisFunc = func;
-      this.ctx.thisObj = null;
-      return func.call(args);
-    } finally {
-      this.ctx.thisFunc = oldThisFunc;
-      this.ctx.thisObj = oldThis;
-    }
-  }
-
-  private LoxObject evaluateBoundFunction(LoxBoundFunction func, List<LoxObject> args, Environment env)
-      throws InterpreterException {
-    if (func.arity() != args.size()) {
-      throw new InterpreterException(String.format("Expected %s arguments but got %s", func.arity(), args.size()));
-    }
-
-    final LoxObject oldThis = this.ctx.thisObj;
-    final LoxFunction oldThisFunc = this.ctx.thisFunc;
-    try {
-      this.ctx.thisObj = func.owner;
-      this.ctx.thisFunc = func;
-
-      return switch (func.funcObj) {
-        case LoxFunction.LoxUserFunction u -> {
-          final Environment bodyEnv = new Environment(func.env());
-          try {
-            for (int i = 0; i < u.node.params.size(); ++i) {
-              bodyEnv.define(u.node.params.get(i).lexeme, args.get(i));
-            }
-
-            this.evaluate(u.node.body.stmts, bodyEnv);
-            yield LoxNil.NIL;
-          } catch (NonLocalJump.Return r) {
-            yield r.value;
-          }
-        }
-        case LoxFunction.LoxForeignFunction f -> f.call(args);
-        default -> throw new Error("Unhandled LoxFunction subclass");
-      };
-    } finally {
-      this.ctx.thisObj = oldThis;
-      this.ctx.thisFunc = oldThisFunc;
-    }
+    return func.call(args);
   }
 
   private LoxObject evaluateBinary(Expr.Binary bin, Environment env) throws InterpreterException {

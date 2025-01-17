@@ -2,6 +2,7 @@ package com.lox.object;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.lox.Environment;
 import com.lox.Interpreter;
@@ -17,6 +18,8 @@ public abstract class LoxFunction extends LoxObject {
   public abstract int arity();
 
   public abstract Environment env();
+
+  public abstract LoxFunction concatEnv(Map<String, LoxObject> symbols);
 
   @Override
   public LoxClass cls() {
@@ -43,8 +46,14 @@ public abstract class LoxFunction extends LoxObject {
       return String.format("<native function '%s'>", this.fname);
     }
 
+    @Override
     public Environment env() {
       return Environment.globals;
+    }
+
+    @Override
+    public LoxFunction concatEnv(Map<String, LoxObject> env) {
+      return this;
     }
   }
 
@@ -57,6 +66,7 @@ public abstract class LoxFunction extends LoxObject {
       this.enclosingEnv = env;
     }
 
+    @Override
     public Environment env() {
       return this.enclosingEnv;
     }
@@ -79,6 +89,12 @@ public abstract class LoxFunction extends LoxObject {
     @Override
     public String toString() {
       return String.format("<function %s>", this.node.name.lexeme);
+    }
+
+    @Override
+    public LoxFunction concatEnv(Map<String, LoxObject> symbols) {
+      final Environment env = new Environment(this.enclosingEnv, symbols);
+      return new LoxUserFunction(this.node, env);
     }
   }
 }

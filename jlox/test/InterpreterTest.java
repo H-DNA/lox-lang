@@ -199,6 +199,7 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = a + 1; print a; }", "4.0\n");
     InterpreterTestUtils.assertStdoutIs("var outer; { var a = 3; fun inner() { return a; } outer = inner; } print outer();", "3.0\n");
     InterpreterTestUtils.assertErrorMessageIs("var outer; { fun inner() { return a; } outer = inner; } { var a = 3; print outer(); }", "Undefined variable 'a'");
+    InterpreterTestUtils.assertStdoutIs("class C { fun g() { return this; }} var g = C().g; print g();  }", "<instance C>\n");
   }
 
   @Test
@@ -259,7 +260,7 @@ public class InterpreterTest {
 
   @Test
   public void testMethod() throws Throwable {
-    InterpreterTestUtils.assertStdoutIs("class C { fun f() {} } print C().f;", "<bound function f>\n");
+    InterpreterTestUtils.assertStdoutIs("class C { fun f() {} } print C().f;", "<function f>\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun f() {} } print C().f();", "nil\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun f(a) { this.a = a; } fun g() { return this.a; } } C().f(10); print C().g();", "nil\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun f(a) { this.a = a; } fun g() { this.f(4); return this.a; } } var c = C(); c.f(10); print c.g();", "4.0\n");
@@ -269,7 +270,7 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("fun g() { return 3; } class C { fun g() { return g(); } } var c = C(); print c.g();", "3.0\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun g() { fun g() { return 3; } return g(); } } var c = C(); print c.g();", "3.0\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun g(a) { this.a = a; } } var c = C(); c.g(1); print c.a; c.g(2); print c.a;", "1.0\n2.0\n");
-    InterpreterTestUtils.assertErrorMessageIs("fun g() { return this; } class C { fun g() { return g(); } } var c = C(); print c.g();", "Cannot access `this` inside an unbound function");
+    InterpreterTestUtils.assertErrorMessageIs("fun g() { return this; } class C { fun g() { return g(); } } var c = C(); print c.g();", "Undefined variable 'this'");
   }
 
   @Test
@@ -277,7 +278,7 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("class C { fun g(a) { this.a = a; } } var c = C(); var g = c.g; g(1); print c.a; g(2); print c.a;", "1.0\n2.0\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun g(a) { this.a = a; } } var c = C(); var g = c.g; print g == c.g;", "false\n");
     InterpreterTestUtils.assertStdoutIs("fun f() { print \"f\"; } class C {} var c = C(); c.f = f; c.f();", "\"f\"\n");
-    InterpreterTestUtils.assertErrorMessageIs("fun f() { print this; } class C {} var c = C(); c.f = f; c.f();", "Cannot access `this` inside an unbound function");
+    InterpreterTestUtils.assertErrorMessageIs("fun f() { print this; } class C {} var c = C(); c.f = f; c.f();", "Undefined variable 'this'");
   }
 
   @Test

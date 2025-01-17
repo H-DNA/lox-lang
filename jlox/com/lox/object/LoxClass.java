@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.lox.Interpreter;
 import com.lox.InterpreterException;
+import com.lox.SpecialSymbols;
 import com.lox.object.LoxObject;
 import com.lox.utils.Pair;
 
@@ -22,7 +23,7 @@ public class LoxClass extends LoxObject {
     this.name = name;
     this.supercls = LoxObject.OBJECT;
     this.methods = new HashMap<>();
-    for (LoxFunction method: methods) {
+    for (LoxFunction method : methods) {
       this.methods.put(method.name(), method);
     }
   }
@@ -32,13 +33,14 @@ public class LoxClass extends LoxObject {
     this.name = name;
     this.supercls = supercls;
     this.methods = new HashMap<>();
-    for (LoxFunction method: methods) {
+    for (LoxFunction method : methods) {
       this.methods.put(method.name(), method);
     }
   }
 
   public boolean isSubclass(LoxClass cls) {
-    if (cls == this || cls == LoxObject.OBJECT) return true;
+    if (cls == this || cls == LoxObject.OBJECT)
+      return true;
     LoxClass curCls = this.supercls;
     while (curCls != LoxObject.OBJECT) {
       if (curCls == cls) {
@@ -48,36 +50,44 @@ public class LoxClass extends LoxObject {
     }
     return false;
   }
+
   public boolean isSuperclass(LoxClass cls) {
     return this == cls || cls.isSubclass(this);
   }
 
-  public Pair<LoxFunction, LoxClass> lookupOwnMethod(String name) {
+  public LoxObject lookupOwnMethod(String name) {
     final LoxFunction res = this.methods.getOrDefault(name, null);
-    return res == null ? null : new Pair(res, this);
+    if (res == null) {
+      return LoxNil.NIL;
+    }
+    final Map<String, LoxObject> symbols = new HashMap<>();
+    symbols.put(SpecialSymbols.THIS_CLASS, this);
+    symbols.put(SpecialSymbols.SUPER_CLASS, this.supercls);
+    return res.concatEnv(symbols);
   }
 
-  public Pair<LoxFunction, LoxClass> lookupMethod(String name) {
-    Pair<LoxFunction, LoxClass> res = null;
+  public LoxObject lookupMethod(String name) {
+    LoxObject res = LoxNil.NIL;
     LoxClass curCls = this;
-    while (res == null && curCls != LoxObject.OBJECT) {
+    while (res == LoxNil.NIL && curCls != LoxObject.OBJECT) {
       res = curCls.lookupOwnMethod(name);
       curCls = curCls.supercls;
     }
-    return res == null ? LoxObject.OBJECT.lookupOwnMethod(name) : res;
+    return res == LoxNil.NIL ? LoxObject.OBJECT.lookupOwnMethod(name) : res;
   }
-  public Pair<LoxFunction, LoxClass> lookupMethod(String name, LoxClass startCls) {
+
+  public LoxObject lookupMethod(String name, LoxClass startCls) {
     if (!this.isSubclass(startCls)) {
       throw new Error("Lookup method must start from a superclass");
     }
 
-    Pair<LoxFunction, LoxClass> res = null;
+    LoxObject res = LoxNil.NIL;
     LoxClass curCls = startCls;
-    while (res == null && curCls != LoxObject.OBJECT) {
+    while (res == LoxNil.NIL && curCls != LoxObject.OBJECT) {
       res = curCls.lookupOwnMethod(name);
       curCls = curCls.supercls;
     }
-    return res == null ? LoxObject.OBJECT.lookupOwnMethod(name) : res;
+    return res == LoxNil.NIL ? LoxObject.OBJECT.lookupOwnMethod(name) : res;
   }
 
   @Override

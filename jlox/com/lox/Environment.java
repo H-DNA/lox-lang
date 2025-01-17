@@ -48,14 +48,21 @@ public class Environment {
   }
 
   public final Environment parent;
-  private final Map<String, LoxObject> values = new HashMap<>();
+  private final Map<String, LoxObject> values;
 
   public Environment() {
     this.parent = globals;
+    this.values = new HashMap<>();
   }
 
   public Environment(Environment parent) {
     this.parent = parent;
+    this.values = new HashMap<>();
+  }
+
+  public Environment(Environment parent, Map<String, LoxObject> symbols) {
+    this.parent = parent;
+    this.values = symbols;
   }
 
   public void define(String name, LoxObject value) throws InterpreterException {
