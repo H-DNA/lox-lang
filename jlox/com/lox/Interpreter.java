@@ -20,8 +20,6 @@ import com.lox.object.LoxString;
 import com.lox.utils.Pair;
 
 public class Interpreter {
-  private Context ctx = new Context();
-
   public void evaluate(List<Stmt> stmts) throws InterpreterException {
     Environment env = new Environment();
     for (Stmt stmt : stmts) {
@@ -357,11 +355,6 @@ public class Interpreter {
   private LoxObject evaluateVariable(Expr.Variable var, Environment env) throws InterpreterException {
     return env.get(var.var.lexeme);
   }
-}
-
-class Context {
-  public LoxObject thisObj = null;
-  public LoxFunction thisFunc = null;
 }
 
 class TypecheckUtils {
