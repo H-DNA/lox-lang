@@ -15,6 +15,8 @@ A Java reimplementation of the Lox programming language, with some modifications
 
 ## Specification
 
+This is the specification of the Lox programming language, introduced in [Crafting interprerters](https://craftinginterpreters.com/). There are some modifications to the semantics.
+
 ### Tokens
 
 #### Keywords
