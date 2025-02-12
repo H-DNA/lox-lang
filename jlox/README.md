@@ -21,17 +21,66 @@ This is the specification of the Lox programming language, introduced in [Crafti
 
 #### Keywords
 
+Keywords are reserved identifiers and have specific meanings. Usage outside of these specific meaning is not allowed.
+
+```
+and class else
+false for fun
+if nil or
+print return true
+var while super this
+```
+
 #### Number literals
+
+```
+[0-9]*.?[0-9]*
+```
+
+The integral part is mandatory. The decimal dot is optional. The decimal part is also optional.
+
+Examples:
+
+```
+1.0
+1.
+1
+```
 
 #### String literals
 
+```
+"[^"]*"
+```
+
+Escape sequences are not supported.
+
 #### Boolean literals
+
+Boolean literals are the keywords: `true` and `false`.
 
 #### User-defined identifiers
 
+User-defined identifiers are sequences of underscores, digits and letters. They must not start with a digit.
+
+```
+this_is_an_identifier
+_this_is_too
+_th1s_also_1s
+```
+
 #### Operator
 
+```
++ - * / .
+! = != < <= >= >
+```
+
 #### Delimiters
+
+```
+; ( ) [ ] { }
+```
 
 ### Syntax
 
