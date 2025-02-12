@@ -21,7 +21,7 @@ method(); // valid
 
 That means the access expression `object.method` must do something special: It must return `method`, with `this` bound to `object`. Therefore, we have answered the first question, `this` is bound when we call `object.method`.
 
-The next question is how to bind & evaluate `this` in `method`? I'm pretty positive that `this`, although being a keyword, behaves just like a normal identifier. Therefore, it's seem natural that `this` should be bound using the same mechanism as normal identifiers. Currently, bindings of identifiers to values are stored inside the function's environment. Therefore, `object.method` should return a function with binding of (`this`, `object`) injected into the function environment.
+The next question is how to bind & evaluate `this` in `method`? I'm pretty positive that `this`, although being a keyword, behaves just like a normal identifier. Therefore, it's seem natural that `this` should be bound using the same mechanism as normal identifiers. Currently, bindings of identifiers to values are stored inside the function's environmen. Therefore, `object.method` should return a function with the binding of (`this`, `object`) injected into the function's environment.
 
 ### Supporting `super`
 
