@@ -13,6 +13,10 @@ A Java reimplementation of the Lox programming language, with some modifications
 
 ### Supporting `super`
 
+### Early resolving identifiers
+
+See the bug in the **Scoping** section below.
+
 ## Specification
 
 This is the specification of the Lox programming language, introduced in [Crafting interprerters](https://craftinginterpreters.com/). There are some modifications to the semantics.
@@ -243,14 +247,93 @@ class B {
 }
 ```
 
+Only single inheritance is supported.
+
 ### Type system
+
+In Lox, everything is an object, even `nil`. That is, you can access members or call methods on anything:
+```
+(3).toString()
+"lox".toString()
+```
+
+The primitive types are: `Nil`, `Number`, `String`, `Boolean`. They are immutable, in the sense that no mutation can be made on these objects.
+```
+(3).a = 3; // error
+```
+
+Functions and classes are of type `Function` and `Class` accordingly.
+
+New types can be defined using the `class` construct.
+
+Every class is a subclass of `Object`.
 
 ### Semantics
 
 #### Scoping
 
+Lox follows lexical scoping.
+
+```
+var t;
+var b = 10;
+{
+  var a = 3;
+  fun f() {
+     print a;
+     print b;
+  }
+  t = f();
+}
+var a = 4;
+t();  // 3 10
+b = 2;
+t();  // 3 2
+```
+
+Bug: Names are not early resolved, but are looked up on demand. This results in weird behavior:  Definition of a non-local variables can lead to the same name resolves to different variables in different scope:
+```
+var i = 3;
+fun f() {
+  fun g() {
+     print i;
+  }
+  g(); // 3
+  var i = "another variable";
+  g(); // another variable
+}
+```
+This is mostly considered undesired behavior.
+
 #### `this`
+
+The keyword `this` is an expression that resolves to the owner object inside a method. Outside of a method, accessing `this` would throw an error.
 
 #### Inheritance
 
+A class can inherit methods from other classes called superclasses. Method lookup of a class traverses the ancestor chain, starting from the class itself, and return the first method with the desired name that it finds.
+
+Methods in the subclass will shadow methods in the superclass with the same name.
+
+Object fields in classes do not exist in different namespaces per class. This means that both `a` in these two constructors are the same:
+```
+class A {
+  fun constructor() {
+    this.a = 3;
+  }
+}
+
+class B < A {
+  fun constructor() {
+    this.a = 10;
+  }
+}
+```
+
 #### `super`
+
+The keyword `super` is used when you want to call a method of a superclass.
+```
+super(); // call the superclass's constructor
+super.method; // return the first method in the ancestor chain starting from the current immediate superclass
+```
