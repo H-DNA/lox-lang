@@ -4,6 +4,15 @@ A Java reimplementation of the Lox programming language, with some modifications
 
 ## Design choices
 
+### Philosophy
+
+- Code as you go - go back and abstract if it's needed.
+- Some duplication is acceptable - I don't want to strictly follow DRY if it only means to reduce some duplication.
+
+### Supporting `this`
+
+### Supporting `super`
+
 ## Specification
 
 ### Tokens
