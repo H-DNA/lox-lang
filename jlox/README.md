@@ -116,17 +116,132 @@ equality ::= comparison | equality (== | !=) comparison
 comparison ::= term | comparison (> | >= | < | <=) term
 term ::= factor | term (+ | -) factor
 factor ::= unary | factor (* | /) unary
-unary ::= call | (! | -) unary
-call ::= primary | call ("(" (expression (, expression)*)? ")" | . identifier)
+unary ::= primary | call | getExpression | (! | -) unary
+call ::= (call | getExpression | primary) ("(" (expression (, expression)*)? ")"
+getExpression ::= (call | getExpression | primary) . identifier
 primary ::= number | string | "true" | "false" | "nil" | "(" expression ")" | identifier | super | "this"
 super ::= "super" "(" (expression (, expression)*)? ")" | "super" . identifier
 ```
 
 #### Variables
 
+Variables can be defined using the `var` construct:
+
+```
+var v = 10;
+var t; // same as `var t = nil`
+```
+
+Redefinition is an error:
+
+```
+var v = 10;
+var v = 3;
+```
+
+Use of a variable before definition is an error:
+
+```
+var v = non_existent;
+```
+
+#### Print statement
+
+The `print` statement can be used to output a value to stdout:
+
+```
+var a = "Hello World!";
+print a;
+// Hello World!
+```
+
 #### Functions
 
+Function can be defined using the `fun` construct:
+
+```
+fun f(x, y) {
+  return x + y;
+}
+```
+
+Recursive or mutually recursive functions can be defined:
+
+```
+fun f() {
+  g();
+}
+
+fun g() {
+  f();
+}
+```
+
+#### Control flow
+
+Conditional control flow can be implemented using the `if` construct:
+
+```
+if (1) {
+  print true; 
+}
+```
+
+Only `false` and `nil` are falsy. All other values are truthy.
+
+While loops can be implemented using the `while` construct:
+
+```
+while (true) {
+  do_something();
+}
+```
+
+For loops can be implemented using the `for` construct:
+
+```
+for (var i = 3; i < 10; i = i + 1) {
+   print i;
+}
+
+var t;
+for (t = 10; t >= 0; t = t - 1) {
+   print t;
+} 
+```
+
 #### Classes
+
+Classes can be defined using the `class` construct:
+
+```
+class A {
+  fun constructor() {
+     this.a = 3;
+  }
+  fun getA() {
+     return this.a;
+  }
+  fun setA(a) {
+     this.a = a;
+  }
+}
+```
+
+Inheritance is specified using the `<` symbol:
+
+```
+class B {
+  fun constructor() {
+     super();
+     this.b = 3;
+  }
+  fun setB(a, b) {
+     super.setA(a);
+     this.b = b;
+  }
+}
+```
 
 ### Type system
 
