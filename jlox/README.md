@@ -31,6 +31,14 @@ print return true
 var while super this
 ```
 
+#### Comment
+
+Only single-line comments are supported:
+
+```
+// this is a comment
+```
+
 #### Number literals
 
 ```
@@ -85,6 +93,34 @@ _th1s_also_1s
 ### Syntax
 
 #### Grammar
+
+```
+program ::= declaration*
+declaration ::= varDeclaration | functionDeclaration | classDeclaration | statement
+statement ::= blockStatement | ifStatement | whileStatement | forStatement | printStatement | returnStatement | expressionStatement
+classDeclaration ::= "class" identifier (< identifier)? "{" functionDeclaration* "}"
+functionDeclaration ::= "fun" identifier "(" (identifier (, identifier)*)? ")" blockStatement
+varDeclaration ::= "var" identifier (= expression)? ;
+blockStatement ::= "{" declaration* "}"
+whileStatement ::= "while" "(" expression ')" statement
+forStatement ::= "for" "(" (varDeclaration | expressionStatement) expressionStatement expression ")" statement
+ifStatement ::= "if" "(" expression ")" statement ("else" statement)?
+returnStatement ::= "return" expression :
+printStatement ::= "print" expression ;
+expressionStatement ::= expression ;
+expression ::= assignment | setExpression | logicalOr
+assignment ::= variable = expression | getExpression = expression
+logicalOr ::= logicalAnd | logicalOr "or" logicalAnd
+logicalAnd ::= equality | logicalAnd "and" equality
+equality ::= comparison | equality (== | !=) comparison
+comparison ::= term | comparison (> | >= | < | <=) term
+term ::= factor | term (+ | -) factor
+factor ::= unary | factor (* | /) unary
+unary ::= call | (! | -) unary
+call ::= primary | call ("(" (expression (, expression)*)? ")" | . identifier)
+primary ::= number | string | "true" | "false" | "nil" | "(" expression ")" | identifier | super | "this"
+super ::= "super" "(" (expression (, expression)*)? ")" | "super" . identifier
+```
 
 #### Variables
 
