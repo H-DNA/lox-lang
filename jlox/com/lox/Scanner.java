@@ -39,9 +39,10 @@ public class Scanner {
     assert !this.isAtEnd();
 
     int startOffset = currentOffset;
-    char c = this.advance();
+    char c = this.peek();
     switch (c) {
       case '(':
+        this.advance();
         this.tokens.add(new Token(
             TokenType.LEFT_PAREN,
             this.source.substring(startOffset, this.currentOffset),
@@ -50,6 +51,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case ')':
+        this.advance();
         this.tokens.add(new Token(
             TokenType.RIGHT_PAREN,
             this.source.substring(startOffset, this.currentOffset),
@@ -58,6 +60,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case '{':
+        this.advance();
         this.tokens.add(new Token(
             TokenType.LEFT_BRACE,
             this.source.substring(startOffset, this.currentOffset),
@@ -66,6 +69,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case '}':
+        this.advance();
         this.tokens.add(new Token(
             TokenType.RIGHT_BRACE,
             this.source.substring(startOffset, this.currentOffset),
@@ -74,6 +78,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case ',':
+        this.advance();
         this.tokens.add(new Token(
             TokenType.COMMA,
             this.source.substring(startOffset, this.currentOffset),
@@ -82,6 +87,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case '.':
+        this.advance();
         this.tokens.add(new Token(
             TokenType.DOT,
             this.source.substring(startOffset, this.currentOffset),
@@ -90,6 +96,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case '-':
+        this.advance();
         this.tokens.add(new Token(
             TokenType.MINUS,
             this.source.substring(startOffset, this.currentOffset),
@@ -98,6 +105,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case '+':
+        this.advance();
         this.tokens.add(new Token(
             TokenType.PLUS,
             this.source.substring(startOffset, this.currentOffset),
@@ -106,6 +114,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case ';':
+        this.advance();
         this.tokens.add(new Token(
             TokenType.SEMICOLON,
             this.source.substring(startOffset, this.currentOffset),
@@ -114,6 +123,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case '*':
+        this.advance();
         this.tokens.add(new Token(
             TokenType.STAR,
             this.source.substring(startOffset, this.currentOffset),
@@ -122,6 +132,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case '!':
+        this.advance();
         this.tokens.add(new Token(
             this.match('=') ? TokenType.BANG_EQUAL : TokenType.BANG,
             this.source.substring(startOffset, this.currentOffset),
@@ -130,6 +141,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case '=':
+        this.advance();
         this.tokens.add(new Token(
             this.match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL,
             this.source.substring(startOffset, this.currentOffset),
@@ -138,6 +150,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case '<':
+        this.advance();
         this.tokens.add(new Token(
             this.match('=') ? TokenType.LESS_EQUAL : TokenType.LESS,
             this.source.substring(startOffset, this.currentOffset),
@@ -146,6 +159,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case '>':
+        this.advance();
         this.tokens.add(new Token(
             this.match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER,
             this.source.substring(startOffset, this.currentOffset),
@@ -154,6 +168,7 @@ public class Scanner {
             this.currentOffset));
         break;
       case '/':
+        this.advance();
         if (this.match('/')) {
           while (this.peek() != '\n' && !this.isAtEnd())
             this.advance();
@@ -170,8 +185,10 @@ public class Scanner {
         this.extractString();
         break;
       default:
-        if (ScannerUtils.isSpace(c))
+        if (ScannerUtils.isSpace(c)) {
+          this.advance();
           break;
+        }
         if (ScannerUtils.isAlphaOrUnderscore(c)) {
           this.extractIdentifier();
           break;
@@ -189,9 +206,11 @@ public class Scanner {
   }
 
   private void extractString() throws ScannerException {
-    assert this.source.charAt(this.currentOffset - 1) == '"';
+    int startOffset = this.currentOffset;
 
-    int startOffset = this.currentOffset - 1;
+    if (this.advance() != '"') {
+      throw new ScannerException("Expected starting \"", startOffset, this.currentOffset);
+    }
 
     while (this.peek() != '"' && !this.isAtEnd()) {
       this.advance();
@@ -212,9 +231,7 @@ public class Scanner {
   }
 
   private void extractNumber() throws ScannerException {
-    assert ScannerUtils.isDigit(this.source.charAt(this.currentOffset - 1));
-
-    int startOffset = this.currentOffset - 1;
+    int startOffset = this.currentOffset;
 
     // Match invalid numerical literals also
     while (ScannerUtils.isAlphaNumericOrUnderscore(this.peek()))
@@ -242,9 +259,7 @@ public class Scanner {
   }
 
   private void extractIdentifier() {
-    assert ScannerUtils.isAlphaNumericOrUnderscore(this.source.charAt(this.currentOffset - 1));
-
-    int startOffset = this.currentOffset - 1;
+    int startOffset = this.currentOffset;
 
     while (ScannerUtils.isAlphaNumericOrUnderscore(this.peek()))
       this.advance();
@@ -258,8 +273,8 @@ public class Scanner {
         type,
         this.source.substring(startOffset, this.currentOffset),
         type == TokenType.TRUE ? Boolean.valueOf(true)
-          : type == TokenType.FALSE ? Boolean.valueOf(false)
-          : null,
+            : type == TokenType.FALSE ? Boolean.valueOf(false)
+                : null,
         startOffset,
         this.currentOffset));
   }
@@ -272,7 +287,8 @@ public class Scanner {
   }
 
   private boolean match(char expected) {
-    if (this.isAtEnd()) return false;
+    if (this.isAtEnd())
+      return false;
     if (expected != this.source.charAt(this.currentOffset))
       return false;
     this.currentOffset += 1;
