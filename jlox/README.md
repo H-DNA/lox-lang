@@ -11,7 +11,24 @@ A Java reimplementation of the Lox programming language, with some modifications
 
 ### Supporting `this`
 
+`this` has some special semantic: right at function (method) definition, it's unknown which value it is bound to.
+
+When does `this` get bound? We know that `this` must at least be bound when we call `object.method()`. Preferably, I want binding of `this` to persist in this case (sidenote: JS differs in this regard):
+```
+var method = object.method;
+method(); // valid
+```
+
+That means the access expression `object.method` must do something special: It must return `method`, with `this` bound to `object`. Therefore, we have answered the first question, `this` is bound when we call `object.method`.
+
+The next question is how to bind & evaluate `this` in `method`? I'm pretty positive that `this`, although being a keyword, behaves just like a normal identifier. Therefore, it's seem natural that `this` should be bound using the same mechanism as normal identifiers. Currently, bindings of identifiers to values are stored inside the function's environment. Therefore, `object.method` should return a function with binding of (`this`, `object`) injected into the function environment.
+
 ### Supporting `super`
+
+`super` can be bound right at function definition. `super` also behaves mostly like normal identifiers, but must appear in more restricted forms: `super.prop` or `super()`. Using the same line of thought, I decided that `object.method` should also inject something into the returned function, specifically (`super`, `superclass`). However, if we evaluate `super` like normal identifiers, `super.method()` would return `superclass.method()`, which is wrong. Therefore, the interpreter has to handle `super` specially: Exclusive logic to handle `super.prop` and `super()`:
+- The interpreter lookups the binding for `super` to get the superclass.
+- The interpreter lookup `prop` (or `constructor`) from the superclass.
+- The interpreter returns the looked up `prop` for `super.prop` or call the constructor for `super()`.
 
 ### Early resolving identifiers
 
@@ -308,6 +325,24 @@ This is mostly considered undesired behavior.
 #### `this`
 
 The keyword `this` is an expression that resolves to the owner object inside a method. Outside of a method, accessing `this` would throw an error.
+
+Methods can be extracted out and `this` still refers to the correct object:
+```
+class A {
+  fun f() {
+     this.a = 3;
+  }
+  fun g() {
+     print this.a;
+  }
+}
+
+var a = A();
+var f = a.f;
+var g = a.g;
+f();
+g(); // 3
+```
 
 #### Inheritance
 
