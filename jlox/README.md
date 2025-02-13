@@ -32,7 +32,56 @@ The next question is how to bind & evaluate `this` in `method`? I'm pretty posit
 
 ### Early resolving identifiers
 
-See the bug in the **Scoping** section below.
+Supporting lexcial scoping seems straightforward: Just create a chain of environments and lookup identifiers by traversing the chain on every usage. However, consider this:
+```
+var i = 3;
+fun f() {
+  fun g() {
+     print i;
+  }
+  g(); // 3
+  var i = "another variable";
+  g(); // another variable
+}
+```
+This doesn't seem right! The same identifier binds to two different variables in two scopes.
+
+This means we have to eagerly bind non-local identifiers in function definition so that their lookup result is consistent. How about, upon function definition, we scan its body and prebind all the non-local identifiers. Hence:
+```
+var i = 3;
+fun f() {
+  fun g() {
+     print i;
+  }
+  g(); // 3
+  var i = "another variable";
+  g(); // 3
+}
+```
+This seems sensible, however, doing this means that we can not define mutually recursive functions in local scope:
+```
+var f = 3;
+fun foo() {
+  fun g() {
+    f();
+  }
+  fun f() {
+    g();
+  }
+}
+```
+
+Therefore, I decided to take the Javascript's approach: Every variables in scope technically exist upon scope enter, even if their declarations have not been reached yet (in this case, the variables are said to be in "temporal deadzone"). Thus, the behavior of the above snippet is like this:
+```
+var i = 3;
+fun f() {
+  fun g() {
+     print i;
+  }
+  // g(); // Error: variable "i" used before define
+  var i = "another variable";
+  g(); // another variable
+}
 
 ## Specification
 
@@ -307,20 +356,6 @@ t();  // 3 10
 b = 2;
 t();  // 3 2
 ```
-
-Bug: Names are not early resolved, but are looked up on demand. This results in weird behavior:  Definition of a non-local variables can lead to the same name resolves to different variables in different scope:
-```
-var i = 3;
-fun f() {
-  fun g() {
-     print i;
-  }
-  g(); // 3
-  var i = "another variable";
-  g(); // another variable
-}
-```
-This is mostly considered undesired behavior.
 
 #### `this`
 
