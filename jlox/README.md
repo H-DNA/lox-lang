@@ -216,6 +216,15 @@ Use of a variable before definition is an error:
 var v = non_existent;
 ```
 
+The identifier is bound to the variable right before the initializer:
+
+```
+var v = 3;
+{
+   var v = v; // Error: Variable "v" used before defined
+}
+```
+
 #### Print statement
 
 The `print` statement can be used to output a value to stdout:
