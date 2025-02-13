@@ -168,6 +168,7 @@ public class InterpreterTest {
   @Test
   public void testWhileStmt() throws Throwable {
     InterpreterTestUtils.assertLastStmtEquals("var a = 0; var sum = 0; while (a < 10) { sum = sum + a; a = a + 1; } sum;", 45.0);
+    InterpreterTestUtils.assertLastStmtEquals("var a = 0; var sum = 0; while (a < 10) { var r = a; sum = sum + r; a = r + 1; } sum;", 45.0);
     InterpreterTestUtils.assertLastStmtEquals("var a = 1; while (a < 10) a = a * 2; a;", 16.0);
   }
   
@@ -175,6 +176,7 @@ public class InterpreterTest {
   public void testForStmt() throws Throwable {
     InterpreterTestUtils.assertLastStmtEquals("var sum = 0; for (var a = 0; a < 10; a = a + 1) { sum = sum + a; } sum;", 45.0);
     InterpreterTestUtils.assertLastStmtEquals("var sum = 0; var a; for (a = 0; a < 10; a = a + 1) { sum = sum + a; } sum;", 45.0);
+    InterpreterTestUtils.assertLastStmtEquals("var sum = 0; var a; for (a = 0; a < 10; a = a + 1) { var r; r = a; sum = sum + r; } sum;", 45.0);
     InterpreterTestUtils.assertLastStmtEquals("var a; for (a = 1; a < 10; a = a * 2) {} a;", 16.0);
   }
   

@@ -54,18 +54,19 @@ public class Interpreter {
         }
       }
       case Stmt.WhileStmt w -> {
-        final Environment blockEnv = new Environment(env);
-        while (ValueUtils.isTruthy(this.evaluateExpr(w.cond, blockEnv))) {
+        while (ValueUtils.isTruthy(this.evaluateExpr(w.cond, env))) {
+          final Environment blockEnv = new Environment(env);
           this.evaluateStmt(w.body, blockEnv);
         }
         yield LoxNil.NIL;
       }
       case Stmt.ForStmt f -> {
-        final Environment blockEnv = new Environment(env);
-        this.evaluateStmt(f.init, blockEnv);
-        while (ValueUtils.isTruthy(this.evaluateStmt(f.cond, blockEnv))) {
+        final Environment initEnv = new Environment(env);
+        this.evaluateStmt(f.init, initEnv);
+        while (ValueUtils.isTruthy(this.evaluateStmt(f.cond, initEnv))) {
+          final Environment blockEnv = new Environment(initEnv);
           this.evaluateStmt(f.body, blockEnv);
-          this.evaluateExpr(f.post, blockEnv);
+          this.evaluateExpr(f.post, initEnv);
         }
         yield LoxNil.NIL;
       }
