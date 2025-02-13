@@ -46,32 +46,33 @@ public class Interpreter {
       }
       case Stmt.IfStmt i -> {
         final LoxObject condValue = this.evaluateExpr(i.cond, env);
-        final Environment blockEnv = new Environment(env);
         if (ValueUtils.isTruthy(condValue)) {
+          final Environment blockEnv = createScopeEnvironment(env, i.thenBranch);
           yield this.evaluateStmt(i.thenBranch, blockEnv);
         } else {
-          yield i.elseBranch != null ? this.evaluateStmt(i.elseBranch, blockEnv) : LoxNil.NIL;
+          yield i.elseBranch != null ? this.evaluateStmt(i.elseBranch, createScopeEnvironment(env, i.elseBranch))
+              : LoxNil.NIL;
         }
       }
       case Stmt.WhileStmt w -> {
         while (ValueUtils.isTruthy(this.evaluateExpr(w.cond, env))) {
-          final Environment blockEnv = new Environment(env);
+          final Environment blockEnv = createScopeEnvironment(env, w.body);
           this.evaluateStmt(w.body, blockEnv);
         }
         yield LoxNil.NIL;
       }
       case Stmt.ForStmt f -> {
-        final Environment initEnv = new Environment(env);
+        final Environment initEnv = createScopeEnvironment(env, f.init);
         this.evaluateStmt(f.init, initEnv);
         while (ValueUtils.isTruthy(this.evaluateStmt(f.cond, initEnv))) {
-          final Environment blockEnv = new Environment(initEnv);
+          final Environment blockEnv = createScopeEnvironment(initEnv, f.body);
           this.evaluateStmt(f.body, blockEnv);
           this.evaluateExpr(f.post, initEnv);
         }
         yield LoxNil.NIL;
       }
       case Stmt.BlockStmt b -> {
-        final Environment blockEnv = new Environment(env);
+        final Environment blockEnv = createScopeEnvironment(env, b);
         LoxObject lastValue = LoxNil.NIL;
         for (Stmt s : b.stmts) {
           lastValue = this.evaluateStmt(s, blockEnv);
@@ -202,11 +203,11 @@ public class Interpreter {
     }
 
     try {
-      final Environment bodyEnv = new Environment(func.env());
+      final Environment initEnv = new Environment(func.env());
       for (int i = 0; i < func.node.params.size(); ++i) {
-        bodyEnv.define(func.node.params.get(i).lexeme, args.get(i));
+        initEnv.define(func.node.params.get(i).lexeme, args.get(i));
       }
-
+      final Environment bodyEnv = createScopeEnvironment(initEnv, func.node.body);
       this.evaluate(func.node.body.stmts, bodyEnv);
       return LoxNil.NIL;
     } catch (NonLocalJump.Return r) {
@@ -355,6 +356,35 @@ public class Interpreter {
 
   private LoxObject evaluateVariable(Expr.Variable var, Environment env) throws InterpreterException {
     return env.get(var.var.lexeme);
+  }
+
+  private Environment createScopeEnvironment(Environment parent, Stmt stmt) throws InterpreterException {
+    final Environment env = new Environment(parent);
+    if (stmt instanceof Stmt.BlockStmt) {
+      final Stmt.BlockStmt block = (Stmt.BlockStmt) stmt;
+      for (Stmt bstmt : block.stmts) {
+        switch (bstmt) {
+          case Stmt.DeclStmt d -> {
+            env.declare(d.id.lexeme);
+          }
+          case Stmt.FuncStmt f -> {
+            env.declare(f.name.lexeme);
+          }
+          case Stmt.ClsStmt c -> {
+            env.declare(c.name.lexeme);
+          }
+          default -> {
+          }
+        }
+      }
+    } else if (stmt instanceof Stmt.FuncStmt) {
+      env.declare(((Stmt.FuncStmt) stmt).name.lexeme);
+    } else if (stmt instanceof Stmt.DeclStmt) {
+      env.declare(((Stmt.DeclStmt) stmt).id.lexeme);
+    } else if (stmt instanceof Stmt.ClsStmt) {
+      env.declare(((Stmt.FuncStmt) stmt).name.lexeme);
+    }
+    return env;
   }
 }
 

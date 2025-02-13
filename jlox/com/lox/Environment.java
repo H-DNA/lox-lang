@@ -68,16 +68,22 @@ public class Environment {
     this.values = symbols;
   }
 
-  public void define(String name, LoxObject value) throws InterpreterException {
+  // Declare that an identifier exists in this environment, but its value is not
+  // defined yet
+  // var x = 3; is equivalent to env.declare("x"); env.assign("x", 3);
+  public void declare(String name) throws InterpreterException {
     if (values.containsKey(name)) {
       throw new InterpreterException("Redeclared variable '" + name + "'");
     }
-    this.values.put(name, value);
+    this.values.put(name, null);
   }
 
   public void assign(String name, LoxObject value) throws InterpreterException {
     for (Environment env = this; env != null; env = env.parent) {
       if (env.values.containsKey(name)) {
+        if (!env.isDefined(name)) {
+          throw new InterpreterException("Variable '" + name + "' used before defined");
+        }
         env.values.put(name, value);
         return;
       }
@@ -85,12 +91,26 @@ public class Environment {
     throw new InterpreterException("Undefined variable '" + name + "'");
   }
 
+  public void define(String name, LoxObject value) throws InterpreterException {
+    if (this.isDefined(name)) {
+      throw new InterpreterException("Redeclared variable '" + name + "'");
+    }
+    this.values.put(name, value);
+  }
+
   public LoxObject get(String name) throws InterpreterException {
     for (Environment env = this; env != null; env = env.parent) {
       if (env.values.containsKey(name)) {
+        if (!env.isDefined(name)) {
+          throw new InterpreterException("Variable '" + name + "' used before defined");
+        }
         return env.values.get(name);
       }
     }
     throw new InterpreterException("Undefined variable '" + name + "'");
+  }
+
+  public boolean isDefined(String name) {
+    return this.values.containsKey(name) && this.values.get(name) != null;
   }
 }

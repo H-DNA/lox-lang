@@ -197,14 +197,16 @@ public class InterpreterTest {
     InterpreterTestUtils.assertStdoutIs("var a = 3; { a = a + 1; } print a;", "4.0\n");
     InterpreterTestUtils.assertStdoutIs("var a = 3; { var b = 3; { a = a + b; } } print a;", "6.0\n");
 
-    InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = a + 1; } print a;", "3.0\n");
-    InterpreterTestUtils.assertStdoutIs("var a = 3; { var a = a + 1; print a; }", "4.0\n");
+    InterpreterTestUtils.assertStdoutIs("fun g() { print a; }; var a = 3.0; g();", "3.0\n");
+    InterpreterTestUtils.assertStdoutIs("var a = 4.0; var t; { fun g() { print a; }; var a = 3.0; t = g; } t();", "3.0\n");
+    InterpreterTestUtils.assertErrorMessageIs("var a = 4.0; var t; { fun g() { print a; }; g(); var a = 3.0; }", "Variable 'a' used before defined\n");
+
     InterpreterTestUtils.assertStdoutIs("var outer; { var a = 3; fun inner() { return a; } outer = inner; } print outer();", "3.0\n");
     InterpreterTestUtils.assertErrorMessageIs("var outer; { fun inner() { return a; } outer = inner; } { var a = 3; print outer(); }", "Undefined variable 'a'");
     InterpreterTestUtils.assertStdoutIs("class C { fun g() { return this; }} var g = C().g; print g();  }", "<instance C>\n");
     InterpreterTestUtils.assertStdoutIs("class C { fun g() { return super(); }} var g = C().g; print g();  }", "nil\n");
   }
-
+  
   @Test
   public void testTypeMismatch() throws Throwable {
     InterpreterTestUtils.assertErrorMessageIs("1 + \"3\"", "Unsupported operator '+' on Number and String");
