@@ -48,7 +48,7 @@ public abstract class LoxFunction extends LoxObject {
 
     @Override
     public Environment env() {
-      return Environment.globals;
+      return null;
     }
 
     @Override

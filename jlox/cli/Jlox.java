@@ -20,7 +20,7 @@ import com.lox.object.LoxObject;
 import com.lox.utils.Pair;
 
 public class Jlox {
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, InterpreterException {
     if (args.length > 1) {
       System.out.println("Usage: jlox [script]");
       System.exit(2);
@@ -31,7 +31,7 @@ public class Jlox {
     }
   }
 
-  public static void runFile(String path) throws IOException {
+  public static void runFile(String path) throws IOException, InterpreterException {
     Interpreter interpreter;
     try {
       interpreter = new Interpreter();
@@ -39,12 +39,12 @@ public class Jlox {
       throw new Error("Failed to construct interpreter");
     }
     byte[] bytes = Files.readAllBytes(Paths.get(path));
-    run(interpreter, new Environment(), new String(bytes, Charset.defaultCharset()));
+    run(interpreter, Environment.createGlobals(), new String(bytes, Charset.defaultCharset()));
   }
 
-  public static void runPrompt() throws IOException {
+  public static void runPrompt() throws IOException, InterpreterException {
     Interpreter interpreter;
-    Environment env = new Environment();
+    Environment env = Environment.createGlobals();
     try {
       interpreter = new Interpreter();
     } catch (Exception e) {

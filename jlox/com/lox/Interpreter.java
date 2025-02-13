@@ -21,7 +21,7 @@ import com.lox.utils.Pair;
 
 public class Interpreter {
   public void evaluate(List<Stmt> stmts) throws InterpreterException {
-    Environment env = new Environment();
+    Environment env = Environment.createGlobals();
     for (Stmt stmt : stmts) {
       this.evaluateStmt(stmt, env);
     }
