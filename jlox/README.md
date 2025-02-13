@@ -82,6 +82,7 @@ fun f() {
   var i = "another variable";
   g(); // another variable
 }
+```
 
 ## Specification
 
