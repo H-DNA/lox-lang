@@ -12,7 +12,7 @@ void freeVM(VirtualMachine *vm) { freeChunk(&vm->chunk); }
 InterpretResult interpret(VirtualMachine *vm) {
 #define READ_BYTE() (vm->chunk.code[vm->ip++])
 #define READ_2BYTES()                                                          \
-  (vm->ip += 2, (vm->chunk.code[vm->ip - 1] << 8) + vm->chunk.code[vm->ip])
+  (vm->ip += 2, (vm->chunk.code[vm->ip - 2] << 8) + vm->chunk.code[vm->ip - 1])
 #define READ_CONSTANT(id) (vm->chunk.constants.values[(id)])
   while (true) {
     uint8_t instruction = READ_BYTE();
