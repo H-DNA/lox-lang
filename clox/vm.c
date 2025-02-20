@@ -44,6 +44,9 @@ InterpretResult interpret(VirtualMachine *vm) {
       push(vm, constant);
       break;
     }
+    case OP_NEGATE:
+      push(vm, -pop(vm));
+      break;
     }
   }
 #undef READ_BYTE

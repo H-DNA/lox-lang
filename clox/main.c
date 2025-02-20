@@ -9,6 +9,7 @@ int main(int argc, const char *argv[]) {
   for (int i = 0; i < 300; ++i) {
     writeConstant(&vm.chunk, i, 0);
   }
+  writeChunk(&vm.chunk, OP_NEGATE, 0);
   writeChunk(&vm.chunk, OP_RETURN, 0);
   interpret(&vm);
   freeVM(&vm);
