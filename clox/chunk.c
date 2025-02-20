@@ -6,7 +6,7 @@
 void initChunk(Chunk *chunk) {
   chunk->count = 0;
   chunk->capacity = 8;
-  chunk->code = (uint8_t *)malloc(8 * sizeof(uint8_t));
+  chunk->code = (uint8_t *)malloc(chunk->capacity * sizeof(uint8_t));
   if (chunk->code == NULL) {
     fprintf(stderr, "Failed to malloc memory in initChunk with capacity 8");
     exit(1);
