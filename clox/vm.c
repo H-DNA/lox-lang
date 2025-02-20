@@ -6,6 +6,7 @@
 void initVM(VirtualMachine *vm) {
   initChunk(&vm->chunk);
   vm->ip = 0;
+  vm->stackTop = 0;
 }
 
 void freeVM(VirtualMachine *vm) { freeChunk(&vm->chunk); }

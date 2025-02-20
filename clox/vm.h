@@ -3,9 +3,13 @@
 
 #include "chunk.h"
 
+#define STACK_MAX 256
+
 typedef struct {
   Chunk chunk;
   unsigned int ip;
+  Value stack[STACK_MAX];
+  unsigned int stackTop;
 } VirtualMachine;
 
 typedef enum {
