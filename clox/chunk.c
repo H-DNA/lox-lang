@@ -1,5 +1,6 @@
 #include "chunk.h"
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 void initChunk(Chunk *chunk) {
@@ -13,10 +14,13 @@ void writeChunk(Chunk *chunk, uint8_t byte) {
     int new_capacity = chunk->capacity * 2;
     chunk->capacity = new_capacity;
     chunk->code = realloc(chunk->code, new_capacity);
+    if (chunk->code == NULL) {
+      fprintf(stderr, "Failed to realloc memory in writeChunk with capacity %d",
+              (int)new_capacity);
+      exit(1);
+    }
   }
   chunk->code[chunk->count++] = byte;
 }
 
-void freeChunk(Chunk* chunk) {
-  free(chunk->code);
-}
+void freeChunk(Chunk *chunk) { free(chunk->code); }
