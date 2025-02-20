@@ -19,6 +19,13 @@ InterpretResult interpret(VirtualMachine *vm) {
 #define READ_CONSTANT(id) (vm->chunk.constants.values[(id)])
   while (true) {
 #ifdef DEBUG_TRACE_EXECUTION
+    printf("          ");
+    for (int i = 0; i < vm->stackTop; ++i) {
+      printf("[ ");
+      printValue(vm->stack[i]);
+      printf(" ]");
+    }
+    printf("\n");
     disassembleInstruction(&vm->chunk, vm->ip);
 #endif
     uint8_t instruction = READ_BYTE();
