@@ -7,3 +7,13 @@ void initVM(VirtualMachine *vm) {
 }
 
 void freeVM(VirtualMachine *vm) { freeChunk(vm->chunk); }
+
+InterpretResult interpret(VirtualMachine *vm) {
+  while (true) {
+    uint8_t instruction = vm->ip++;
+    switch (instruction) {
+      case OP_RETURN:
+        return INTERPRET_OK;
+    }
+  }
+}
