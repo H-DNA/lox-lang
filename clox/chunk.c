@@ -22,8 +22,8 @@ void writeChunk(Chunk *chunk, uint8_t byte, unsigned int line) {
   if (chunk->count == chunk->capacity) {
     int new_capacity = chunk->capacity * 2;
     chunk->capacity = new_capacity;
-    chunk->code = realloc(chunk->code, new_capacity);
-    chunk->lines = realloc(chunk->lines, new_capacity);
+    chunk->code = realloc(chunk->code, new_capacity * sizeof(uint8_t));
+    chunk->lines = realloc(chunk->lines, new_capacity * sizeof(unsigned int));
     if (chunk->code == NULL || chunk->lines == NULL) {
       fprintf(stderr, "Failed to realloc memory in writeChunk with capacity %d",
               (int)new_capacity);
