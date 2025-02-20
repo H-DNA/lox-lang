@@ -21,5 +21,7 @@ typedef enum {
 void initVM(VirtualMachine *vm);
 void freeVM(VirtualMachine *vm);
 InterpretResult interpret(VirtualMachine *vm);
+void push(VirtualMachine* vm, Value value);
+Value pop(VirtualMachine* vm);
 
 #endif

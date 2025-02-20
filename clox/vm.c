@@ -1,6 +1,7 @@
 #include "vm.h"
 #include "chunk.h"
 #include "debug.h"
+#include "value.h"
 #include <stdio.h>
 
 void initVM(VirtualMachine *vm) {
@@ -42,3 +43,9 @@ InterpretResult interpret(VirtualMachine *vm) {
 #undef READ_2BYTES
 #undef READ_CONSTANT
 }
+
+void push(VirtualMachine *vm, Value value) {
+  vm->stack[vm->stackTop++] = value;
+}
+
+Value pop(VirtualMachine *vm) { return vm->stack[--vm->stackTop]; }
