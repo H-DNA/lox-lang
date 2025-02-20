@@ -47,6 +47,30 @@ InterpretResult interpret(VirtualMachine *vm) {
     case OP_NEGATE:
       push(vm, -pop(vm));
       break;
+    case OP_ADD: {
+      Value first = pop(vm);
+      Value second = pop(vm);
+      push(vm, first + second);
+      break;
+    }
+    case OP_SUBTRACT: {
+      Value first = pop(vm);
+      Value second = pop(vm);
+      push(vm, first - second);
+      break;
+    }
+    case OP_MULTIPLY: {
+      Value first = pop(vm);
+      Value second = pop(vm);
+      push(vm, first * second);
+      break;
+    }
+    case OP_DIVIDE: {
+      Value first = pop(vm);
+      Value second = pop(vm);
+      push(vm, first / second);
+      break;
+    }
     }
   }
 #undef READ_BYTE

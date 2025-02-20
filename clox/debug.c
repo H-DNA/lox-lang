@@ -35,8 +35,7 @@ int disassembleInstruction(Chunk *chunk, int offset) {
   case OP_CONSTANT_LONG: {
     uint8_t constant_first = chunk->code[offset + 1];
     uint8_t constant_second = chunk->code[offset + 2];
-    unsigned int constant =
-        (constant_first << 8) + constant_second;
+    unsigned int constant = (constant_first << 8) + constant_second;
     printf("%-16s %4d ", "OP_CONSTANT_LONG", constant);
     printValue(chunk->constants.values[constant]);
     printf("\n");
@@ -44,6 +43,22 @@ int disassembleInstruction(Chunk *chunk, int offset) {
   }
   case OP_NEGATE: {
     printf("%-16s\n", "OP_NEGATE");
+    return offset + 1;
+  }
+  case OP_ADD: {
+    printf("%-16s\n", "OP_ADD");
+    return offset + 1;
+  }
+  case OP_SUBTRACT: {
+    printf("%-16s\n", "OP_SUBTRACT");
+    return offset + 1;
+  }
+  case OP_MULTIPLY: {
+    printf("%-16s\n", "OP_MULTIPLY");
+    return offset + 1;
+  }
+  case OP_DIVIDE: {
+    printf("%-16s\n", "OP_DIVIDE");
     return offset + 1;
   }
   default:
