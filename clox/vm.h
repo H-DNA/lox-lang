@@ -4,7 +4,7 @@
 #include "chunk.h"
 
 typedef struct {
-  Chunk *chunk;
+  Chunk chunk;
   unsigned int ip;
 } VirtualMachine;
 
