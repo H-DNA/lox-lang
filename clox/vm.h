@@ -5,6 +5,7 @@
 
 typedef struct {
   Chunk *chunk;
+  unsigned int ip;
 } VirtualMachine;
 
 void initVM(VirtualMachine *vm);
