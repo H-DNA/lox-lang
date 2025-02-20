@@ -5,6 +5,7 @@
 #include "value.h"
 
 typedef enum {
+  OP_CONSTANT,
   OP_RETURN,
 } OpCode;
 
@@ -19,5 +20,6 @@ void initChunk(Chunk* chunk);
 void writeChunk(Chunk* chunk, uint8_t byte);
 void freeChunk(Chunk* chunk);
 int addConstant(Chunk* chunk, Value value);
+void printValue(Value value);
 
 #endif

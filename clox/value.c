@@ -27,4 +27,4 @@ void writeValueArray(ValueArray *array, Value value) {
   array->values[array->count++] = value;
 }
 
-void freeChunk(ValueArray *array) { free(array->values); }
+void freeValueArray(ValueArray *array) { free(array->values); }
