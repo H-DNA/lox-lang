@@ -32,6 +32,16 @@ int disassembleInstruction(Chunk *chunk, int offset) {
     printf("\n");
     return offset + 2;
   }
+  case OP_CONSTANT_LONG: {
+    uint8_t constant_first = chunk->code[offset + 1];
+    uint8_t constant_second = chunk->code[offset + 2];
+    unsigned int constant =
+        (constant_first << 8) + constant_second;
+    printf("%-16s %4d ", "OP_CONSTANT_LONG", constant);
+    printValue(chunk->constants.values[constant]);
+    printf("\n");
+    return offset + 3;
+  }
   default:
     printf("Unknown opcode %d\n", instruction);
     return offset + 1;

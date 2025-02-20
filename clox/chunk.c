@@ -35,6 +35,21 @@ void writeChunk(Chunk *chunk, uint8_t byte, unsigned int line) {
   ++chunk->count;
 }
 
+void writeConstant(Chunk *chunk, Value value, unsigned int line) {
+  int index = addConstant(chunk, value);
+  if (index < 256) {
+    writeChunk(chunk, OP_CONSTANT, line);
+    writeChunk(chunk, index, line);
+  } else if (index < 256 * 256) {
+    writeChunk(chunk, OP_CONSTANT_LONG, line);
+    writeChunk(chunk, index >> 8, line);
+    writeChunk(chunk, (uint8_t)index, line);
+  } else {
+    fprintf(stderr, "Too many constants");
+    exit(1);
+  }
+}
+
 void freeChunk(Chunk *chunk) {
   free(chunk->code);
   free(chunk->lines);
