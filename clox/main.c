@@ -1,15 +1,16 @@
 #include "chunk.h"
 #include "common.h"
 #include "debug.h"
+#include "vm.h"
 
 int main(int argc, const char *argv[]) {
-  Chunk chunk;
-  initChunk(&chunk);
+  VirtualMachine vm;
+  initVM(&vm);
   for (int i = 0; i < 300; ++i) {
-    writeConstant(&chunk, i, 0);
+    writeConstant(vm.chunk, i, 0);
   }
-  writeChunk(&chunk, OP_RETURN, 0);
-  disassembleChunk(&chunk, "test chunk");
-  freeChunk(&chunk);
+  writeChunk(vm.chunk, OP_RETURN, 0);
+  disassembleChunk(vm.chunk, "test chunk");
+  freeVM(&vm);
   return 0;
 }
