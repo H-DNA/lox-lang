@@ -31,17 +31,17 @@ InterpretResult interpret(VirtualMachine *vm) {
     uint8_t instruction = READ_BYTE();
     switch (instruction) {
     case OP_RETURN:
+      printValue(pop(vm));
+      printf("\n");
       return INTERPRET_OK;
     case OP_CONSTANT: {
       Value constant = READ_CONSTANT(READ_BYTE());
-      printValue(constant);
-      printf("\n");
+      push(vm, constant);
       break;
     }
     case OP_CONSTANT_LONG: {
       Value constant = READ_CONSTANT(READ_2BYTES());
-      printValue(constant);
-      printf("\n");
+      push(vm, constant);
       break;
     }
     }
