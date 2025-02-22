@@ -20,7 +20,7 @@ typedef enum {
 
 void initVM(VirtualMachine *vm);
 void freeVM(VirtualMachine *vm);
-InterpretResult interpret(VirtualMachine *vm);
+InterpretResult interpret(VirtualMachine *vm, const char* source);
 void push(VirtualMachine* vm, Value value);
 Value pop(VirtualMachine* vm);
 

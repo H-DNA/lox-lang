@@ -1,5 +1,6 @@
 #include "vm.h"
 #include "chunk.h"
+#include "compiler.h"
 #include "debug.h"
 #include "value.h"
 #include <stdio.h>
@@ -12,7 +13,7 @@ void initVM(VirtualMachine *vm) {
 
 void freeVM(VirtualMachine *vm) { freeChunk(&vm->chunk); }
 
-InterpretResult interpret(VirtualMachine *vm) {
+static InterpretResult run(VirtualMachine *vm) {
 #define READ_BYTE() (vm->chunk.code[vm->ip++])
 #define READ_2BYTES()                                                          \
   (vm->ip += 2, (vm->chunk.code[vm->ip - 2] << 8) + vm->chunk.code[vm->ip - 1])
@@ -76,6 +77,11 @@ InterpretResult interpret(VirtualMachine *vm) {
 #undef READ_BYTE
 #undef READ_2BYTES
 #undef READ_CONSTANT
+}
+
+InterpretResult interpret(VirtualMachine *vm, const char *source) {
+  compile(vm, source);
+  return run(vm);
 }
 
 void push(VirtualMachine *vm, Value value) {
