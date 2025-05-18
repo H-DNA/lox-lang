@@ -31,6 +31,7 @@ static void repl() {
       printf("\n");
       break;
     }
+    interpret(&vm, line);
   }
 
   freeVM(&vm);

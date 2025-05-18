@@ -50,7 +50,8 @@ typedef enum {
   TOKEN_VAR,
   TOKEN_WHILE,
 
-  TOKEN_ERROR,
+  TOKEN_INVALID,
+  TOKEN_UNCLOSED_STRING,
   TOKEN_EOF,
 } TokenType;
 
@@ -62,5 +63,7 @@ typedef struct {
 } Token;
 
 void initScanner(Scanner *scanner, const char *source);
+
+Token scanToken(Scanner *scanner);
 
 #endif
