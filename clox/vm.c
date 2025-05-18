@@ -80,9 +80,18 @@ static InterpretResult run(VirtualMachine *vm) {
 }
 
 InterpretResult interpret(VirtualMachine *vm, const char *source) {
-  compile(vm, source);
-  // return run(vm);
-  return INTERPRET_OK;
+  initChunk(&vm->chunk);
+  vm->ip = 0;
+
+  if (!compile(vm, source)) {
+    freeChunk(&vm->chunk);
+    return INTERPRET_COMPILE_ERROR;
+  }
+
+  InterpretResult result = run(vm);
+
+  freeChunk(&vm->chunk);
+  return result;
 }
 
 void push(VirtualMachine *vm, Value value) {
