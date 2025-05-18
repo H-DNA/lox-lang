@@ -186,5 +186,6 @@ Token scanToken(Scanner *scanner) {
     return string(scanner);
   }
 
+  advance(scanner);
   return makeToken(TOKEN_INVALID, start, scanner->current, scanner->line);
 }
