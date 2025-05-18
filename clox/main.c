@@ -54,7 +54,7 @@ static void runFile(const char *pathname) {
 static char *readFile(const char *pathname) {
   FILE *file = fopen(pathname, "rb");
   if (!file) {
-    fprintf(stderr, "Failed to open file %s", pathname);
+    fprintf(stderr, "Failed to open file %s\n", pathname);
     exit(1);
   }
 
@@ -64,13 +64,13 @@ static char *readFile(const char *pathname) {
 
   char *buffer = (char *)malloc(fileSize + 1);
   if (!buffer) {
-    fprintf(stderr, "Failed to malloc memory for file content %s", pathname);
+    fprintf(stderr, "Failed to malloc memory for file content %s\n", pathname);
     exit(1);
   }
 
   const size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
   if (bytesRead != fileSize) {
-    fprintf(stderr, "Failed to read file content %s", pathname);
+    fprintf(stderr, "Failed to read file content %s\n", pathname);
     exit(1);
   }
   buffer[bytesRead] = '\0';
