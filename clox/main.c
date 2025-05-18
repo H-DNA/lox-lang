@@ -41,7 +41,7 @@ static void runFile(const char *pathname) {
   initVM(&vm);
 
   char *source = readFile(pathname);
-  InterpretResult result = interpret(&vm);
+  InterpretResult result = interpret(&vm, source);
   free(source);
 
   freeVM(&vm);
