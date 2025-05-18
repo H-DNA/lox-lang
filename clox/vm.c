@@ -81,7 +81,8 @@ static InterpretResult run(VirtualMachine *vm) {
 
 InterpretResult interpret(VirtualMachine *vm, const char *source) {
   compile(vm, source);
-  return run(vm);
+  // return run(vm);
+  return INTERPRET_OK;
 }
 
 void push(VirtualMachine *vm, Value value) {
