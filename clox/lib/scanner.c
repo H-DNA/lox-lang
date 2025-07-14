@@ -166,22 +166,28 @@ Token scanToken(Scanner *scanner) {
   case '*':
     advance(scanner);
     return makeToken(TOKEN_STAR, start, scanner->current, scanner->line);
-  case '!':
+  case '!': {
     advance(scanner);
-    return makeToken(match(scanner, '=') ? TOKEN_BANG_EQUAL : TOKEN_BANG, start,
-                     scanner->current, scanner->line);
-  case '=':
+    const TokenType type = match(scanner, '=') ? TOKEN_BANG_EQUAL : TOKEN_BANG;
+    return makeToken(type, start, scanner->current, scanner->line);
+  }
+  case '=': {
     advance(scanner);
-    return makeToken(match(scanner, '=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL,
-                     start, scanner->current, scanner->line);
-  case '<':
+    const TokenType type =
+        match(scanner, '=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL;
+    return makeToken(type, start, scanner->current, scanner->line);
+  }
+  case '<': {
     advance(scanner);
-    return makeToken(match(scanner, '=') ? TOKEN_LESS_EQUAL : TOKEN_LESS, start,
-                     scanner->current, scanner->line);
-  case '>':
+    const TokenType type = match(scanner, '=') ? TOKEN_LESS_EQUAL : TOKEN_LESS;
+    return makeToken(type, start, scanner->current, scanner->line);
+  }
+  case '>': {
     advance(scanner);
-    return makeToken(match(scanner, '=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER,
-                     start, scanner->current, scanner->line);
+    const TokenType type =
+        match(scanner, '=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER;
+    return makeToken(type, start, scanner->current, scanner->line);
+  }
   case '"':
     return string(scanner);
   }

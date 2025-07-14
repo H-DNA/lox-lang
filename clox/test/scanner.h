@@ -1,52 +1,88 @@
 #include "../lib/scanner.h"
 #include <CUnit/CUnit.h>
 
-static void test_punctuation() {
+static void test_operator() {
   Scanner scanner;
-  initScanner(&scanner, ".,{}()");
+  initScanner(&scanner, "+-*/!<> ==!=>=<==");
   Token token;
 
   token = scanToken(&scanner);
-  CU_ASSERT_TRUE(token.type == TOKEN_DOT);
+  CU_ASSERT_TRUE(token.type == TOKEN_PLUS);
   CU_ASSERT_TRUE(token.line == 0);
   CU_ASSERT_TRUE(token.start == 0);
   CU_ASSERT_TRUE(token.end == 1);
 
   token = scanToken(&scanner);
-  CU_ASSERT_TRUE(token.type == TOKEN_COMMA);
+  CU_ASSERT_TRUE(token.type == TOKEN_MINUS);
   CU_ASSERT_TRUE(token.line == 0);
   CU_ASSERT_TRUE(token.start == 1);
   CU_ASSERT_TRUE(token.end == 2);
 
   token = scanToken(&scanner);
-  CU_ASSERT_TRUE(token.type == TOKEN_LEFT_BRACE);
+  CU_ASSERT_TRUE(token.type == TOKEN_STAR);
   CU_ASSERT_TRUE(token.line == 0);
   CU_ASSERT_TRUE(token.start == 2);
   CU_ASSERT_TRUE(token.end == 3);
 
   token = scanToken(&scanner);
-  CU_ASSERT_TRUE(token.type == TOKEN_RIGHT_BRACE);
+  CU_ASSERT_TRUE(token.type == TOKEN_SLASH);
   CU_ASSERT_TRUE(token.line == 0);
   CU_ASSERT_TRUE(token.start == 3);
   CU_ASSERT_TRUE(token.end == 4);
 
   token = scanToken(&scanner);
-  CU_ASSERT_TRUE(token.type == TOKEN_LEFT_PAREN);
+  CU_ASSERT_TRUE(token.type == TOKEN_BANG);
   CU_ASSERT_TRUE(token.line == 0);
   CU_ASSERT_TRUE(token.start == 4);
   CU_ASSERT_TRUE(token.end == 5);
 
   token = scanToken(&scanner);
-  CU_ASSERT_TRUE(token.type == TOKEN_RIGHT_PAREN);
+  CU_ASSERT_TRUE(token.type == TOKEN_LESS);
   CU_ASSERT_TRUE(token.line == 0);
   CU_ASSERT_TRUE(token.start == 5);
   CU_ASSERT_TRUE(token.end == 6);
 
   token = scanToken(&scanner);
-  CU_ASSERT_TRUE(token.type == TOKEN_EOF);
+  CU_ASSERT_TRUE(token.type == TOKEN_GREATER);
   CU_ASSERT_TRUE(token.line == 0);
   CU_ASSERT_TRUE(token.start == 6);
-  CU_ASSERT_TRUE(token.end == 6);
+  CU_ASSERT_TRUE(token.end == 7);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_EQUAL_EQUAL);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 8);
+  CU_ASSERT_TRUE(token.end == 10);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_BANG_EQUAL);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 10);
+  CU_ASSERT_TRUE(token.end == 12);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_GREATER_EQUAL);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 12);
+  CU_ASSERT_TRUE(token.end == 14);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_LESS_EQUAL);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 14);
+  CU_ASSERT_TRUE(token.end == 16);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_EQUAL);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 16);
+  CU_ASSERT_TRUE(token.end == 17);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_EOF);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 17);
+  CU_ASSERT_TRUE(token.end == 17);
 }
 
 static void test_punctuation() {
@@ -106,4 +142,5 @@ static void test_punctuation() {
 static void run_scanner_suite() {
   CU_pSuite suite = CU_add_suite("Scanner suite", NULL, NULL);
   CU_add_test(suite, "Lex punctuation", test_punctuation);
+  CU_add_test(suite, "Lex operators", test_operator);
 }
