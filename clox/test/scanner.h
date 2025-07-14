@@ -1,6 +1,30 @@
 #include "../lib/scanner.h"
 #include <CUnit/CUnit.h>
 
+static void test_string() {
+  Scanner scanner;
+  initScanner(&scanner, "\"this is a string\"\"abc");
+  Token token;
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_STRING);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 0);
+  CU_ASSERT_TRUE(token.end == 18);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_UNCLOSED_STRING);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 18);
+  CU_ASSERT_TRUE(token.end == 22);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_EOF);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 22);
+  CU_ASSERT_TRUE(token.end == 22);
+}
+
 static void test_operator() {
   Scanner scanner;
   initScanner(&scanner, "+-*/!<> ==!=>=<==");
@@ -143,4 +167,5 @@ static void run_scanner_suite() {
   CU_pSuite suite = CU_add_suite("Scanner suite", NULL, NULL);
   CU_add_test(suite, "Lex punctuation", test_punctuation);
   CU_add_test(suite, "Lex operators", test_operator);
+  CU_add_test(suite, "Lex strings", test_string);
 }
