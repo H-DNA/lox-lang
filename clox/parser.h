@@ -8,8 +8,9 @@ typedef struct {
   Token current;
   Token previous;
   bool hasError;
+  Scanner *scanner;
 } Parser;
 
-void initParser(Parser *parser);
+void initParser(Parser *parser, Scanner *scanner);
 
 #endif
