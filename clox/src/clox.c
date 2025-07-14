@@ -1,5 +1,5 @@
-#include "common.h"
-#include "vm.h"
+#include "../lib/common.h"
+#include "../lib/vm.h"
 #include <stdio.h>
 #include <stdlib.h>
 
