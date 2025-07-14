@@ -1,4 +1,4 @@
-# The Lox programming languages
+# The Lox programming language
 
 This repo contains some implementations of the Lox programming language (with some modifications to the grammar).
 
