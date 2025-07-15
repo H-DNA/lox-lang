@@ -1,6 +1,66 @@
 #include "../lib/scanner.h"
 #include <CUnit/CUnit.h>
 
+static void test_identifier() {
+  Scanner scanner;
+  initScanner(&scanner, "a_ _b _ abc");
+  Token token;
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_IDENTIFIER);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 0);
+  CU_ASSERT_TRUE(token.end == 2);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_IDENTIFIER);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 3);
+  CU_ASSERT_TRUE(token.end == 5);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_IDENTIFIER);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 6);
+  CU_ASSERT_TRUE(token.end == 7);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_IDENTIFIER);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 8);
+  CU_ASSERT_TRUE(token.end == 11);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_EOF);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 11);
+  CU_ASSERT_TRUE(token.end == 11);
+}
+
+static void test_newline() {
+  Scanner scanner;
+  initScanner(&scanner, "\na\n\nb\n");
+  Token token;
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_IDENTIFIER);
+  CU_ASSERT_TRUE(token.line == 1);
+  CU_ASSERT_TRUE(token.start == 1);
+  CU_ASSERT_TRUE(token.end == 2);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_IDENTIFIER);
+  CU_ASSERT_TRUE(token.line == 3);
+  CU_ASSERT_TRUE(token.start == 4);
+  CU_ASSERT_TRUE(token.end == 5);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_EOF);
+  CU_ASSERT_TRUE(token.line == 4);
+  CU_ASSERT_TRUE(token.start == 6);
+  CU_ASSERT_TRUE(token.end == 6);
+}
+
 static void test_number() {
   Scanner scanner;
   initScanner(&scanner, "-1.2 .3");
@@ -205,4 +265,6 @@ static void run_scanner_suite() {
   CU_add_test(suite, "Lex operators", test_operator);
   CU_add_test(suite, "Lex strings", test_string);
   CU_add_test(suite, "Lex numbers", test_number);
+  CU_add_test(suite, "Lex identifiers", test_identifier);
+  CU_add_test(suite, "Lex newlines", test_newline);
 }
