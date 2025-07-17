@@ -6,7 +6,6 @@
 
 typedef struct {
   Token current;
-  Token previous;
   bool hasError;
   Scanner *scanner;
   Chunk chunk;

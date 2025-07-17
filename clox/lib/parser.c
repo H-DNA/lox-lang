@@ -6,8 +6,6 @@
 #include <stdlib.h>
 
 static void advance(Parser *parser) {
-  parser->previous = parser->current;
-
   for (;;) {
     parser->current = scanToken(parser->scanner);
     if (parser->current.type != TOKEN_INVALID &&
@@ -30,28 +28,12 @@ static void consume(Parser *parser, TokenType type, const char *message) {
 }
 
 static void number(Parser *parser) {
-  double value = strtod(parser->previous.start + parser->scanner->source, NULL);
-  writeConstant(&parser->chunk, value, parser->previous.line);
+  double value = strtod(parser->current.start + parser->scanner->source, NULL);
+  writeConstant(&parser->chunk, value, parser->current.line);
+  advance(parser);
 }
 
-static void expression(Parser *parser) {
-
-}
-
-static void unary(Parser *parser) {
-  Token op = parser->previous;
-
-  expression(parser);
-
-  switch (op.type) {
-  case TOKEN_MINUS:
-    writeChunk(&parser->chunk, OP_NEGATE, op.line);
-    break;
-  default:
-    printf("Unreachable in unary()");
-    exit(1);
-  }
-}
+static void expression(Parser *parser) {}
 
 static void grouping(Parser *parser) {
   consume(parser, TOKEN_LEFT_PAREN, "Expect opening '('");
