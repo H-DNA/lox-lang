@@ -9,6 +9,7 @@ typedef struct {
   Token previous;
   bool hasError;
   Scanner *scanner;
+  Chunk chunk;
 } Parser;
 
 void initParser(Parser *parser, Scanner *scanner);
