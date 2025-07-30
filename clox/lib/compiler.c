@@ -7,7 +7,7 @@ bool compile(VirtualMachine *vm, const char *source) {
   Scanner scanner;
   initScanner(&scanner, source);
   Parser parser;
-  initParser(&parser, &scanner);
+  initParser(&parser, &scanner, vm);
 
   return !parser.hasError;
 }

@@ -2,6 +2,7 @@
 #include "chunk.h"
 #include "error.h"
 #include "scanner.h"
+#include "vm.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,10 +39,10 @@ static void expression_bp(Parser *parser, uint bp);
 static void expression(Parser *parser);
 static void grouping(Parser *parser);
 
-void initParser(Parser *parser, Scanner *scanner) {
+void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm) {
   parser->hasError = false;
   parser->scanner = scanner;
-  initChunk(&parser->chunk);
+  parser->chunk = &vm->chunk;
 }
 
 static void grouping(Parser *parser) {
@@ -141,13 +142,13 @@ static int right_infix_bp(TokenType type) {
 static void emit_infix(Parser *parser, TokenType type) {
   switch (type) {
   case TOKEN_PLUS:
-    writeChunk(&parser->chunk, OP_ADD, parser->current.line);
+    writeChunk(parser->chunk, OP_ADD, parser->current.line);
   case TOKEN_MINUS:
-    writeChunk(&parser->chunk, OP_SUBTRACT, parser->current.line);
+    writeChunk(parser->chunk, OP_SUBTRACT, parser->current.line);
   case TOKEN_STAR:
-    writeChunk(&parser->chunk, OP_MULTIPLY, parser->current.line);
+    writeChunk(parser->chunk, OP_MULTIPLY, parser->current.line);
   case TOKEN_SLASH:
-    writeChunk(&parser->chunk, OP_DIVIDE, parser->current.line);
+    writeChunk(parser->chunk, OP_DIVIDE, parser->current.line);
   default:
     printf("Unreachable in emit_infix");
     exit(1);
@@ -157,7 +158,7 @@ static void emit_infix(Parser *parser, TokenType type) {
 static void emit_prefix(Parser *parser, TokenType type) {
   switch (type) {
   case TOKEN_MINUS:
-    writeChunk(&parser->chunk, OP_NEGATE, parser->current.line);
+    writeChunk(parser->chunk, OP_NEGATE, parser->current.line);
   default:
     printf("Unreachable in emit_prefix");
     exit(1);
@@ -166,6 +167,6 @@ static void emit_prefix(Parser *parser, TokenType type) {
 
 static void number(Parser *parser) {
   double value = strtod(parser->current.start + parser->scanner->source, NULL);
-  writeConstant(&parser->chunk, value, parser->current.line);
+  writeConstant(parser->chunk, value, parser->current.line);
   advance(parser);
 }

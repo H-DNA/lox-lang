@@ -8,9 +8,9 @@ typedef struct {
   Token current;
   bool hasError;
   Scanner *scanner;
-  Chunk chunk;
+  Chunk *chunk;
 } Parser;
 
-void initParser(Parser *parser, Scanner *scanner);
+void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm);
 
 #endif
