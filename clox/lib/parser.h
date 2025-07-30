@@ -13,4 +13,6 @@ typedef struct {
 
 void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm);
 
+void parse(Parser *parser);
+
 #endif

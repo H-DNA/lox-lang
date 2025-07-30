@@ -45,6 +45,8 @@ void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm) {
   parser->chunk = &vm->chunk;
 }
 
+void parse(Parser *parser) { expression(parser); }
+
 static void grouping(Parser *parser) {
   consume(parser, TOKEN_LEFT_PAREN, "Expect opening '('");
   expression(parser);
@@ -93,7 +95,7 @@ static void expression_bp(Parser *parser, uint bp) {
 
 static int prefix_bp(TokenType type) {
   switch (type) {
-  TOKEN_MINUS:
+  case TOKEN_MINUS:
     return 20;
   default:
     printf("Unreachable in prefix_bp");
