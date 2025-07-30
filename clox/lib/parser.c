@@ -85,9 +85,6 @@ static void expression_bp(Parser *parser, uint bp) {
       emit_infix(parser, parser->current.type);
       break;
     default:
-      reportError("Invalid operator", parser->current.line);
-      synchronize_expression(parser);
-      parser->hasError = true;
       return;
     }
   }
