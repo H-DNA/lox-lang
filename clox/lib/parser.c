@@ -56,11 +56,13 @@ static void grouping(Parser *parser) {
 static void expression(Parser *parser) { expression_bp(parser, 0); }
 
 static void expression_bp(Parser *parser, uint bp) {
+  TokenType operator_type;
   switch (parser->current.type) {
   case TOKEN_MINUS:
+    operator_type = parser->current.type;
     advance(parser);
-    expression_bp(parser, prefix_bp(parser->current.type));
-    emit_prefix(parser, parser->current.type);
+    expression_bp(parser, prefix_bp(operator_type));
+    emit_prefix(parser, operator_type);
     break;
   case TOKEN_LEFT_PAREN:
     grouping(parser);
@@ -83,9 +85,10 @@ static void expression_bp(Parser *parser, uint bp) {
     case TOKEN_SLASH:
       if (left_infix_bp(parser->current.type) < bp)
         return;
+      operator_type = parser->current.type;
       advance(parser);
-      expression_bp(parser, right_infix_bp(parser->current.type));
-      emit_infix(parser, parser->current.type);
+      expression_bp(parser, right_infix_bp(operator_type));
+      emit_infix(parser, operator_type);
       break;
     default:
       return;
