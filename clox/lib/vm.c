@@ -2,6 +2,7 @@
 #include "chunk.h"
 #include "compiler.h"
 #include "debug.h"
+#include "error.h"
 #include "value.h"
 #include <stdio.h>
 
@@ -45,31 +46,48 @@ static InterpretResult run(VirtualMachine *vm) {
       push(vm, constant);
       break;
     }
-    case OP_NEGATE:
-      push(vm, -pop(vm));
+    case OP_NEGATE: {
+      Value operand = pop(vm);
+      if (!isNumber(operand)) {
+        reportRuntimeError(vm, "Operand must be a number");
+      }
+      push(vm, makeNumber(-asNumber(pop(vm))));
       break;
+    }
     case OP_ADD: {
       Value first = pop(vm);
       Value second = pop(vm);
-      push(vm, first + second);
+      if (!isNumber(first) || !isNumber(second)) {
+        reportRuntimeError(vm, "Operand must be a number");
+      }
+      push(vm, makeNumber(asNumber(first) + asNumber(second)));
       break;
     }
     case OP_SUBTRACT: {
       Value first = pop(vm);
       Value second = pop(vm);
-      push(vm, second - first);
+      if (!isNumber(first) || !isNumber(second)) {
+        reportRuntimeError(vm, "Operand must be a number");
+      }
+      push(vm, makeNumber(asNumber(second) - asNumber(first)));
       break;
     }
     case OP_MULTIPLY: {
       Value first = pop(vm);
       Value second = pop(vm);
-      push(vm, first * second);
+      if (!isNumber(first) || !isNumber(second)) {
+        reportRuntimeError(vm, "Operand must be a number");
+      }
+      push(vm, makeNumber(asNumber(first) * asNumber(second)));
       break;
     }
     case OP_DIVIDE: {
       Value first = pop(vm);
       Value second = pop(vm);
-      push(vm, second / first);
+      if (!isNumber(first) || !isNumber(second)) {
+        reportRuntimeError(vm, "Operand must be a number");
+      }
+      push(vm, makeNumber(asNumber(second) / asNumber(first)));
       break;
     }
     }
@@ -80,7 +98,9 @@ static InterpretResult run(VirtualMachine *vm) {
 }
 
 InterpretResult interpret(VirtualMachine *vm, const char *source) {
+  vm->stackTop = 0;
   vm->ip = 0;
+  resetChunkCode(&vm->chunk);
 
   if (!compile(vm, source)) {
     return INTERPRET_COMPILE_ERROR;

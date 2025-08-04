@@ -2,6 +2,7 @@
 #include "chunk.h"
 #include "error.h"
 #include "scanner.h"
+#include "value.h"
 #include "vm.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -180,7 +181,8 @@ static void emit_prefix(Parser *parser, TokenType type) {
 }
 
 static void number(Parser *parser) {
-  double value = strtod(parser->current.start + parser->scanner->source, NULL);
-  writeConstant(parser->chunk, value, parser->current.line);
+  double raw_value =
+      strtod(parser->current.start + parser->scanner->source, NULL);
+  writeConstant(parser->chunk, makeNumber(raw_value), parser->current.line);
   advance(parser);
 }

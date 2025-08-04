@@ -18,16 +18,17 @@ typedef enum {
 typedef struct {
   int count;
   int capacity;
-  uint8_t* code;
-  unsigned int* lines;
+  uint8_t *code;
+  unsigned int *lines;
   ValueArray constants;
 } Chunk;
 
-void initChunk(Chunk* chunk);
-void writeChunk(Chunk* chunk, uint8_t byte, unsigned int line);
-void writeConstant(Chunk* chunk, Value value, unsigned int line);
-void freeChunk(Chunk* chunk);
-int addConstant(Chunk* chunk, Value value);
+void initChunk(Chunk *chunk);
+void resetChunkCode(Chunk *chunk);
+void writeChunk(Chunk *chunk, uint8_t byte, unsigned int line);
+void writeConstant(Chunk *chunk, Value value, unsigned int line);
+void freeChunk(Chunk *chunk);
+int addConstant(Chunk *chunk, Value value);
 void printValue(Value value);
 
 #endif

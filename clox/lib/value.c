@@ -28,3 +28,23 @@ void writeValueArray(ValueArray *array, Value value) {
 }
 
 void freeValueArray(ValueArray *array) { free(array->values); }
+
+bool isNumber(Value value) { return value.type == VAL_NUMBER; }
+bool isBoolean(Value value) { return value.type == VAL_BOOL; }
+bool isNil(Value value) { return value.type == VAL_NIL; }
+
+double asNumber(Value value) { return value.number; }
+bool asBoolean(Value value) { return value.boolean; }
+
+Value makeNumber(double number) {
+  Value value = {.type = VAL_NUMBER, .number = number};
+  return value;
+}
+Value makeBoolean(bool boolean) {
+  Value value = {.type = VAL_NUMBER, .boolean = boolean};
+  return value;
+}
+Value makeNil() {
+  Value value = {.type = VAL_NIL};
+  return value;
+}

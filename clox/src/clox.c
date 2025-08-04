@@ -33,7 +33,6 @@ static void repl() {
     }
     interpret(&vm, line);
   }
-
   freeVM(&vm);
 }
 

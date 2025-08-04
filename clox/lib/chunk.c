@@ -1,5 +1,6 @@
 #include "chunk.h"
 #include "value.h"
+#include "vm.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +17,10 @@ void initChunk(Chunk *chunk) {
   }
 
   initValueArray(&chunk->constants);
+}
+
+void resetChunkCode(Chunk* chunk) {
+  chunk->count = 0;
 }
 
 void writeChunk(Chunk *chunk, uint8_t byte, unsigned int line) {
@@ -61,4 +66,12 @@ int addConstant(Chunk *chunk, Value value) {
   return chunk->constants.count - 1;
 }
 
-void printValue(Value value) { printf("%g", value); }
+void printValue(Value value) {
+  if (value.type == VAL_NUMBER) {
+    printf("%g", value.number);
+  } else if (value.type == VAL_BOOL) {
+    value.boolean ? printf("true") : printf("false");
+  } else if (value.type == VAL_NIL) {
+    printf("nil");
+  }
+}
