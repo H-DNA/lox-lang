@@ -1,6 +1,36 @@
 #include "../lib/scanner.h"
 #include <CUnit/CUnit.h>
 
+static void test_keywords() {
+  Scanner scanner;
+  initScanner(&scanner, "true false nil");
+  Token token;
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_TRUE);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 0);
+  CU_ASSERT_TRUE(token.end == 4);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_FALSE);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 5);
+  CU_ASSERT_TRUE(token.end == 10);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_NIL);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 11);
+  CU_ASSERT_TRUE(token.end == 14);
+
+  token = scanToken(&scanner);
+  CU_ASSERT_TRUE(token.type == TOKEN_EOF);
+  CU_ASSERT_TRUE(token.line == 0);
+  CU_ASSERT_TRUE(token.start == 14);
+  CU_ASSERT_TRUE(token.end == 14);
+}
+
 static void test_identifier() {
   Scanner scanner;
   initScanner(&scanner, "a_ _b _ abc");
@@ -267,4 +297,5 @@ static void run_scanner_suite() {
   CU_add_test(suite, "Lex numbers", test_number);
   CU_add_test(suite, "Lex identifiers", test_identifier);
   CU_add_test(suite, "Lex newlines", test_newline);
+  CU_add_test(suite, "Lex keywords", test_keywords);
 }
