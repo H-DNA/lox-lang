@@ -45,7 +45,10 @@ void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm) {
   parser->chunk = &vm->chunk;
 }
 
-void parse(Parser *parser) { expression(parser); }
+void parse(Parser *parser) {
+  advance(parser);
+  expression(parser);
+}
 
 static void grouping(Parser *parser) {
   consume(parser, TOKEN_LEFT_PAREN, "Expect opening '('");
