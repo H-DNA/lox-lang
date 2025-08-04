@@ -148,12 +148,16 @@ static void emit_infix(Parser *parser, TokenType type) {
   switch (type) {
   case TOKEN_PLUS:
     writeChunk(parser->chunk, OP_ADD, parser->current.line);
+    break;
   case TOKEN_MINUS:
     writeChunk(parser->chunk, OP_SUBTRACT, parser->current.line);
+    break;
   case TOKEN_STAR:
     writeChunk(parser->chunk, OP_MULTIPLY, parser->current.line);
+    break;
   case TOKEN_SLASH:
     writeChunk(parser->chunk, OP_DIVIDE, parser->current.line);
+    break;
   default:
     printf("Unreachable in emit_infix");
     exit(1);
@@ -164,6 +168,7 @@ static void emit_prefix(Parser *parser, TokenType type) {
   switch (type) {
   case TOKEN_MINUS:
     writeChunk(parser->chunk, OP_NEGATE, parser->current.line);
+    break;
   default:
     printf("Unreachable in emit_prefix");
     exit(1);
