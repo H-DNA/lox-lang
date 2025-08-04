@@ -117,6 +117,9 @@ static TokenType identifierType(Scanner *scanner, int start, int end) {
   } else if (end - start == 5 &&
              strncmp(scanner->source + start, "false", end - start) == 0) {
     return TOKEN_FALSE;
+  } else if (end - start == 3 &&
+             strncmp(scanner->source + start, "nil", end - start) == 0) {
+    return TOKEN_NIL;
   }
   return TOKEN_IDENTIFIER;
 }
