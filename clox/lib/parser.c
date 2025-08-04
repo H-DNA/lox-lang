@@ -48,6 +48,7 @@ void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm) {
 void parse(Parser *parser) {
   advance(parser);
   expression(parser);
+  writeChunk(parser->chunk, OP_RETURN, parser->current.line);
 }
 
 static void grouping(Parser *parser) {
