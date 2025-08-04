@@ -48,3 +48,7 @@ Value makeNil() {
   Value value = {.type = VAL_NIL};
   return value;
 }
+
+bool isFalsy(Value value) {
+  return isNil(value) || (isBoolean(value) && !asBoolean(value));
+}

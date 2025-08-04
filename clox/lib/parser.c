@@ -66,6 +66,7 @@ static void expression_bp(Parser *parser, uint bp) {
   TokenType operator_type;
   switch (parser->current.type) {
   case TOKEN_MINUS:
+  case TOKEN_BANG:
     operator_type = parser->current.type;
     advance(parser);
     expression_bp(parser, prefix_bp(operator_type));
@@ -113,6 +114,7 @@ static void expression_bp(Parser *parser, uint bp) {
 static int prefix_bp(TokenType type) {
   switch (type) {
   case TOKEN_MINUS:
+  case TOKEN_BANG:
     return 20;
   default:
     printf("Unreachable in prefix_bp");
@@ -182,6 +184,9 @@ static void emit_prefix(Parser *parser, TokenType type) {
   switch (type) {
   case TOKEN_MINUS:
     writeChunk(parser->chunk, OP_NEGATE, parser->current.line);
+    break;
+  case TOKEN_BANG:
+    writeChunk(parser->chunk, OP_NOT, parser->current.line);
     break;
   default:
     printf("Unreachable in emit_prefix");

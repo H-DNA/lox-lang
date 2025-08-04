@@ -45,6 +45,10 @@ int disassembleInstruction(Chunk *chunk, int offset) {
     printf("%-16s\n", "OP_NEGATE");
     return offset + 1;
   }
+  case OP_NOT: {
+    printf("%-16s\n", "OP_NOT");
+    return offset + 1;
+  }
   case OP_ADD: {
     printf("%-16s\n", "OP_ADD");
     return offset + 1;

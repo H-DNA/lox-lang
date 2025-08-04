@@ -27,6 +27,7 @@ bool asBoolean(Value value);
 Value makeNumber(double number);
 Value makeBoolean(bool boolean);
 Value makeNil();
+bool isFalsy(Value value);
 
 typedef struct {
   int capacity;

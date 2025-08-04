@@ -54,6 +54,11 @@ static InterpretResult run(VirtualMachine *vm) {
       push(vm, makeNumber(-asNumber(pop(vm))));
       break;
     }
+    case OP_NOT: {
+      Value operand = pop(vm);
+      push(vm, makeBoolean(isFalsy(operand)));
+      break;
+    }
     case OP_ADD: {
       Value first = pop(vm);
       Value second = pop(vm);
