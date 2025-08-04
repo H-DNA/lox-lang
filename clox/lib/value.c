@@ -41,7 +41,7 @@ Value makeNumber(double number) {
   return value;
 }
 Value makeBoolean(bool boolean) {
-  Value value = {.type = VAL_NUMBER, .boolean = boolean};
+  Value value = {.type = VAL_BOOL, .boolean = boolean};
   return value;
 }
 Value makeNil() {

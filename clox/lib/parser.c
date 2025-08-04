@@ -30,6 +30,8 @@ static void consume(Parser *parser, TokenType type, const char *message) {
 }
 
 static void number(Parser *parser);
+static void boolean(Parser *parser);
+static void nil(Parser *parser);
 static int prefix_bp(TokenType type);
 static void synchronize_expression(Parser *parser);
 static int left_infix_bp(TokenType type);
@@ -74,6 +76,13 @@ static void expression_bp(Parser *parser, uint bp) {
     break;
   case TOKEN_NUMBER:
     number(parser);
+    break;
+  case TOKEN_TRUE:
+  case TOKEN_FALSE:
+    boolean(parser);
+    break;
+  case TOKEN_NIL:
+    nil(parser);
     break;
   default:
     reportError("Invalid operand", parser->current.line);
@@ -184,5 +193,16 @@ static void number(Parser *parser) {
   double raw_value =
       strtod(parser->current.start + parser->scanner->source, NULL);
   writeConstant(parser->chunk, makeNumber(raw_value), parser->current.line);
+  advance(parser);
+}
+
+static void boolean(Parser *parser) {
+  bool raw_value = parser->current.type == TOKEN_TRUE;
+  writeConstant(parser->chunk, makeBoolean(raw_value), parser->current.line);
+  advance(parser);
+}
+
+static void nil(Parser *parser) {
+  writeConstant(parser->chunk, makeNil(), parser->current.line);
   advance(parser);
 }

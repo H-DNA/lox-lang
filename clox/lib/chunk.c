@@ -68,9 +68,9 @@ int addConstant(Chunk *chunk, Value value) {
 
 void printValue(Value value) {
   if (value.type == VAL_NUMBER) {
-    printf("%g", value.number);
+    printf("%g", asNumber(value));
   } else if (value.type == VAL_BOOL) {
-    value.boolean ? printf("true") : printf("false");
+    asBoolean(value) ? printf("true") : printf("false");
   } else if (value.type == VAL_NIL) {
     printf("nil");
   }

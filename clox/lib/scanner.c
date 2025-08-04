@@ -1,5 +1,7 @@
 #include "scanner.h"
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
 void initScanner(Scanner *scanner, const char *source) {
   scanner->source = source;
@@ -108,14 +110,24 @@ static bool isAlpha(char c) {
   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 }
 
-static TokenType identifierType() { return TOKEN_IDENTIFIER; }
+static TokenType identifierType(Scanner *scanner, int start, int end) {
+  if (end - start == 4 &&
+      strncmp(scanner->source + start, "true", end - start) == 0) {
+    return TOKEN_TRUE;
+  } else if (end - start == 5 &&
+             strncmp(scanner->source + start, "false", end - start) == 0) {
+    return TOKEN_FALSE;
+  }
+  return TOKEN_IDENTIFIER;
+}
 
 static Token identifier(Scanner *scanner) {
   int start = scanner->current;
   advance(scanner);
   while (isAlpha(peek(scanner)) || isDigit(peek(scanner)))
     advance(scanner);
-  return makeToken(identifierType(), start, scanner->current, scanner->line);
+  return makeToken(identifierType(scanner, start, scanner->current), start,
+                   scanner->current, scanner->line);
 }
 
 Token scanToken(Scanner *scanner) {
