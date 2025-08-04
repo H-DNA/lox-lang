@@ -57,7 +57,7 @@ static InterpretResult run(VirtualMachine *vm) {
     case OP_SUBTRACT: {
       Value first = pop(vm);
       Value second = pop(vm);
-      push(vm, first - second);
+      push(vm, second - first);
       break;
     }
     case OP_MULTIPLY: {
@@ -69,7 +69,7 @@ static InterpretResult run(VirtualMachine *vm) {
     case OP_DIVIDE: {
       Value first = pop(vm);
       Value second = pop(vm);
-      push(vm, first / second);
+      push(vm, second / first);
       break;
     }
     }
