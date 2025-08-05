@@ -98,6 +98,11 @@ static void expression_bp(Parser *parser, uint bp) {
     case TOKEN_PLUS:
     case TOKEN_STAR:
     case TOKEN_SLASH:
+    case TOKEN_EQUAL_EQUAL:
+    case TOKEN_GREATER:
+    case TOKEN_GREATER_EQUAL:
+    case TOKEN_LESS:
+    case TOKEN_LESS_EQUAL:
       if (left_infix_bp(parser->current.type) < bp)
         return;
       operator_type = parser->current.type;
@@ -136,10 +141,17 @@ static int left_infix_bp(TokenType type) {
   switch (type) {
   case TOKEN_PLUS:
   case TOKEN_MINUS:
-    return 1;
+    return 11;
   case TOKEN_STAR:
   case TOKEN_SLASH:
-    return 3;
+    return 13;
+  case TOKEN_EQUAL_EQUAL:
+  case TOKEN_GREATER:
+  case TOKEN_GREATER_EQUAL:
+  case TOKEN_LESS:
+  case TOKEN_LESS_EQUAL:
+  case TOKEN_BANG_EQUAL:
+    return 9;
   default:
     printf("Unreachable in left_infix_bp");
     exit(1);
@@ -150,10 +162,17 @@ static int right_infix_bp(TokenType type) {
   switch (type) {
   case TOKEN_PLUS:
   case TOKEN_MINUS:
-    return 2;
+    return 12;
   case TOKEN_STAR:
   case TOKEN_SLASH:
-    return 4;
+    return 14;
+  case TOKEN_EQUAL_EQUAL:
+  case TOKEN_GREATER:
+  case TOKEN_GREATER_EQUAL:
+  case TOKEN_LESS:
+  case TOKEN_LESS_EQUAL:
+  case TOKEN_BANG_EQUAL:
+    return 10;
   default:
     printf("Unreachable in right_infix_bp");
     exit(1);
@@ -173,6 +192,27 @@ static void emit_infix(Parser *parser, TokenType type) {
     break;
   case TOKEN_SLASH:
     writeChunk(parser->chunk, OP_DIVIDE, parser->current.line);
+    break;
+  case TOKEN_EQUAL_EQUAL:
+    writeChunk(parser->chunk, OP_EQUAL, parser->current.line);
+    break;
+  case TOKEN_BANG_EQUAL:
+    writeChunk(parser->chunk, OP_EQUAL, parser->current.line);
+    writeChunk(parser->chunk, OP_NOT, parser->current.line);
+    break;
+  case TOKEN_GREATER:
+    writeChunk(parser->chunk, OP_GREATER, parser->current.line);
+    break;
+  case TOKEN_GREATER_EQUAL:
+    writeChunk(parser->chunk, OP_LESS, parser->current.line);
+    writeChunk(parser->chunk, OP_NOT, parser->current.line);
+    break;
+  case TOKEN_LESS:
+    writeChunk(parser->chunk, OP_LESS, parser->current.line);
+    break;
+  case TOKEN_LESS_EQUAL:
+    writeChunk(parser->chunk, OP_GREATER, parser->current.line);
+    writeChunk(parser->chunk, OP_NOT, parser->current.line);
     break;
   default:
     printf("Unreachable in emit_infix");

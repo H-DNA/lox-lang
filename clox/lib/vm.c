@@ -59,6 +59,30 @@ static InterpretResult run(VirtualMachine *vm) {
       push(vm, makeBoolean(isFalsy(operand)));
       break;
     }
+    case OP_EQUAL: {
+      Value first = pop(vm);
+      Value second = pop(vm);
+      push(vm, makeBoolean(areEqual(second, first)));
+      break;
+    }
+    case OP_GREATER: {
+      Value first = pop(vm);
+      Value second = pop(vm);
+      if (!isNumber(first) || !isNumber(second)) {
+        reportRuntimeError(vm, "Operand must be a number");
+      }
+      push(vm, makeBoolean(asNumber(second) > asNumber(first)));
+      break;
+    }
+    case OP_LESS: {
+      Value first = pop(vm);
+      Value second = pop(vm);
+      if (!isNumber(first) || !isNumber(second)) {
+        reportRuntimeError(vm, "Operand must be a number");
+      }
+      push(vm, makeBoolean(asNumber(second) < asNumber(first)));
+      break;
+    }
     case OP_ADD: {
       Value first = pop(vm);
       Value second = pop(vm);

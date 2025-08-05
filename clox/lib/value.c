@@ -52,3 +52,19 @@ Value makeNil() {
 bool isFalsy(Value value) {
   return isNil(value) || (isBoolean(value) && !asBoolean(value));
 }
+
+bool areEqual(Value first, Value second) {
+  if (first.type != second.type)
+    return false;
+  switch (first.type) {
+  case VAL_NIL:
+    return true;
+  case VAL_BOOL:
+    return second.boolean == first.boolean;
+  case VAL_NUMBER:
+    return second.number == first.number;
+  default:
+    printf("Unreachable in areEqual");
+    exit(1);
+  }
+}
