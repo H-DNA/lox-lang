@@ -77,6 +77,14 @@ int disassembleInstruction(Chunk *chunk, int offset) {
     printf("%-16s\n", "OP_LESS");
     return offset + 1;
   }
+  case OP_AND: {
+    printf("%-16s\n", "OP_AND");
+    return offset + 1;
+  }
+  case OP_OR: {
+    printf("%-16s\n", "OP_OR");
+    return offset + 1;
+  }
   default:
     printf("Unknown opcode %d\n", instruction);
     return offset + 1;

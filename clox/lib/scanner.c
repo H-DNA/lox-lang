@@ -120,6 +120,12 @@ static TokenType identifierType(Scanner *scanner, int start, int end) {
   } else if (end - start == 3 &&
              strncmp(scanner->source + start, "nil", end - start) == 0) {
     return TOKEN_NIL;
+  } else if (end - start == 3 &&
+             strncmp(scanner->source + start, "and", end - start) == 0) {
+    return TOKEN_AND;
+  } else if (end - start == 2 &&
+             strncmp(scanner->source + start, "or", end - start) == 0) {
+    return TOKEN_OR;
   }
   return TOKEN_IDENTIFIER;
 }

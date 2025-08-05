@@ -14,6 +14,8 @@ typedef enum {
   OP_EQUAL,
   OP_GREATER,
   OP_LESS,
+  OP_AND,
+  OP_OR,
   OP_NEGATE,
   OP_NOT,
   OP_RETURN,

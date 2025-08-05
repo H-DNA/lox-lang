@@ -83,6 +83,18 @@ static InterpretResult run(VirtualMachine *vm) {
       push(vm, makeBoolean(asNumber(second) < asNumber(first)));
       break;
     }
+    case OP_AND: {
+      Value first = pop(vm);
+      Value second = pop(vm);
+      push(vm, makeBoolean(!isFalsy(first) && !isFalsy(second)));
+      break;
+    }
+    case OP_OR: {
+      Value first = pop(vm);
+      Value second = pop(vm);
+      push(vm, makeBoolean(!isFalsy(first) || !isFalsy(second)));
+      break;
+    }
     case OP_ADD: {
       Value first = pop(vm);
       Value second = pop(vm);

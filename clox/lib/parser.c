@@ -98,11 +98,14 @@ static void expression_bp(Parser *parser, uint bp) {
     case TOKEN_PLUS:
     case TOKEN_STAR:
     case TOKEN_SLASH:
+    case TOKEN_BANG_EQUAL:
     case TOKEN_EQUAL_EQUAL:
     case TOKEN_GREATER:
     case TOKEN_GREATER_EQUAL:
     case TOKEN_LESS:
     case TOKEN_LESS_EQUAL:
+    case TOKEN_AND:
+    case TOKEN_OR:
       if (left_infix_bp(parser->current.type) < bp)
         return;
       operator_type = parser->current.type;
@@ -152,6 +155,10 @@ static int left_infix_bp(TokenType type) {
   case TOKEN_LESS_EQUAL:
   case TOKEN_BANG_EQUAL:
     return 9;
+  case TOKEN_AND:
+    return 7;
+  case TOKEN_OR:
+    return 5;
   default:
     printf("Unreachable in left_infix_bp");
     exit(1);
@@ -173,6 +180,10 @@ static int right_infix_bp(TokenType type) {
   case TOKEN_LESS_EQUAL:
   case TOKEN_BANG_EQUAL:
     return 10;
+  case TOKEN_AND:
+    return 8;
+  case TOKEN_OR:
+    return 6;
   default:
     printf("Unreachable in right_infix_bp");
     exit(1);
@@ -213,6 +224,12 @@ static void emit_infix(Parser *parser, TokenType type) {
   case TOKEN_LESS_EQUAL:
     writeChunk(parser->chunk, OP_GREATER, parser->current.line);
     writeChunk(parser->chunk, OP_NOT, parser->current.line);
+    break;
+  case TOKEN_AND:
+    writeChunk(parser->chunk, OP_AND, parser->current.line);
+    break;
+  case TOKEN_OR:
+    writeChunk(parser->chunk, OP_OR, parser->current.line);
     break;
   default:
     printf("Unreachable in emit_infix");
