@@ -4,7 +4,18 @@
 #include "debug.h"
 #include "error.h"
 #include "value.h"
+#include <stdarg.h>
 #include <stdio.h>
+
+static void runtimeError(VirtualMachine *vm, const char *format, ...) {
+  int line = vm->chunk.lines[vm->ip];
+  fprintf(stderr, "[line %d] ", line);
+  va_list args;
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+  fputs("\n", stderr);
+}
 
 void initVM(VirtualMachine *vm) {
   initChunk(&vm->chunk);
@@ -49,7 +60,7 @@ static InterpretResult run(VirtualMachine *vm) {
     case OP_NEGATE: {
       Value operand = pop(vm);
       if (!isNumber(operand)) {
-        reportRuntimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operand must be a number");
         break;
       }
       push(vm, makeNumber(-asNumber(pop(vm))));
@@ -70,7 +81,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value first = pop(vm);
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
-        reportRuntimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operand must be a number");
         break;
       }
       push(vm, makeBoolean(asNumber(second) > asNumber(first)));
@@ -80,7 +91,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value first = pop(vm);
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
-        reportRuntimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operand must be a number");
         break;
       }
       push(vm, makeBoolean(asNumber(second) < asNumber(first)));
@@ -102,7 +113,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value first = pop(vm);
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
-        reportRuntimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operand must be a number");
         break;
       }
       push(vm, makeNumber(asNumber(first) + asNumber(second)));
@@ -112,7 +123,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value first = pop(vm);
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
-        reportRuntimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operand must be a number");
         break;
       }
       push(vm, makeNumber(asNumber(second) - asNumber(first)));
@@ -122,7 +133,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value first = pop(vm);
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
-        reportRuntimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operand must be a number");
         break;
       }
       push(vm, makeNumber(asNumber(first) * asNumber(second)));
@@ -132,7 +143,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value first = pop(vm);
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
-        reportRuntimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operand must be a number");
         break;
       }
       push(vm, makeNumber(asNumber(second) / asNumber(first)));

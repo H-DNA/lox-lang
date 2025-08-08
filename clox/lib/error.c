@@ -20,14 +20,3 @@ void reportErrorToken(Scanner *scanner, Token token) {
     reportError(message, token.line);
   }
 }
-
-void reportRuntimeError(VirtualMachine *vm, const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  vfprintf(stderr, format, args);
-  va_end(args);
-  fputs("\n", stderr);
-
-  int line = vm->chunk.lines[vm->ip];
-  fprintf(stderr, "[line %d]\n", line);
-}
