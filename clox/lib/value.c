@@ -1,4 +1,5 @@
 #include "value.h"
+#include "object.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -29,13 +30,19 @@ void writeValueArray(ValueArray *array, Value value) {
 
 void freeValueArray(ValueArray *array) { free(array->values); }
 
+bool isObject(Value value) { return value.type == VAL_OBJ; }
 bool isNumber(Value value) { return value.type == VAL_NUMBER; }
 bool isBoolean(Value value) { return value.type == VAL_BOOL; }
 bool isNil(Value value) { return value.type == VAL_NIL; }
 
+Obj *asObject(Value value) { return value.obj; }
 double asNumber(Value value) { return value.number; }
 bool asBoolean(Value value) { return value.boolean; }
 
+Value makeObject(Obj *obj) {
+  Value value = {.type = VAL_BOOL, .obj = obj};
+  return value;
+}
 Value makeNumber(double number) {
   Value value = {.type = VAL_NUMBER, .number = number};
   return value;
@@ -63,6 +70,8 @@ bool areEqual(Value first, Value second) {
     return second.boolean == first.boolean;
   case VAL_NUMBER:
     return second.number == first.number;
+  case VAL_OBJ:
+    return areObjectsEqual(first, second);
   default:
     printf("Unreachable in areEqual");
     exit(1);

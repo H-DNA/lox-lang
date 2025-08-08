@@ -1,4 +1,5 @@
 #include "chunk.h"
+#include "object.h"
 #include "value.h"
 #include "vm.h"
 #include <stdint.h>
@@ -19,9 +20,7 @@ void initChunk(Chunk *chunk) {
   initValueArray(&chunk->constants);
 }
 
-void resetChunkCode(Chunk* chunk) {
-  chunk->count = 0;
-}
+void resetChunkCode(Chunk *chunk) { chunk->count = 0; }
 
 void writeChunk(Chunk *chunk, uint8_t byte, unsigned int line) {
   if (chunk->count == chunk->capacity) {
@@ -73,5 +72,7 @@ void printValue(Value value) {
     asBoolean(value) ? printf("true") : printf("false");
   } else if (value.type == VAL_NIL) {
     printf("nil");
+  } else if (value.type == VAL_OBJ) {
+    printObject(value);
   }
 }

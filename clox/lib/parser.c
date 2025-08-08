@@ -1,9 +1,11 @@
 #include "parser.h"
 #include "chunk.h"
 #include "error.h"
+#include "object/string.h"
 #include "scanner.h"
 #include "value.h"
 #include "vm.h"
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -29,6 +31,7 @@ static void consume(Parser *parser, TokenType type, const char *message) {
   parser->hasError = true;
 }
 
+static void string(Parser *parser);
 static void number(Parser *parser);
 static void boolean(Parser *parser);
 static void nil(Parser *parser);
@@ -81,6 +84,9 @@ static void expression_bp(Parser *parser, uint bp) {
   case TOKEN_TRUE:
   case TOKEN_FALSE:
     boolean(parser);
+    break;
+  case TOKEN_STRING:
+    string(parser);
     break;
   case TOKEN_NIL:
     nil(parser);
@@ -249,6 +255,16 @@ static void emit_prefix(Parser *parser, TokenType type) {
     printf("Unreachable in emit_prefix");
     exit(1);
   }
+}
+
+static void string(Parser *parser) {
+  int length = parser->current.end - parser->current.start - 2;
+  char *raw_value = malloc(length + 1);
+  memcpy(raw_value, parser->scanner->source + parser->current.start + 1,
+         length);
+  writeConstant(parser->chunk, makeString(raw_value, length),
+                parser->current.line);
+  advance(parser);
 }
 
 static void number(Parser *parser) {
