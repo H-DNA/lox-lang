@@ -50,6 +50,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value operand = pop(vm);
       if (!isNumber(operand)) {
         reportRuntimeError(vm, "Operand must be a number");
+        break;
       }
       push(vm, makeNumber(-asNumber(pop(vm))));
       break;
@@ -70,6 +71,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         reportRuntimeError(vm, "Operand must be a number");
+        break;
       }
       push(vm, makeBoolean(asNumber(second) > asNumber(first)));
       break;
@@ -79,6 +81,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         reportRuntimeError(vm, "Operand must be a number");
+        break;
       }
       push(vm, makeBoolean(asNumber(second) < asNumber(first)));
       break;
@@ -100,6 +103,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         reportRuntimeError(vm, "Operand must be a number");
+        break;
       }
       push(vm, makeNumber(asNumber(first) + asNumber(second)));
       break;
@@ -109,6 +113,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         reportRuntimeError(vm, "Operand must be a number");
+        break;
       }
       push(vm, makeNumber(asNumber(second) - asNumber(first)));
       break;
@@ -118,6 +123,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         reportRuntimeError(vm, "Operand must be a number");
+        break;
       }
       push(vm, makeNumber(asNumber(first) * asNumber(second)));
       break;
@@ -127,6 +133,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         reportRuntimeError(vm, "Operand must be a number");
+        break;
       }
       push(vm, makeNumber(asNumber(second) / asNumber(first)));
       break;
