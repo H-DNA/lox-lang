@@ -262,6 +262,7 @@ static void string(Parser *parser) {
   char *raw_value = malloc(length + 1);
   memcpy(raw_value, parser->scanner->source + parser->current.start + 1,
          length);
+  raw_value[length] = '\0';
   writeConstant(parser->chunk, makeString(raw_value, length),
                 parser->current.line);
   advance(parser);
