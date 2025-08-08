@@ -3,6 +3,7 @@
 #include "compiler.h"
 #include "debug.h"
 #include "error.h"
+#include "object/string.h"
 #include "value.h"
 #include <stdarg.h>
 #include <stdio.h>
@@ -60,7 +61,7 @@ static InterpretResult run(VirtualMachine *vm) {
     case OP_NEGATE: {
       Value operand = pop(vm);
       if (!isNumber(operand)) {
-        runtimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operands must be two numbers");
         return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeNumber(-asNumber(pop(vm))));
@@ -81,7 +82,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value first = pop(vm);
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
-        runtimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operands must be two numbers");
         return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeBoolean(asNumber(second) > asNumber(first)));
@@ -91,7 +92,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value first = pop(vm);
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
-        runtimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operands must be two numbers");
         return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeBoolean(asNumber(second) < asNumber(first)));
@@ -112,18 +113,21 @@ static InterpretResult run(VirtualMachine *vm) {
     case OP_ADD: {
       Value first = pop(vm);
       Value second = pop(vm);
-      if (!isNumber(first) || !isNumber(second)) {
-        runtimeError(vm, "Operand must be a number");
+      if (isNumber(first) && isNumber(second)) {
+        push(vm, makeNumber(asNumber(first) + asNumber(second)));
+      } else if (isString(first) && isString(second)) {
+        push(vm, concatenateStrings(second, first));
+      } else {
+        runtimeError(vm, "Operands must be two numbers or two strings");
         return INTERPRET_RUNTIME_ERROR;
       }
-      push(vm, makeNumber(asNumber(first) + asNumber(second)));
       break;
     }
     case OP_SUBTRACT: {
       Value first = pop(vm);
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
-        runtimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operands must be two numbers");
         return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeNumber(asNumber(second) - asNumber(first)));
@@ -133,7 +137,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value first = pop(vm);
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
-        runtimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operands must be two numbers");
         return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeNumber(asNumber(first) * asNumber(second)));
@@ -143,7 +147,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value first = pop(vm);
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
-        runtimeError(vm, "Operand must be a number");
+        runtimeError(vm, "Operands must be two numbers");
         return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeNumber(asNumber(second) / asNumber(first)));

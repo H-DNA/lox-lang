@@ -5,9 +5,9 @@
 #include "scanner.h"
 #include "value.h"
 #include "vm.h"
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static void advance(Parser *parser) {
   for (;;) {

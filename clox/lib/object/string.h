@@ -17,6 +17,7 @@ char *getCString(Value value);
 int getStringLength(Value value);
 
 Value makeString(char *string, int length);
+Value concatenateStrings(Value v1, Value v2);
 
 void printString(Value value);
 
