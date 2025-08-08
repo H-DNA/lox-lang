@@ -61,7 +61,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value operand = pop(vm);
       if (!isNumber(operand)) {
         runtimeError(vm, "Operand must be a number");
-        break;
+        return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeNumber(-asNumber(pop(vm))));
       break;
@@ -82,7 +82,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         runtimeError(vm, "Operand must be a number");
-        break;
+        return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeBoolean(asNumber(second) > asNumber(first)));
       break;
@@ -92,7 +92,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         runtimeError(vm, "Operand must be a number");
-        break;
+        return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeBoolean(asNumber(second) < asNumber(first)));
       break;
@@ -114,7 +114,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         runtimeError(vm, "Operand must be a number");
-        break;
+        return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeNumber(asNumber(first) + asNumber(second)));
       break;
@@ -124,7 +124,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         runtimeError(vm, "Operand must be a number");
-        break;
+        return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeNumber(asNumber(second) - asNumber(first)));
       break;
@@ -134,7 +134,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         runtimeError(vm, "Operand must be a number");
-        break;
+        return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeNumber(asNumber(first) * asNumber(second)));
       break;
@@ -144,7 +144,7 @@ static InterpretResult run(VirtualMachine *vm) {
       Value second = pop(vm);
       if (!isNumber(first) || !isNumber(second)) {
         runtimeError(vm, "Operand must be a number");
-        break;
+        return INTERPRET_RUNTIME_ERROR;
       }
       push(vm, makeNumber(asNumber(second) / asNumber(first)));
       break;
