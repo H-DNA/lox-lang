@@ -2,11 +2,13 @@
 #define clox_object_string_h
 
 #include "../object.h"
+#include <stdint.h>
 
 struct ObjString {
   Obj obj;
   int length;
   char *chars;
+  uint32_t hash;
 };
 
 bool isString(Value value);

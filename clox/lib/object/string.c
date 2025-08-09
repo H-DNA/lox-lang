@@ -16,12 +16,22 @@ int getStringLength(Value value) {
   return ((ObjString *)asObject(value))->length;
 }
 
+static uint32_t hashString(const char *str) {
+  uint32_t hash = 2166136261u;
+  for (int i = 0; str[i] != '\0'; i++) {
+    hash ^= (uint8_t)str[i];
+    hash *= 16777619;
+  }
+  return hash;
+}
+
 // Taking ownership of string
 Value makeString(VirtualMachine *vm, char *string, int length) {
   ObjString *obj =
       (ObjString *)allocateObject(vm, sizeof(ObjString), OBJ_STRING);
   obj->chars = string;
   obj->length = length;
+  obj->hash = hashString(obj->chars);
   Value value = {.type = VAL_OBJ, .obj = (Obj *)obj};
   return value;
 }
