@@ -8,7 +8,7 @@ typedef struct {
   Token current;
   bool hasError;
   Scanner *scanner;
-  Chunk *chunk;
+  VirtualMachine *vm;
 } Parser;
 
 void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm);

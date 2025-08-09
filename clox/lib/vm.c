@@ -22,9 +22,13 @@ void initVM(VirtualMachine *vm) {
   initChunk(&vm->chunk);
   vm->ip = 0;
   vm->stackTop = 0;
+  vm->objects = NULL;
 }
 
-void freeVM(VirtualMachine *vm) { freeChunk(&vm->chunk); }
+void freeVM(VirtualMachine *vm) {
+  freeChunk(&vm->chunk);
+  freeObjects(vm->objects);
+}
 
 static InterpretResult run(VirtualMachine *vm) {
 #define READ_BYTE() (vm->chunk.code[vm->ip++])
@@ -116,7 +120,7 @@ static InterpretResult run(VirtualMachine *vm) {
       if (isNumber(first) && isNumber(second)) {
         push(vm, makeNumber(asNumber(first) + asNumber(second)));
       } else if (isString(first) && isString(second)) {
-        push(vm, concatenateStrings(second, first));
+        push(vm, concatenateStrings(vm, second, first));
       } else {
         runtimeError(vm, "Operands must be two numbers or two strings");
         return INTERPRET_RUNTIME_ERROR;

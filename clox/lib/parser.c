@@ -48,13 +48,13 @@ static void grouping(Parser *parser);
 void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm) {
   parser->hasError = false;
   parser->scanner = scanner;
-  parser->chunk = &vm->chunk;
+  parser->vm = vm;
 }
 
 void parse(Parser *parser) {
   advance(parser);
   expression(parser);
-  writeChunk(parser->chunk, OP_RETURN, parser->current.line);
+  writeChunk(&parser->vm->chunk, OP_RETURN, parser->current.line);
 }
 
 static void grouping(Parser *parser) {
@@ -199,43 +199,43 @@ static int right_infix_bp(TokenType type) {
 static void emit_infix(Parser *parser, TokenType type) {
   switch (type) {
   case TOKEN_PLUS:
-    writeChunk(parser->chunk, OP_ADD, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_ADD, parser->current.line);
     break;
   case TOKEN_MINUS:
-    writeChunk(parser->chunk, OP_SUBTRACT, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_SUBTRACT, parser->current.line);
     break;
   case TOKEN_STAR:
-    writeChunk(parser->chunk, OP_MULTIPLY, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_MULTIPLY, parser->current.line);
     break;
   case TOKEN_SLASH:
-    writeChunk(parser->chunk, OP_DIVIDE, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_DIVIDE, parser->current.line);
     break;
   case TOKEN_EQUAL_EQUAL:
-    writeChunk(parser->chunk, OP_EQUAL, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_EQUAL, parser->current.line);
     break;
   case TOKEN_BANG_EQUAL:
-    writeChunk(parser->chunk, OP_EQUAL, parser->current.line);
-    writeChunk(parser->chunk, OP_NOT, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_EQUAL, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_NOT, parser->current.line);
     break;
   case TOKEN_GREATER:
-    writeChunk(parser->chunk, OP_GREATER, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_GREATER, parser->current.line);
     break;
   case TOKEN_GREATER_EQUAL:
-    writeChunk(parser->chunk, OP_LESS, parser->current.line);
-    writeChunk(parser->chunk, OP_NOT, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_LESS, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_NOT, parser->current.line);
     break;
   case TOKEN_LESS:
-    writeChunk(parser->chunk, OP_LESS, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_LESS, parser->current.line);
     break;
   case TOKEN_LESS_EQUAL:
-    writeChunk(parser->chunk, OP_GREATER, parser->current.line);
-    writeChunk(parser->chunk, OP_NOT, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_GREATER, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_NOT, parser->current.line);
     break;
   case TOKEN_AND:
-    writeChunk(parser->chunk, OP_AND, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_AND, parser->current.line);
     break;
   case TOKEN_OR:
-    writeChunk(parser->chunk, OP_OR, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_OR, parser->current.line);
     break;
   default:
     printf("Unreachable in emit_infix");
@@ -246,10 +246,10 @@ static void emit_infix(Parser *parser, TokenType type) {
 static void emit_prefix(Parser *parser, TokenType type) {
   switch (type) {
   case TOKEN_MINUS:
-    writeChunk(parser->chunk, OP_NEGATE, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_NEGATE, parser->current.line);
     break;
   case TOKEN_BANG:
-    writeChunk(parser->chunk, OP_NOT, parser->current.line);
+    writeChunk(&parser->vm->chunk, OP_NOT, parser->current.line);
     break;
   default:
     printf("Unreachable in emit_prefix");
@@ -263,7 +263,7 @@ static void string(Parser *parser) {
   memcpy(raw_value, parser->scanner->source + parser->current.start + 1,
          length);
   raw_value[length] = '\0';
-  writeConstant(parser->chunk, makeString(raw_value, length),
+  writeConstant(&parser->vm->chunk, makeString(parser->vm, raw_value, length),
                 parser->current.line);
   advance(parser);
 }
@@ -271,17 +271,19 @@ static void string(Parser *parser) {
 static void number(Parser *parser) {
   double raw_value =
       strtod(parser->current.start + parser->scanner->source, NULL);
-  writeConstant(parser->chunk, makeNumber(raw_value), parser->current.line);
+  writeConstant(&parser->vm->chunk, makeNumber(raw_value),
+                parser->current.line);
   advance(parser);
 }
 
 static void boolean(Parser *parser) {
   bool raw_value = parser->current.type == TOKEN_TRUE;
-  writeConstant(parser->chunk, makeBoolean(raw_value), parser->current.line);
+  writeConstant(&parser->vm->chunk, makeBoolean(raw_value),
+                parser->current.line);
   advance(parser);
 }
 
 static void nil(Parser *parser) {
-  writeConstant(parser->chunk, makeNil(), parser->current.line);
+  writeConstant(&parser->vm->chunk, makeNil(), parser->current.line);
   advance(parser);
 }

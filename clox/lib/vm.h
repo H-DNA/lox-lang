@@ -10,6 +10,7 @@ typedef struct {
   unsigned int ip;
   Value stack[STACK_MAX];
   unsigned int stackTop;
+  Obj *objects;
 } VirtualMachine;
 
 typedef enum {

@@ -16,11 +16,13 @@ ObjString *asString(Value value);
 char *getCString(Value value);
 int getStringLength(Value value);
 
-Value makeString(char *string, int length);
-Value concatenateStrings(Value v1, Value v2);
+Value makeString(VirtualMachine *vm, char *string, int length);
+Value concatenateStrings(VirtualMachine *vm, Value v1, Value v2);
 
 void printString(Value value);
 
 bool areStringsEqual(Value v1, Value v2);
+
+void freeString(ObjString *obj);
 
 #endif

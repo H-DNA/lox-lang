@@ -2,6 +2,7 @@
 #define clox_object_h
 
 #include "value.h"
+#include "vm.h"
 
 typedef enum {
   OBJ_STRING,
@@ -20,6 +21,8 @@ void printObject(Value value);
 
 bool areObjectsEqual(Value, Value);
 
-Obj *allocateObject(size_t size, ObjType type);
+Obj *allocateObject(VirtualMachine *vm, size_t size, ObjType type);
+
+void freeObjects(Obj *root);
 
 #endif

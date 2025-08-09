@@ -17,15 +17,16 @@ int getStringLength(Value value) {
 }
 
 // Taking ownership of string
-Value makeString(char *string, int length) {
-  ObjString *obj = (ObjString *)allocateObject(sizeof(ObjString), OBJ_STRING);
+Value makeString(VirtualMachine *vm, char *string, int length) {
+  ObjString *obj =
+      (ObjString *)allocateObject(vm, sizeof(ObjString), OBJ_STRING);
   obj->chars = string;
   obj->length = length;
   Value value = {.type = VAL_OBJ, .obj = (Obj *)obj};
   return value;
 }
 
-Value concatenateStrings(Value v1, Value v2) {
+Value concatenateStrings(VirtualMachine *vm, Value v1, Value v2) {
   ObjString *obj1 = asString(v1);
   ObjString *obj2 = asString(v2);
   int length = obj1->length + obj2->length;
@@ -33,7 +34,7 @@ Value concatenateStrings(Value v1, Value v2) {
   memcpy(res, obj1->chars, obj1->length);
   memcpy(res + obj1->length, obj2->chars, obj2->length);
   res[length] = '\0';
-  return makeString(res, length);
+  return makeString(vm, res, length);
 }
 
 void printString(Value value) {
@@ -45,4 +46,9 @@ bool areStringsEqual(Value v1, Value v2) {
   ObjString *s1 = asString(v1);
   ObjString *s2 = asString(v2);
   return s1->length == s2->length && memcmp(s1, s2, s1->length) == 0;
+}
+
+void freeString(ObjString *obj) {
+  free(obj->chars);
+  free(obj);
 }
