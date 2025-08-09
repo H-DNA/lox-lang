@@ -44,5 +44,5 @@ void printString(Value value) {
 bool areStringsEqual(Value v1, Value v2) {
   ObjString *s1 = asString(v1);
   ObjString *s2 = asString(v2);
-  return s1->length == s2->length && memcmp(s1, s2, s1->length);
+  return s1->length == s2->length && memcmp(s1, s2, s1->length) == 0;
 }
