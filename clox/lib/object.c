@@ -8,12 +8,12 @@ ObjType objectType(Value value) { return asObject(value)->type; }
 
 void printObject(Value value) {
   switch (asObject(value)->type) {
-    case OBJ_STRING:
-      printString(value);
-      break;
-    default:
-      printf("Unreachable in printObject");
-      exit(1);
+  case OBJ_STRING:
+    printString(value);
+    break;
+  default:
+    printf("Unreachable in printObject");
+    exit(1);
   }
 }
 
@@ -26,9 +26,15 @@ bool areObjectsEqual(Value v1, Value v2) {
   }
 
   switch (obj1->type) {
-    case OBJ_STRING:
-      return areStringsEqual(v1, v2);
-    default:
-      return obj1 == obj2;
+  case OBJ_STRING:
+    return areStringsEqual(v1, v2);
+  default:
+    return obj1 == obj2;
   }
+}
+
+Obj *allocateObject(size_t size, ObjType type) {
+  Obj *object = (Obj *)malloc(size);
+  object->type = type;
+  return object;
 }

@@ -18,7 +18,7 @@ int getStringLength(Value value) {
 
 // Taking ownership of string
 Value makeString(char *string, int length) {
-  ObjString *obj = malloc(sizeof(ObjString));
+  ObjString *obj = (ObjString *)allocateObject(sizeof(ObjString), OBJ_STRING);
   obj->chars = string;
   obj->length = length;
   Value value = {.type = VAL_OBJ, .obj = (Obj *)obj};
