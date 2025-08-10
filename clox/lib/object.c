@@ -21,17 +21,7 @@ void printObject(Value value) {
 bool areObjectsEqual(Value v1, Value v2) {
   Obj *obj1 = asObject(v1);
   Obj *obj2 = asObject(v2);
-
-  if (obj1->type != obj2->type) {
-    return false;
-  }
-
-  switch (obj1->type) {
-  case OBJ_STRING:
-    return areStringsEqual(v1, v2);
-  default:
-    return obj1 == obj2;
-  }
+  return obj1 == obj2;
 }
 
 Obj *allocateObject(VirtualMachine *vm, size_t size, ObjType type) {

@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "error.h"
 #include "object/string.h"
+#include "table.h"
 #include "value.h"
 #include <stdarg.h>
 #include <stdio.h>
@@ -23,10 +24,12 @@ void initVM(VirtualMachine *vm) {
   vm->ip = 0;
   vm->stackTop = 0;
   vm->objects = NULL;
+  initTable(&vm->strings);
 }
 
 void freeVM(VirtualMachine *vm) {
   freeChunk(&vm->chunk);
+  freeTable(&vm->strings);
   freeObjects(vm->objects);
 }
 

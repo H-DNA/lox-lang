@@ -259,11 +259,7 @@ static void emit_prefix(Parser *parser, TokenType type) {
 
 static void string(Parser *parser) {
   int length = parser->current.end - parser->current.start - 2;
-  char *raw_value = malloc(length + 1);
-  memcpy(raw_value, parser->scanner->source + parser->current.start + 1,
-         length);
-  raw_value[length] = '\0';
-  writeConstant(&parser->vm->chunk, makeString(parser->vm, raw_value, length),
+  writeConstant(&parser->vm->chunk, makeString(parser->vm, parser->scanner->source + parser->current.start + 1, length),
                 parser->current.line);
   advance(parser);
 }

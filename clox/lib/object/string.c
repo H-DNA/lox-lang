@@ -1,6 +1,7 @@
 #include "./string.h"
 #include "../object.h"
 #include "../value.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,22 +17,34 @@ int getStringLength(Value value) {
   return ((ObjString *)asObject(value))->length;
 }
 
-static uint32_t hashString(const char *str) {
+static uint32_t hashString(const char *str, int length) {
   uint32_t hash = 2166136261u;
-  for (int i = 0; str[i] != '\0'; i++) {
+  for (int i = 0; i < length; i++) {
     hash ^= (uint8_t)str[i];
     hash *= 16777619;
   }
   return hash;
 }
 
-// Taking ownership of string
-Value makeString(VirtualMachine *vm, char *string, int length) {
+Value makeString(VirtualMachine *vm, const char *string, int length) {
+  uint32_t hash = hashString(string, length);
+  ObjString *interned = tableFindString(&vm->strings, string, length, hash);
+  if (interned != NULL) {
+    Value value = {.type = VAL_OBJ, .obj = (Obj *)interned};
+    return value;
+  }
+
   ObjString *obj =
       (ObjString *)allocateObject(vm, sizeof(ObjString), OBJ_STRING);
-  obj->chars = string;
+  char *raw_value = malloc(length + 1);
+  memcpy(raw_value, string, length);
+  raw_value[length] = '\0';
+  obj->chars = raw_value;
   obj->length = length;
-  obj->hash = hashString(obj->chars);
+  obj->hash = hash;
+
+  tableSet(&vm->strings, obj, makeNil());
+
   Value value = {.type = VAL_OBJ, .obj = (Obj *)obj};
   return value;
 }
@@ -40,22 +53,17 @@ Value concatenateStrings(VirtualMachine *vm, Value v1, Value v2) {
   ObjString *obj1 = asString(v1);
   ObjString *obj2 = asString(v2);
   int length = obj1->length + obj2->length;
-  char *res = malloc(length + 1);
+  char *res = malloc(length);
   memcpy(res, obj1->chars, obj1->length);
   memcpy(res + obj1->length, obj2->chars, obj2->length);
-  res[length] = '\0';
-  return makeString(vm, res, length);
+  Value value = makeString(vm, res, length);
+  free(res);
+  return value;
 }
 
 void printString(Value value) {
   ObjString *obj = asString(value);
   printf("%s", obj->chars);
-}
-
-bool areStringsEqual(Value v1, Value v2) {
-  ObjString *s1 = asString(v1);
-  ObjString *s2 = asString(v2);
-  return s1->length == s2->length && memcmp(s1, s2, s1->length) == 0;
 }
 
 void freeString(ObjString *obj) {
