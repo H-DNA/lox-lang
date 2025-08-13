@@ -32,6 +32,13 @@ int disassembleInstruction(Chunk *chunk, int offset) {
     printf("\n");
     return offset + 2;
   }
+  case OP_DEFINE_GLOBAL: {
+    uint8_t constant = chunk->code[offset + 1];
+    printf("%-16s %4d ", "OP_DEFINE_GLOBAL", constant);
+    printValue(chunk->constants.values[constant]);
+    printf("\n");
+    return offset + 2;
+  }
   case OP_CONSTANT_LONG: {
     uint8_t constant_first = chunk->code[offset + 1];
     uint8_t constant_second = chunk->code[offset + 2];

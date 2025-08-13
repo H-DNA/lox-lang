@@ -24,6 +24,7 @@ typedef enum {
   OP_NIL,
   OP_TRUE,
   OP_FALSE,
+  OP_DEFINE_GLOBAL,
 } OpCode;
 
 typedef struct {

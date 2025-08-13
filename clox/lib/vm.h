@@ -1,8 +1,8 @@
 #ifndef clox_vm_h
 #define clox_vm_h
 
-#include "table.h"
 #include "chunk.h"
+#include "table.h"
 
 #define STACK_MAX 256
 
@@ -13,6 +13,7 @@ typedef struct {
   unsigned int stackTop;
   Obj *objects;
   Table strings;
+  Table globals;
 } VirtualMachine;
 
 typedef enum {

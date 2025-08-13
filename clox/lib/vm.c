@@ -25,11 +25,13 @@ void initVM(VirtualMachine *vm) {
   vm->stackTop = 0;
   vm->objects = NULL;
   initTable(&vm->strings);
+  initTable(&vm->globals);
 }
 
 void freeVM(VirtualMachine *vm) {
   freeChunk(&vm->chunk);
   freeTable(&vm->strings);
+  freeTable(&vm->globals);
   freeObjects(vm->objects);
 }
 
@@ -60,6 +62,12 @@ static InterpretResult run(VirtualMachine *vm) {
     case OP_POP:
       pop(vm);
       break;
+    case OP_DEFINE_GLOBAL: {
+      ObjString *name = asString(READ_CONSTANT(READ_BYTE()));
+      Value initializer = pop(vm);
+      tableSet(&vm->globals, name, initializer);
+      break;
+    }
     case OP_CONSTANT: {
       Value constant = READ_CONSTANT(READ_BYTE());
       push(vm, constant);

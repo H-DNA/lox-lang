@@ -3,6 +3,7 @@
 #include "error.h"
 #include "object/string.h"
 #include "scanner.h"
+#include "table.h"
 #include "value.h"
 #include "vm.h"
 #include <stdio.h>
@@ -57,6 +58,7 @@ static void statement(Parser *parser);
 static void printStatement(Parser *parser);
 static void expressionStatement(Parser *parser);
 static void varDeclaration(Parser *parser);
+static void synchronizeVarDeclaration(Parser *parser);
 
 void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm) {
   parser->hasError = false;
@@ -82,7 +84,41 @@ static void declaration(Parser *parser) {
   }
 }
 
-static void varDeclaration(Parser *parser) {}
+static void varDeclaration(Parser *parser) {
+  consume(parser, TOKEN_VAR, "Expect the 'var' keyword");
+
+  if (parser->current.type != TOKEN_IDENTIFIER) {
+    reportError("Expect an identifier", parser->current.line);
+    synchronizeVarDeclaration(parser);
+    parser->hasError = true;
+    return;
+  }
+  Value name =
+      makeString(parser->vm, parser->scanner->source + parser->current.start,
+                 parser->current.end - parser->current.start);
+  int global = addConstant(&parser->vm->chunk, name);
+  advance(parser);
+
+  if (match(parser, TOKEN_EQUAL)) {
+    expression(parser);
+  } else {
+    writeChunk(&parser->vm->chunk, OP_NIL, parser->current.start);
+  }
+  consume(parser, TOKEN_SEMICOLON, "Expect the ending semicolon ';'");
+
+  writeChunk(&parser->vm->chunk, OP_DEFINE_GLOBAL, parser->current.start);
+  writeChunk(&parser->vm->chunk, global, parser->current.start);
+}
+
+static void synchronizeVarDeclaration(Parser *parser) {
+  while (parser->current.type != TOKEN_EOF &&
+         parser->current.type != TOKEN_SEMICOLON) {
+    advance(parser);
+  }
+  if (parser->current.type == TOKEN_SEMICOLON) {
+    advance(parser);
+  }
+}
 
 static void statement(Parser *parser) {
   switch (parser->current.type) {

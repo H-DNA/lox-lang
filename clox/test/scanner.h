@@ -31,6 +31,7 @@ static void test_keywords() {
   CU_ASSERT_TRUE(token.end == 14);
 }
 
+
 static void test_identifier() {
   Scanner scanner;
   initScanner(&scanner, "a_ _b _ abc");
