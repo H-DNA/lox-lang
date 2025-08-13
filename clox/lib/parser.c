@@ -82,8 +82,7 @@ static void declaration(Parser *parser) {
   }
 }
 
-static void varDeclaration(Parser *parser) {
-}
+static void varDeclaration(Parser *parser) {}
 
 static void statement(Parser *parser) {
   switch (parser->current.type) {
@@ -316,21 +315,23 @@ static void string(Parser *parser) {
 }
 
 static void number(Parser *parser) {
-  double raw_value =
+  double rawValue =
       strtod(parser->current.start + parser->scanner->source, NULL);
-  writeConstant(&parser->vm->chunk, makeNumber(raw_value),
-                parser->current.line);
+  writeConstant(&parser->vm->chunk, makeNumber(rawValue), parser->current.line);
   advance(parser);
 }
 
 static void boolean(Parser *parser) {
-  bool raw_value = parser->current.type == TOKEN_TRUE;
-  writeConstant(&parser->vm->chunk, makeBoolean(raw_value),
-                parser->current.line);
+  bool rawValue = parser->current.type == TOKEN_TRUE;
+  if (rawValue) {
+    writeChunk(&parser->vm->chunk, OP_TRUE, parser->current.line);
+  } else {
+    writeChunk(&parser->vm->chunk, OP_FALSE, parser->current.line);
+  }
   advance(parser);
 }
 
 static void nil(Parser *parser) {
-  writeConstant(&parser->vm->chunk, makeNil(), parser->current.line);
+  writeChunk(&parser->vm->chunk, OP_NIL, parser->current.line);
   advance(parser);
 }

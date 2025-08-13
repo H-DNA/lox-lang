@@ -21,6 +21,9 @@ typedef enum {
   OP_RETURN,
   OP_PRINT,
   OP_POP,
+  OP_NIL,
+  OP_TRUE,
+  OP_FALSE,
 } OpCode;
 
 typedef struct {

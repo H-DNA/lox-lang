@@ -70,6 +70,18 @@ static InterpretResult run(VirtualMachine *vm) {
       push(vm, constant);
       break;
     }
+    case OP_NIL: {
+      push(vm, makeNil());
+      break;
+    }
+    case OP_TRUE: {
+      push(vm, makeBoolean(true));
+      break;
+    }
+    case OP_FALSE: {
+      push(vm, makeBoolean(false));
+      break;
+    }
     case OP_NEGATE: {
       Value operand = pop(vm);
       if (!isNumber(operand)) {
