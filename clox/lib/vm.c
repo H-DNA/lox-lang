@@ -57,6 +57,9 @@ static InterpretResult run(VirtualMachine *vm) {
       printValue(pop(vm));
       printf("\n");
       break;
+    case OP_POP:
+      pop(vm);
+      break;
     case OP_CONSTANT: {
       Value constant = READ_CONSTANT(READ_BYTE());
       push(vm, constant);

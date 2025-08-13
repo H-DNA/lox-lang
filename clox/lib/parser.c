@@ -55,6 +55,7 @@ static void grouping(Parser *parser);
 static void declaration(Parser *parser);
 static void statement(Parser *parser);
 static void printStatement(Parser *parser);
+static void expressionStatement(Parser *parser);
 
 void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm) {
   parser->hasError = false;
@@ -76,6 +77,8 @@ static void statement(Parser *parser) {
   switch (parser->current.type) {
   case TOKEN_PRINT:
     printStatement(parser);
+  default:
+    expressionStatement(parser);
   }
 }
 
@@ -84,6 +87,12 @@ static void printStatement(Parser *parser) {
   expression(parser);
   consume(parser, TOKEN_SEMICOLON, "Expect the ending semicolon ';'");
   writeChunk(&parser->vm->chunk, OP_PRINT, parser->current.line);
+}
+
+static void expressionStatement(Parser *parser) {
+  expression(parser);
+  consume(parser, TOKEN_SEMICOLON, "Expect the ending semicolon ';'");
+  writeChunk(&parser->vm->chunk, OP_POP, parser->current.line);
 }
 
 static void grouping(Parser *parser) {
