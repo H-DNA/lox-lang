@@ -79,7 +79,12 @@ static void statement(Parser *parser) {
   }
 }
 
-static void printStatement(Parser *parser) {}
+static void printStatement(Parser *parser) {
+  consume(parser, TOKEN_PRINT, "Expect the 'print' keyword");
+  expression(parser);
+  consume(parser, TOKEN_SEMICOLON, "Expect the ending semicolon ';'");
+  writeChunk(&parser->vm->chunk, OP_PRINT, parser->current.line);
+}
 
 static void grouping(Parser *parser) {
   consume(parser, TOKEN_LEFT_PAREN, "Expect opening '('");
@@ -163,9 +168,6 @@ static int prefixBp(TokenType type) {
 static void synchronizeExpression(Parser *parser) {
   while (parser->current.type != TOKEN_EOF &&
          parser->current.type != TOKEN_SEMICOLON) {
-    advance(parser);
-  }
-  if (parser->current.type == TOKEN_SEMICOLON) {
     advance(parser);
   }
 }

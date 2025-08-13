@@ -111,23 +111,27 @@ static bool isAlpha(char c) {
 }
 
 static TokenType identifierType(Scanner *scanner, int start, int end) {
-  if (end - start == 4 &&
-      strncmp(scanner->source + start, "true", end - start) == 0) {
+  int length = end - start;
+  if (length == 4 && strncmp(scanner->source + start, "true", length) == 0) {
     return TOKEN_TRUE;
-  } else if (end - start == 5 &&
-             strncmp(scanner->source + start, "false", end - start) == 0) {
+  } else if (length == 5 &&
+             strncmp(scanner->source + start, "false", length) == 0) {
     return TOKEN_FALSE;
-  } else if (end - start == 3 &&
-             strncmp(scanner->source + start, "nil", end - start) == 0) {
+  } else if (length == 3 &&
+             strncmp(scanner->source + start, "nil", length) == 0) {
     return TOKEN_NIL;
-  } else if (end - start == 3 &&
-             strncmp(scanner->source + start, "and", end - start) == 0) {
+  } else if (length == 3 &&
+             strncmp(scanner->source + start, "and", length) == 0) {
     return TOKEN_AND;
-  } else if (end - start == 2 &&
-             strncmp(scanner->source + start, "or", end - start) == 0) {
+  } else if (length == 2 &&
+             strncmp(scanner->source + start, "or", length) == 0) {
     return TOKEN_OR;
+  } else if (length == 5 &&
+             strncmp(scanner->source + start, "print", length) == 0) {
+    return TOKEN_PRINT;
+  } else {
+    return TOKEN_IDENTIFIER;
   }
-  return TOKEN_IDENTIFIER;
 }
 
 static Token identifier(Scanner *scanner) {
