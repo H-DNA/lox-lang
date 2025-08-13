@@ -68,6 +68,16 @@ static InterpretResult run(VirtualMachine *vm) {
       tableSet(&vm->globals, name, initializer);
       break;
     }
+    case OP_GET_GLOBAL: {
+      ObjString *name = asString(READ_CONSTANT(READ_BYTE()));
+      Value value;
+      if (!tableGet(&vm->globals, name, &value)) {
+        runtimeError(vm, "Undefined variable '%s'.", name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      push(vm, value);
+      break;
+    }
     case OP_CONSTANT: {
       Value constant = READ_CONSTANT(READ_BYTE());
       push(vm, constant);

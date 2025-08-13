@@ -44,6 +44,7 @@ static void string(Parser *parser);
 static void number(Parser *parser);
 static void boolean(Parser *parser);
 static void nil(Parser *parser);
+static void variable(Parser *parser);
 static int prefixBp(TokenType type);
 static void synchronizeExpression(Parser *parser);
 static int leftInfixBp(TokenType type);
@@ -176,6 +177,9 @@ static void expressionBp(Parser *parser, uint bp) {
     break;
   case TOKEN_NIL:
     nil(parser);
+    break;
+  case TOKEN_IDENTIFIER:
+    variable(parser);
     break;
   default:
     reportError("Invalid operand", parser->current.line);
@@ -370,4 +374,19 @@ static void boolean(Parser *parser) {
 static void nil(Parser *parser) {
   writeChunk(&parser->vm->chunk, OP_NIL, parser->current.line);
   advance(parser);
+}
+
+static void variable(Parser *parser) {
+  if (parser->current.type != TOKEN_IDENTIFIER) {
+    reportError("Expect an identifier", parser->current.line);
+    parser->hasError = true;
+    return;
+  }
+  Value name =
+      makeString(parser->vm, parser->scanner->source + parser->current.start,
+                 parser->current.end - parser->current.start);
+  int nameIndex = addConstant(&parser->vm->chunk, name);
+  advance(parser);
+  writeChunk(&parser->vm->chunk, OP_GET_GLOBAL, parser->current.line);
+  writeChunk(&parser->vm->chunk, nameIndex, parser->current.line);
 }
