@@ -71,12 +71,15 @@ void parse(Parser *parser) {
   writeChunk(&parser->vm->chunk, OP_RETURN, parser->current.line);
 }
 
-static void declaration(Parser *parser) { statement(parser); }
+static void declaration(Parser *parser) {
+  statement(parser);
+}
 
 static void statement(Parser *parser) {
   switch (parser->current.type) {
   case TOKEN_PRINT:
     printStatement(parser);
+    break;
   default:
     expressionStatement(parser);
   }
