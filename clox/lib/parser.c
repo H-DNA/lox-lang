@@ -56,6 +56,7 @@ static void declaration(Parser *parser);
 static void statement(Parser *parser);
 static void printStatement(Parser *parser);
 static void expressionStatement(Parser *parser);
+static void varDeclaration(Parser *parser);
 
 void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm) {
   parser->hasError = false;
@@ -72,7 +73,16 @@ void parse(Parser *parser) {
 }
 
 static void declaration(Parser *parser) {
-  statement(parser);
+  switch (parser->current.type) {
+  case TOKEN_VAR:
+    varDeclaration(parser);
+    break;
+  default:
+    statement(parser);
+  }
+}
+
+static void varDeclaration(Parser *parser) {
 }
 
 static void statement(Parser *parser) {
