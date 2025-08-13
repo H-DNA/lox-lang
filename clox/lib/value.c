@@ -16,12 +16,12 @@ void initValueArray(ValueArray *array) {
 
 void writeValueArray(ValueArray *array, Value value) {
   if (array->count == array->capacity) {
-    int new_capacity = array->capacity * 2;
-    array->capacity = new_capacity;
-    array->values = realloc(array->values, new_capacity * sizeof(Value));
+    int newCapacity = array->capacity * 2;
+    array->capacity = newCapacity;
+    array->values = realloc(array->values, newCapacity * sizeof(Value));
     if (array->values == NULL) {
       fprintf(stderr, "Failed to realloc memory in writeChunk with capacity %d",
-              (int)new_capacity);
+              (int)newCapacity);
       exit(1);
     }
   }

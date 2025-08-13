@@ -70,14 +70,14 @@ bool tableSet(Table *table, ObjString *key, Value value) {
     adjust_capacity(table, capacity);
   }
   Entry *entry = find_entry(table->entries, table->capacity, key);
-  bool is_new_key = entry->key == NULL;
-  if (is_new_key && isNil(entry->value)) {
+  bool isNewKey = entry->key == NULL;
+  if (isNewKey && isNil(entry->value)) {
     ++table->count;
   }
 
   entry->key = key;
   entry->value = value;
-  return is_new_key;
+  return isNewKey;
 }
 
 void tableAddAll(Table *from, Table *to) {

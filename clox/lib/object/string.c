@@ -36,10 +36,10 @@ Value makeString(VirtualMachine *vm, const char *string, int length) {
 
   ObjString *obj =
       (ObjString *)allocateObject(vm, sizeof(ObjString), OBJ_STRING);
-  char *raw_value = malloc(length + 1);
-  memcpy(raw_value, string, length);
-  raw_value[length] = '\0';
-  obj->chars = raw_value;
+  char *rawValue = malloc(length + 1);
+  memcpy(rawValue, string, length);
+  rawValue[length] = '\0';
+  obj->chars = rawValue;
   obj->length = length;
   obj->hash = hash;
 

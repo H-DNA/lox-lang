@@ -31,19 +31,30 @@ static void consume(Parser *parser, TokenType type, const char *message) {
   parser->hasError = true;
 }
 
+static bool match(Parser *parser, TokenType type) {
+  if (parser->current.type != type) {
+    return false;
+  }
+  advance(parser);
+  return true;
+}
+
 static void string(Parser *parser);
 static void number(Parser *parser);
 static void boolean(Parser *parser);
 static void nil(Parser *parser);
-static int prefix_bp(TokenType type);
-static void synchronize_expression(Parser *parser);
-static int left_infix_bp(TokenType type);
-static int right_infix_bp(TokenType type);
-static void emit_infix(Parser *parser, TokenType type);
-static void emit_prefix(Parser *parser, TokenType type);
-static void expression_bp(Parser *parser, uint bp);
+static int prefixBp(TokenType type);
+static void synchronizeExpression(Parser *parser);
+static int leftInfixBp(TokenType type);
+static int rightInfixBp(TokenType type);
+static void emitInfix(Parser *parser, TokenType type);
+static void emitPrefix(Parser *parser, TokenType type);
+static void expressionBp(Parser *parser, uint bp);
 static void expression(Parser *parser);
 static void grouping(Parser *parser);
+static void declaration(Parser *parser);
+static void statement(Parser *parser);
+static void printStatement(Parser *parser);
 
 void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm) {
   parser->hasError = false;
@@ -53,9 +64,22 @@ void initParser(Parser *parser, Scanner *scanner, VirtualMachine *vm) {
 
 void parse(Parser *parser) {
   advance(parser);
-  expression(parser);
+  while (!match(parser, TOKEN_EOF)) {
+    declaration(parser);
+  }
   writeChunk(&parser->vm->chunk, OP_RETURN, parser->current.line);
 }
+
+static void declaration(Parser *parser) { statement(parser); }
+
+static void statement(Parser *parser) {
+  switch (parser->current.type) {
+  case TOKEN_PRINT:
+    printStatement(parser);
+  }
+}
+
+static void printStatement(Parser *parser) {}
 
 static void grouping(Parser *parser) {
   consume(parser, TOKEN_LEFT_PAREN, "Expect opening '('");
@@ -63,17 +87,17 @@ static void grouping(Parser *parser) {
   consume(parser, TOKEN_RIGHT_PAREN, "Expect closing ')'");
 }
 
-static void expression(Parser *parser) { expression_bp(parser, 0); }
+static void expression(Parser *parser) { expressionBp(parser, 0); }
 
-static void expression_bp(Parser *parser, uint bp) {
-  TokenType operator_type;
+static void expressionBp(Parser *parser, uint bp) {
+  TokenType operatorType;
   switch (parser->current.type) {
   case TOKEN_MINUS:
   case TOKEN_BANG:
-    operator_type = parser->current.type;
+    operatorType = parser->current.type;
     advance(parser);
-    expression_bp(parser, prefix_bp(operator_type));
-    emit_prefix(parser, operator_type);
+    expressionBp(parser, prefixBp(operatorType));
+    emitPrefix(parser, operatorType);
     break;
   case TOKEN_LEFT_PAREN:
     grouping(parser);
@@ -93,7 +117,7 @@ static void expression_bp(Parser *parser, uint bp) {
     break;
   default:
     reportError("Invalid operand", parser->current.line);
-    synchronize_expression(parser);
+    synchronizeExpression(parser);
     parser->hasError = true;
     return;
   }
@@ -112,12 +136,12 @@ static void expression_bp(Parser *parser, uint bp) {
     case TOKEN_LESS_EQUAL:
     case TOKEN_AND:
     case TOKEN_OR:
-      if (left_infix_bp(parser->current.type) < bp)
+      if (leftInfixBp(parser->current.type) < bp)
         return;
-      operator_type = parser->current.type;
+      operatorType = parser->current.type;
       advance(parser);
-      expression_bp(parser, right_infix_bp(operator_type));
-      emit_infix(parser, operator_type);
+      expressionBp(parser, rightInfixBp(operatorType));
+      emitInfix(parser, operatorType);
       break;
     default:
       return;
@@ -125,7 +149,7 @@ static void expression_bp(Parser *parser, uint bp) {
   }
 }
 
-static int prefix_bp(TokenType type) {
+static int prefixBp(TokenType type) {
   switch (type) {
   case TOKEN_MINUS:
   case TOKEN_BANG:
@@ -136,7 +160,7 @@ static int prefix_bp(TokenType type) {
   }
 }
 
-static void synchronize_expression(Parser *parser) {
+static void synchronizeExpression(Parser *parser) {
   while (parser->current.type != TOKEN_EOF &&
          parser->current.type != TOKEN_SEMICOLON) {
     advance(parser);
@@ -146,7 +170,7 @@ static void synchronize_expression(Parser *parser) {
   }
 }
 
-static int left_infix_bp(TokenType type) {
+static int leftInfixBp(TokenType type) {
   switch (type) {
   case TOKEN_PLUS:
   case TOKEN_MINUS:
@@ -171,7 +195,7 @@ static int left_infix_bp(TokenType type) {
   }
 }
 
-static int right_infix_bp(TokenType type) {
+static int rightInfixBp(TokenType type) {
   switch (type) {
   case TOKEN_PLUS:
   case TOKEN_MINUS:
@@ -196,7 +220,7 @@ static int right_infix_bp(TokenType type) {
   }
 }
 
-static void emit_infix(Parser *parser, TokenType type) {
+static void emitInfix(Parser *parser, TokenType type) {
   switch (type) {
   case TOKEN_PLUS:
     writeChunk(&parser->vm->chunk, OP_ADD, parser->current.line);
@@ -243,7 +267,7 @@ static void emit_infix(Parser *parser, TokenType type) {
   }
 }
 
-static void emit_prefix(Parser *parser, TokenType type) {
+static void emitPrefix(Parser *parser, TokenType type) {
   switch (type) {
   case TOKEN_MINUS:
     writeChunk(&parser->vm->chunk, OP_NEGATE, parser->current.line);
@@ -259,7 +283,10 @@ static void emit_prefix(Parser *parser, TokenType type) {
 
 static void string(Parser *parser) {
   int length = parser->current.end - parser->current.start - 2;
-  writeConstant(&parser->vm->chunk, makeString(parser->vm, parser->scanner->source + parser->current.start + 1, length),
+  writeConstant(&parser->vm->chunk,
+                makeString(parser->vm,
+                           parser->scanner->source + parser->current.start + 1,
+                           length),
                 parser->current.line);
   advance(parser);
 }
